@@ -1,12 +1,12 @@
-# C++20 STL Cookbook
+# Template Metaprogramming with C++  
 
-*Leverage the latest features of the STL to solve real-world problems*
+*Learn everything about C++ templates and unlock the power of template metaprogramming*
 
-<a href="https://www.packtpub.com/product/c-20-stl-cookbook/9781803248714?utm_source=github&utm_medium=repository&utm_campaign=9781803248714"><img src="https://static.packt-cdn.com/products/9781803248714/cover/smaller" alt="C++20 STL Cookbook" height="256px" align="right"></a>
+ <a href=""><img src="cover.jpg" height="256px" align="right"></a>
 
-* 作者：Bill Weinman 
+* 作者：Marius Bancila   
 * 译者：陈晓伟
-* 首次发布时间：2022年5月27日([来源](https://www.amazon.com/20-STL-Cookbook-Leverage-real-world/dp/1803248718/ref=sr_1_3?keywords=Modern+CMake+for+C%2B%2B&qid=1661265799&s=books&sr=1-3))
+* 首次发布时间：2022年8月29日([来源](https://www.amazon.sg/Template-Metaprogramming-template-metaprogramming-efficient/dp/1803243457/ref=sr_1_1?keywords=Template+Metaprogramming+with+C%2B%2B&qid=1671973833&sr=8-1))
 
 > 翻译是译者用自己的思想，换一种语言，对原作者想法的重新阐释。鉴于我的学识所限，误解和错译在所难免。如果你能买到本书的原版，且有能力阅读英文，请直接去读原文。因为与之相较，我的译文可能根本不值得一读。
 >
@@ -14,11 +14,11 @@
 
 ## 本书概述
 
-Fast, efficient, and flexible, the C++ programming language has come a long way and is used in every area of the industry to solve many problems. The latest version C++20 will see programmers change the way they code as it brings a whole array of features enabling the quick deployment of applications. This book will get you up and running with using the STL in the best way possible.
+Learn how the metaprogramming technique enables you to create data structures and functions that allow computation to happen at compile time. With this book, you'll realize how templates help you avoid writing duplicate code and are key to creating generic libraries, such as the standard library or Boost, that can be used in a multitude of programs.
 
-Beginning with new language features in C++20, this book will help you understand the language's mechanics and library features and offer insights into how they work. Unlike other books, the C++20 STL Cookbook takes an implementation-specific, problem-solution approach that will help you overcome hurdles quickly. You'll learn core STL concepts, such as containers, algorithms, utility classes, lambda expressions, iterators, and more, while working on real-world recipes. This book is a reference guide for using the C++ STL with its latest capabilities and exploring the cutting-edge features in functional programming and lambda expressions.
+The introductory chapters of this book will give you insights into the fundamentals of templates and metaprogramming. You'll then move on to practice writing complex templates and exploring advanced concepts such as template recursion, template argument deduction, forwarding references, type traits, and conditional compilation. Along the way, you'll learn how to write variadic templates and how to provide requirements to the template arguments with C++20 constraints and concepts. Finally, you'll apply your knowledge of C++ metaprogramming templates to implement various metaprogramming patterns and techniques.
 
-By the end of the book C++20 book, you'll be able to leverage the latest C++ features and save time and effort while solving tasks elegantly using the STL.
+By the end of this book, you'll have learned how to write effective templates and implement metaprogramming in your everyday programming journey.
 
 #### 关键特性
 
@@ -29,44 +29,38 @@ By the end of the book C++20 book, you'll be able to leverage the latest C++ fea
 
 #### 将会学到
 
-- Understand the new language features and the problems they can solve
+- Understand the syntax for all types of templates 
 
-- Implement generic features of the STL with practical examples
+- Discover how specialization and instantiation works 
 
-- Understand standard support classes for concurrency and synchronization
+- Get to grips with template argument deduction and forwarding references 
 
-- Perform efficient memory management using the STL
+- Write variadic templates with ease
 
-- Implement seamless formatting using std::format
+- Become familiar with type traits and conditional compilation 
 
-- Work with strings the STL way instead of handcrafting C-style code
+- Restrict template arguments in C++20 with constraints and concepts 
+
+- Implement patterns such as CRTP, mixins, and tag dispatching
 
   
 
 ## 适读人群
 
-This book is for intermediate to advanced C++ programmers who want to get the most out of the Standard Template Library of C++20, the newest version of C++. Basic knowledge of coding and C++ concepts is necessary to get started with this book.
+This book is for beginner-to-intermediate C++ developers who want to learn about template metaprogramming as well as advanced C++ developers looking to get up to speed with the new C++20 features related to templates and the the various idioms and patterns. Basic C++ coding experience is necessary to get started with this book.
 
 ## 作者简介
 
-Bill Weinman has been involved in technology since he built his first computer at age 16, in 1971. He’s been coding in C and C++ since the early 1970s. He’s written systems and applications for major clients, including NASA, Bank of America, Xerox, IBM, and the US Navy. Also an electronics engineer, he worked on the Voyager II spacecraft, audio amplifiers for SAE, and sound systems for Altec Lansing.
-
-Since the mid-1990s, Mr. Weinman has focused on writing and teaching. His books and courses cover HTML, SQL, CGI, Python, and of course, C and C++. An early contributor to online learning, his clear, concise writing has made his courses a popular feature on lynda and LinkedIn Learning.
-
-Follow Bill on his website at bw.org.  
-
-
-
-## 审评者介绍
-
-Vitalijs Vaznais was born in Daugavpils, Latvia. His favorite programming languages are C and C++, which he has been using for the last 26 years (and commercially for 24 years). He is pleased with the latest changes/evolution in both these languages and looks forward to seeing how they start to evolve.  
+Marius Bancila is a software engineer with almost two decades of experience in developing solutions for the industrial and financial sectors. He is the author of The Modern C++ Challenge and co-author of Learn C# Programming. He works as a software architect and is focused on Microsoft technologies, mainly developing desktop applications with C++ and C#. He is passionate about sharing his technical expertise with others and, for that reason, he has been recognized as a Microsoft MVP for C++ and later developer technologies since 2006. Marius lives in Romania and is active in various online communities.
 
 
 
 ## 本书相关
 
-* github地址：https://github.com/xiaoweiChen/CPP-20-STL-Cookbook
+* github地址：https://github.com/xiaoweiChen/Template-Metaprogramming-with-CPP
 * 译文的LaTeX 环境配置：https://www.cnblogs.com/1625--H/p/11524968.html 
+  * 禁用拼写检查：https://blog.csdn.net/weixin_39278265/article/details/87931348
+
 * vscode中配置latex：https://blog.csdn.net/Ruins_LEE/article/details/123555016
-* 原书示例：https://github.com/PacktPublishing/CPP-20-STL-Cookbook
+* 原书示例：https://github.com/PacktPublishing/Template-Metaprogramming-with-CPP
 
