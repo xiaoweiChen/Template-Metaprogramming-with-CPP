@@ -1,0 +1,46 @@
+
+Before you start using templates, it's important to understand the benefits of using them as well as the disadvantages they may incur.
+
+Let's start by pointing out the advantages:
+
+\begin{itemize}
+\item
+Templates help us avoid writing repetitive code.
+
+\item
+Templates foster the creation of generic libraries providing algorithms and types, such as the standard C++ library (sometimes incorrectly referred to as the STL), which can be used in many applications, regardless of their type.
+
+\item
+The use of templates can result in less and better code. For instance, using algorithms from the standard library can help write less code that is likely easier to understand and maintain and also probably more robust because of the effort put into the development and testing of these algorithms.
+\end{itemize}
+
+When it comes to disadvantages, the following are worth mentioning:
+
+\begin{itemize}
+\item
+The syntax is considered complex and cumbersome, although with a little practice this should not really pose a real hurdle in the development and use of templates.
+
+\item
+Compiler errors related to template code can often be long and cryptic, making it very hard to identify their cause. Newer versions of the C++ compilers have made progress in simplifying these kinds of errors, although they generally remain an important issue. The inclusion of concepts in the C++20 standard has been seen as an attempt, among others, to help provide better diagnostics for compiling errors.
+
+\item
+They increase the compilation times because they are implemented entirely in headers. Whenever a change to a template is made, all the translation units in which that header is included must be recompiled.
+
+\item
+Template libraries are provided as a collection of one or more headers that must be compiled together with the code that uses them.
+
+\item
+Another disadvantage that results from the implementation of templates in headers is that there is no information hiding. The entire template code is available in headers for anyone to read. Library developers often resort to the use of namespaces with names such as detail or details to contain code that is supposed to be internal for a library and should not be called directly by those using the library.
+
+\item
+They could be harder to validate since code that is not used is not instantiated by the compiler. It is, therefore, important that when writing unit tests, good code coverage must be ensured. This is especially the case for libraries.
+\end{itemize}
+
+Although the list of disadvantages may seem longer, the use of templates is not a bad thing or something to be avoided. On the contrary, templates are a powerful feature of the C++ language. Templates are not always properly understood and sometimes are misused or overused. However, the judicious use of templates has unquestionable advantages. This book will try to provide a better understanding of templates and their use.
+
+
+
+
+
+
+

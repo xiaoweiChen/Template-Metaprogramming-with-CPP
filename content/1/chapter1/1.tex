@@ -1,0 +1,135 @@
+Each language feature is designed to help with a problem or task that developers face when using that language. The purpose of templates is to help us avoid writing repetitive code that only differs slightly.
+
+To exemplify this, let's take the classical example of a max function. Such a function takes two numerical arguments and returns the largest of the two. We can easily implement this as follows:
+
+\begin{lstlisting}[style=styleCXX]
+int max(int const a, int const b)
+{
+	return a > b ? a : b;
+}
+\end{lstlisting}
+
+This works pretty well, but as you can see, it will only work for values of the type int (or those that are convertible to int). What if we need the same function but with arguments of the type double? Then, we can overload this function (create a function with the same name but a different number or type of arguments) for the double type:
+
+\begin{lstlisting}[style=styleCXX]
+double max(double const a, double const b)
+{
+	return a > b ? a : b;
+}
+\end{lstlisting}
+
+However, int and double are not the only numeric types. There is char, short, long, long and their unsigned counterparts, unsigned char, unsigned short, unsigned long, and unsigned long. There are also the types float and long double. And other types, such as int8\_t, int16\_t, int32\_t, and int64\_t. And there could be other types that can be compared, such as bigint, Matrix, point2d, and any user-defined type that overloads operator>. How can a general-purpose library provide a general-purpose function such as max for all these types? It can overload the function for all the built-in types and perhaps other library types but cannot do so for any user-defined type.
+
+An alternative to overloading functions with different parameters is to use void* to pass arguments of different types. Keep in mind this is a bad practice and the following example is shown only as a possible alternative in a world without templates. However, for the sake of discussion, we can design a sorting function that will run the quick sort algorithm on an array of elements of any possible type that provides a strict weak ordering. The details of the quicksort algorithm can be looked up online, such as on Wikipedia at \url{https://en.wikipedia.org/wiki/Quicksort}.
+
+The quicksort algorithm needs to compare and swap any two elements. However, since we don't know their type, the implementation cannot do this directly. The solution is to rely on callbacks, which are functions passed as arguments that will be invoked when necessary. A possible implementation can be as follows:
+\begin{lstlisting}[style=styleCXX]
+using swap_fn = void(*)(void*, int const, int const);
+using compare_fn = bool(*)(void*, int const, int const);
+int partition(void* arr, int const low, int const high,
+compare_fn fcomp, swap_fn fswap)
+{
+	int i = low - 1;
+	for (int j = low; j <= high - 1; j++)
+	{
+		if (fcomp(arr, j, high))
+		{
+			i++;
+			fswap(arr, i, j);
+		}
+	}
+	fswap(arr, i + 1, high);
+	return i + 1;
+}
+void quicksort(void* arr, int const low, int const high,
+compare_fn fcomp, swap_fn fswap)
+{
+	if (low < high)
+	{
+		int const pi = partition(arr, low, high, fcomp,
+		fswap);
+		quicksort(arr, low, pi - 1, fcomp, fswap);
+		quicksort(arr, pi + 1, high, fcomp, fswap);
+	}
+}
+\end{lstlisting}
+
+In order to invoke the quicksort function, we need to provide implementations for these comparisons and swapping functions for each type of array that we pass to the function. The following are implementations for the int type:
+
+\begin{lstlisting}[style=styleCXX]
+void swap_int(void* arr, int const i, int const j)
+{
+	int* iarr = (int*)arr;
+	int t = iarr[i];
+	iarr[i] = iarr[j];
+	iarr[j] = t;
+}
+
+bool less_int(void* arr, int const i, int const j)
+{
+	int* iarr = (int*)arr;
+	return iarr[i] <= iarr[j];
+}
+\end{lstlisting}
+
+With all these defined, we can write code that sorts arrays of integers as follows:
+
+\begin{lstlisting}[style=styleCXX]
+int main()
+{
+	int arr[] = { 13, 1, 8, 3, 5, 2, 1 };
+	int n = sizeof(arr) / sizeof(arr[0]);
+	quicksort(arr, 0, n - 1, less_int, swap_int);
+}
+\end{lstlisting}
+
+These examples focused on functions but the same problem applies to classes. Consider that you want to write a class that models a collection of numerical values that has variable size and stores the elements contiguously in memory. You could provide the following implementation (only the declaration is sketched here) for storing integers:
+
+\begin{lstlisting}[style=styleCXX]
+struct int_vector
+{
+	int_vector();
+	
+	size_t size() const;
+	size_t capacity() const;
+	bool empty() const;
+	
+	void clear();
+	void resize(size_t const size);
+	
+	void push_back(int value);
+	void pop_back();
+	
+	int at(size_t const index) const;
+	int operator[](size_t const index) const;
+private:
+	int* data_;
+	size_t size_;
+	size_t capacity_;
+};
+\end{lstlisting}
+
+This all looks good but the moment you need to store values of the type double, or std::string, or any user-defined type you'll have to write the same code, each time only changing the type of the elements. This is something nobody wants to do because it is repetitive work and because when something needs to change (such as adding a new feature or fixing a bug) you need to apply the same change in multiple places.
+
+Lastly, a similar problem can be encountered, although less often, when you need to define variables. Let's consider the case of a variable that holds the new line character. You can declare it as follows:
+
+\begin{lstlisting}[style=styleCXX]
+constexpr char NewLine = '\n';
+\end{lstlisting}
+
+What if you need the same constant but for a different encoding, such as wide string literals, UTF-8, and so on? You can have multiple variables, having different names, such as in the following example:
+
+\begin{lstlisting}[style=styleCXX]
+constexpr wchar_t NewLineW = L'\n';
+constexpr char8_t NewLineU8 = u8'\n';
+constexpr char16_t NewLineU16 = u'\n';
+constexpr char32_t NewLineU32 = U'\n';
+\end{lstlisting}
+
+Templates are a technique that allows developers to write blueprints that enable the compiler to generate all this repetitive code for us. In the following section, we will see how to transform the preceding snippets into C++ templates.
+
+
+
+
+
+

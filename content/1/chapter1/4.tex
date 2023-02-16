@@ -1,0 +1,88 @@
+Template metaprogramming is the C++ implementation of generic programming. This paradigm was first explored in the 1970s and the first major languages to support it were Ada and Eiffel in the first half of the 1980s. David Musser and Alexander Stepanov defined generic programming, in a paper called Generic Programming, in 1989, as follows:
+
+\textit{Generic programming centers around the idea of abstracting from concrete, efficient algorithms to obtain generic algorithms that can be combined with different data representations to produce a wide variety of useful software.}
+
+This defines a paradigm of programming where algorithms are defined in terms of types that are specified later and instantiated based on their use.
+
+Templates were not part of the initial C with Classes language developed by Bjarne Stroustrup. Stroustrup's first papers describing templates in C++ appeared in 1986, one year after the publication of his book, The C++ Programming Language, First Edition. Templates became available in the C++ language in 1990, before the ANSI and ISO C++ committees for standardization were founded.
+
+In the early 1990s, Alexander Stepanov, David Musser, and Meng Lee experimented with the implementation in C++ of various generic concepts. This led to the first implementation of the Standard Template Library (STL). When the ANSI/ISO committee became aware of the library in 1994, it quickly added it to the drafted specifications. STL was standardized along with the C++ language in 1998 in what became known as C++98.
+
+Newer versions of the C++ standard, collectively referred to as modern C++, have introduced various improvements to template metaprogramming. The following table lists them briefly:
+
+\begin{table}[H]
+\centering
+	\begin{tabular}{|l|l|l|}
+		\hline
+		\textbf{Version} &
+		\textbf{Feature} &
+		\textbf{Description} \\ \hline
+		\multirow{4}{*}{C++11} &
+		Variadic templates &
+		\begin{tabular}[c]{@{}l@{}}Temloates can have a variable number of template\\ parameters.\end{tabular} \\ \cline{2-3} 
+		&
+		Template aliases &
+		\begin{tabular}[c]{@{}l@{}}Ability to define synonyms for a template type with\\ the help of using declarations.\end{tabular} \\ \cline{2-3} 
+		&
+		Extern templates &
+		\begin{tabular}[c]{@{}l@{}}To tell the compiler not to instantiate a template in a\\ translation unit.\end{tabular} \\ \cline{2-3} 
+		&
+		Type traits &
+		\begin{tabular}[c]{@{}l@{}}The new header \textless{}type\_traits\textgreater contains\\ standard type traits that identify the category of an\\ object and characteristics of a type.\end{tabular} \\ \hline
+		C++14 &
+		Variable templates &
+		\begin{tabular}[c]{@{}l@{}}Support for defining variables or static data\\ members that are templates.\end{tabular} \\ \hline
+		\multirow{4}{*}{C++17} &
+		Fold expressions &
+		\begin{tabular}[c]{@{}l@{}}Reduce the parameter pack of a variadic template\\ over a binary operator.\end{tabular} \\ \cline{2-3} 
+		&
+		\begin{tabular}[c]{@{}l@{}}typename in template\\ parameters\end{tabular} &
+		\begin{tabular}[c]{@{}l@{}}The typename keyword can be used instead of\\ class in a template parameter\end{tabular} \\ \cline{2-3} 
+		&
+		\begin{tabular}[c]{@{}l@{}}auto for non-type\\ template parameter\end{tabular} &
+		\begin{tabular}[c]{@{}l@{}}The keyword auto can be used for non-type\\ template parameters.\end{tabular} \\ \cline{2-3} 
+		&
+		\begin{tabular}[c]{@{}l@{}}Class template\\ argument deduction\end{tabular} &
+		\begin{tabular}[c]{@{}l@{}}The compiler infers the type of template parameters\\ from the way an object is initialized.\end{tabular} \\ \hline
+		\multirow{4}{*}{C++20} &
+		Template lambdas &
+		Ladmbdas can be templates just like regular functions. \\ \cline{2-3} 
+		&
+		\begin{tabular}[c]{@{}l@{}}String literals as\\ template parameters\end{tabular} &
+		\begin{tabular}[c]{@{}l@{}}String literals can be used as non-type template\\ arguments and a new form of the user-defined\\ literal operator for strings.\end{tabular} \\ \cline{2-3} 
+		&
+		Constraints &
+		Define requirements on template arguments. \\ \cline{2-3} 
+		&
+		Concepts &
+		Named sets of constraints. \\ \hline
+	\end{tabular}
+\end{table}
+
+\begin{center}
+Table 1.1
+\end{center}
+
+All these features, along with other aspects of template metaprogramming, will make the sole subject of this book and will be presented in detail in the following chapters. For now, let's see what the advantages and disadvantages are of using templates.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

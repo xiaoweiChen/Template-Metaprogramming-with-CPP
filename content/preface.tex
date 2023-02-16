@@ -1,0 +1,107 @@
+\begin{flushright}
+  \zihao{1} 前言
+\end{flushright}
+
+The C++ programming language is one of the most widely used in the world and it has been so for decades. Its success isn’t due just to the performance it provides or maybe to its ease of use, which many would argue against, but probably to its versatility. C++ is a general-purpose, multi-paradigm programming language that blends together procedural, functional, and generic programming.
+
+Generic programming is a paradigm of writing code such as that entities such as functions and classes are written in terms of types that are specified later. These generic entities are instantiated only when needed for specific types that are specified as arguments. These generic entities are known as templates in C++.
+
+Metaprogramming is the programming technique of using templates (and constexpr functions in C++) to generate code at compile-time that is then merged with the rest of the source code for compiling a final program. Metaprogramming implies that at least an input or an output is a type.
+
+Templates in C++ have a reputation of being pretty horrendous, as described in the C++ Core Guideless (a document of dos and don’ts maintained by Bjarne Stroustrup and Herb Sutter). However, they make generic libraries possible such as the C++ Standard Library that C++ developers use all the time. Whether you’re writing templates yourself or just using templates written by others (such as standard containers or algorithms), templates are most likely part of your daily code.
+
+This book is intended to provide a good understanding of all the spectrum of templates available in C++ (from their basic syntax to concepts in C++20). This will be the focus of the first two parts of the book. The third and final part will help you put the newly acquired knowledge into practice to perform metaprogramming with templates.
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Who this book is for?}
+
+This book is for beginner-to-intermediate C++ developers who want to learn about template metaprogramming as well as advanced C++ developers looking to get up to speed with the new C++20 features related to templates and the various idioms and patterns. Basic C++ coding experience is necessary to get started with this book.
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{What this book covers}
+
+Chapter 1, Introduction to Templates, provides an introduction to the concept of template metaprogramming in C++, with several simple examples, and a discussion on why we need templates and what are the pros and cons of using templates.
+
+Chapter 2, Template Fundamentals, explores all forms of templates in C++: function templates, class templates, variable templates, and alias templates. For each of these, we discuss the syntax and the details of how they work. Furthermore, the key concepts of template instantiation and specialization are addressed here.
+
+Chapter 3, Variadic Templates, is dedicated entirely to variadic templates which are templates that have a variable number of template parameters. We discuss in detail variadic function templates, variadic class templates, variadic alias templates, and variadic variable templates, parameter packs and how they are expanded, as well as fold expressions that help us simplify the writing of variadic templates.
+
+Chapter 4, Advanced Template Concepts, groups a series of advanced template concepts such as dependent names and name lookup, template argument deduction, template recursion, perfect forwarding, generic and template lambdas. By understanding these topics, readers will be able to greatly expand the variety of templates they can read or write.
+
+Chapter 5, Type Traits and Conditional Compilation, is dedicated to type traits. The reader will learn about type traits, what traits the standard library provides, and how they can be used to solve different problems.
+
+Chapter 6, Concepts and Constraints, presents the new C++20 mechanism for defining requirements for template arguments with concepts and constraints. You will learn about the various ways to specify constraints. Moreover, we provide an overview of the content of the C++20 standard concepts library.
+
+Chapter 7, Patterns and Idioms, explores a series of unrelated advanced topics of using the knowledge learned so far into implementing various patterns. We explore the concepts of static polymorphism, type erasure, tag dispatching, and patterns such as the curiously recursive template pattern, expression templates, mixins, and typelists.
+
+Chapter 8, Ranges and Algorithms, is dedicated to understanding containers, iterators, and algorithms, which are the core components of the standard template library. You will learn here how to write a generic container and an iterator type for it as well as a general-purpose algorithm.
+
+Chapter 9, The Ranges Library, explores the new C++20 Ranges library with its key features such as ranges, range adaptors, and constrained algorithms. These enable us to write simpler code for working with ranges. Furthermore, you will also learn here how to write your own range adaptor.
+
+Appendix is a short epilog that provides a summary of the book.
+
+Assignment Answers contains all the answers to the questions from all the chapters.
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{To get the most out of this book}
+
+To get started with this book, you need to have some basic knowledge of the C++ programming language. You need to know the syntax and fundamentals about classes, functions, operators, function overloading, inheritance, virtual functions, and more. However, no knowledge of templates is required, as this book will teach you everything from scratch.
+
+All the code samples in this book are cross-platform. That means you can use any compiler to build and run them. However, although many snippets work with a C++11 compiler, there are also snippets that require a C++17 or C++20 compliant compiler. Therefore, we recommend you use a compiler version that supports C++20 so you can run all the samples. The samples in this book have been tested with MSVC 19.30 (Visual Studio 2022), GCC 12.1/13, and Clang 13/14. If you don’t have such a C++20 compliant compiler on your machine, you can try one online. We recommend one of the following:
+
+\begin{itemize}
+\item
+Compiler Explorer (\url{https://godbolt.org/})
+
+\item
+Wandbox (\url{https://wandbox.org/})
+
+\item
+C++ Insights (\url{https://cppinsights.io/})
+\end{itemize}
+
+The C++ Insights online tools will be referred several times in the book for analyzing the code generated by the compiler.
+
+You should refer to the page, \url{https://en.cppreference.com/w/cpp/compiler
+\_support}, if you want to check compilers support for different versions of the C++ standard.
+
+If you are using the digital version of this book, we advise you to type the code yourself or access the code from the book’s GitHub repository (a link is available in the next section). Doing so will help you avoid any potential errors related to the copying and pasting of code.
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Mentions and further readings}
+
+Throughout the book, we are referring multiple times to the C++ standard. This document is copy-righted by the International Organization for Standardization. The official C++ standard document can be purchased from here: \url{https://www.iso.org/standard/79358.html}. However, multiple drafts of the C++ standard as well as the sources used to generate them are freely available on GitHub at \url{https://github.com/cplusplus/draft}. You cand find additional information about the C++ standard at \url{https://isocpp.org/std/the-standard}.
+
+A great online resource for C++ developers is the C++ Reference website, available at \url{https://en.cppreference.com/}. This provides exhaustive documentation of the C++ language directly derived from the C++ standard. Content from the C++ Reference is quoted several times in the book. The C++ Reference content is licensed under CC-BY-SA license, \url{https://en.cppreference.com/w/Cppreference:Copyright/CC-BY-SA}.
+
+At the end of each chapter, you will find a section called Further reading. This section contains a list of readings used as a bibliography and recommended for deepening your knowledge of the presented topics.
+
+
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Download the example code files}
+
+You can download the example code files for this book from GitHub at \url{https:// github.com/PacktPublishing/Template-Metaprogramming-with-CPP}.
+If there’s an update to the code, it will be updated in the GitHub repository.
+
+We also have other code bundles from our rich catalog of books and videos available at \url{https://github.com/PacktPublishing/}. Check them out!
+
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Download the color images}
+
+We also provide a PDF file that has color images of the screenshots and diagrams used in this book. You can download it here: \url{https://packt.link/Un8j5}.
+
+
+
+
+
+
+
+

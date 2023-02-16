@@ -1,0 +1,55 @@
+So far in this chapter, we have used the general term templates. However, there are four different terms describing the kind of templates we have written:
+
+\begin{itemize}
+\item
+Function template is the term used for a templated function. An example is the max template seen previously.
+
+\item
+Class template is the term used for a templated class (which can be defined either with the class, struct, or union keyword). An example is the vector class we wrote in the previous section.
+
+\item
+Variable template is the term used for templated variables, such as the NewLine template from the previous section.
+
+\item
+Alias template is the term used for templated type aliases. We will see examples for alias templates in the next chapter.
+\end{itemize}
+
+Templates are parameterized with one or more parameters (in the examples we have seen so far, there was a single parameter). These are called template parameters and can be of three categories:
+
+\begin{itemize}
+\item
+Type template parameters, such as in template<typename T>, where the parameter represents a type specified when the template is used.
+
+\item
+Non-type template parameters, such as in template<size\_t N> or template<auto n>, where each parameter must have a structural type, which includes integral types, floating-point types (as for C++20), pointer types, enumeration types, lvalue reference types, and others.
+
+\item
+Template template parameters, such as in template<typename K, typename V, template<typename> typename C>, where the type of a parameter is another template.
+\end{itemize}
+
+Templates can be specialized by providing alternative implementations. These implementations can depend on the characteristics of the template parameters. The purpose of specialization is to enable optimizations or reduce code bloat. There are two forms of specialization:
+
+\begin{itemize}
+\item
+Partial specialization: This is an alternative implementation provided for only some of the template parameters.
+
+\item
+(Explicit) full specialization: This is a specialization of a template when all the template arguments are provided.
+\end{itemize}
+
+The process of generating code from a template by the compiler is called template instantiation. This happens by substituting the template arguments for the template parameters used in the definition of the template. For instance, in the example where we used vector<int>, the compiler substituted the int type in every place where T appeared.
+
+Template instantiation can have two forms:
+
+\begin{itemize}
+\item
+Implicit instantiation: This occurs when the compiler instantiates a template due to its use in code. This happens only for those combinations or arguments that are in use. For instance, if the compiler encounters the use of vector<int> and vector<double>, it will instantiate the vector class template for the types int and double and nothing more.
+
+\item
+Explicit instantiation: This is a way to explicitly tell the compiler what instantiations of a template to create, even if those instantiations are not explicitly used in your code. This is useful, for instance, when creating library files, because uninstantiated templates are not put into object files. They also help reduce compile times and object sizes, in ways that we will see at a later time.
+\end{itemize}
+
+All the terms and topics mentioned in this section will be detailed in other chapters of the book. This section is intended as a short reference guide to template terminology. Keep in mind though that there are many other terms related to templates that will be introduced at the appropriate time.
+
+
+
