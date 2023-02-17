@@ -1,4 +1,347 @@
+
+A template specialization is the definition created from a template instantiation. The template that is being specialized is called the primary template. You can provide an explicit specialized definition for a given set of template arguments, therefore overwriting the implicit code the compiler would generate instead. This is the technique that powers features such as type traits and conditional compilation, which are metaprogramming concepts we will explore in Chapter 5, Type Traits and Conditional Compilation.
+
+There are two forms of template specialization: explicit (full) specialization and partial specialization. We will look in detail at these two in the following sections.
+
 \subsubsubsection{2.6.1\hspace{0.2cm}Explicit specialization}
 
+Explicit specialization (also called full specialization) occurs when you provide a definition for a template instantiation with the full set of template arguments. The following can be fully specialized:
+
+\begin{itemize}
+\item 
+Function templates
+
+\item 
+Class templates
+
+\item 
+Variable templates (as of C++14)
+
+\item 
+Member functions, classes, and enumerations of a class template
+
+\item 
+Member function templates and class templates of a class or class template
+
+\item 
+Static data members of a class template
+\end{itemize}
+
+Let's start by looking at the following example:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+struct is_floating_point
+{
+	constexpr static bool value = false;
+};
+
+template <>
+struct is_floating_point<float>
+{
+	constexpr static bool value = true;
+};
+
+template <>
+struct is_floating_point<double>
+{
+	constexpr static bool value = true;
+};
+
+template <>
+struct is_floating_point<long double>
+{
+	constexpr static bool value = true;
+};
+\end{lstlisting}
+
+In this code snippet, is\_floating\_point is the primary template. It contains a constexpr static Boolean data member called value that is initialized with the false value. Then, we have three full specializations of this primary template, for the float, double, and long double types. These new definitions change the way value is being initialized using true instead of false. As a result, we can use this template to write code as follows:
+
+\begin{lstlisting}[style=styleCXX]
+std::cout << is_floating_point<int>::value << '\n';
+std::cout << is_floating_point<float>::value << '\n';
+std::cout << is_floating_point<double>::value << '\n';
+std::cout << is_floating_point<long double>::value << '\n';
+std::cout << is_floating_point<std::string>::value << '\n';
+\end{lstlisting}
+
+The first and last lines print 0 (for false); the other lines print 1 (for true). This example is a demonstration of how type traits work. In fact, the standard library contains a class template called is\_floating\_point in the std namespace, defined in the <type\_traits> header. We will learn more about this topic in Chapter 5, Type Traits and Conditional Compilation.
+
+As you can see in this example, static class members can be fully specialized. However, each specialization has its own copy of any static members, which is demonstrated with the following example:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+struct foo
+{
+	static T value;
+};
+
+template <typename T> T foo<T>::value = 0;
+template <> int foo<int>::value = 42;
+
+foo<double> a, b; // a.value=0, b.value=0
+foo<int> c; // c.value=42
+
+a.value = 100; // a.value=100, b.value=100, c.value=42
+\end{lstlisting}
+
+Here, foo<T> is a class template with a single static member, called value. This is initialized with 0 for the primary template and with 42 for the int specialization. After declaring the variables a, b, and c, a.value is 0 and b.value is 0 while c.value is 42. However, after assigning the value 100 to a.value, b.value is also 100, while c.value remains 42.
+
+Explicit specialization must appear after the primary template declaration. It does not require a definition of the primary template to be available prior to the explicit specialization. The following code is therefore valid:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+struct is_floating_point;
+
+template <>
+struct is_floating_point<float>
+{
+	constexpr static bool value = true;
+};
+
+template <typename T>
+struct is_floating_point
+{
+	constexpr static bool value = false;
+};
+\end{lstlisting}
+
+Template specializations can also be only declared without being defined. Such a template specialization can be used like any other incomplete type. You can see an example of this here:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename>
+struct foo {}; // primary template
+
+template <>
+struct foo<int>; // explicit specialization declaration
+
+foo<double> a; // OK
+foo<int>* b; // OK
+foo<int> c; // error, foo<int> incomplete type
+\end{lstlisting}
+
+In this example, foo<T> is the primary template for which a declaration of an explicit specialization for the int type exists. This makes it possible to use foo<double> and foo<int>* (declaring pointers to partial types is supported). However, at the point of declaring the c variable, the complete type foo<int> is not available, since a definition of the full specialization for int is missing. This generates a compiler error.
+
+When specializing a function template, if the compiler can deduce a template argument from the type of the function arguments, then that template argument is optional. This is demonstrated by the following example:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+struct foo {};
+
+template <typename T>
+void func(foo<T>)
+{
+	std::cout << "primary template\n";
+}
+
+template<>
+void func(foo<int>)
+{
+std::cout << "int specialization\n";
+}
+\end{lstlisting}
+
+The syntax for the full specialization for int of the func function template should be template<> func<int>(foo<int>). However, the compiler is able to deduce the actual type that T represents from the function argument. Therefore, we don't have to specify it when defining the specialization.
+
+On the other hand, declarations or definitions of function templates and member function templates are not allowed to contain default function arguments. Therefore, in the following example, the compiler will issue an error:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+void func(T a)
+{
+	std::cout << "primary template\n";
+}
+
+template <>
+void func(int a = 0) // error: default argument not allowed
+{
+	std::cout << "int specialization\n";
+}
+\end{lstlisting}
+
+In all these examples, the templates had a single template argument. However, in practice, many templates have multiple arguments. Explicit specialization requires a definition with the full set of arguments being specified. This is demonstrated with the following snippet:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T, typename U>
+void func(T a, U b)
+{
+	std::cout << "primary template\n";
+}
+
+template <>
+void func(int a, int b)
+{
+std::cout << "int-int specialization\n";
+}
+
+template <>
+void func(int a, double b)
+{
+std::cout << "int-double specialization\n";
+}
+
+func(1, 2); // int-int specialization
+func(1, 2.0); // int-double specialization
+func(1.0, 2.0); // primary template
+\end{lstlisting}
+
+With these covered, we can move forward and look into partial specialization, which is basically a generalization of explicit (full) specialization.
+
 \subsubsubsection{2.6.2\hspace{0.2cm}Partial specialization}
+
+Partial specialization occurs when you specialize a primary template but only specify some of the template arguments. This means a partial specialization has both a template parameter list (which follows the template keyword) and a template argument list (which follows the template name). However, only classes can be partially specialized.
+
+Let's explore the following example to understand how this works:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T, int S>
+struct collection
+{
+	void operator()()
+	{ std::cout << "primary template\n"; }
+};
+
+template <typename T>
+struct collection<T, 10>
+{
+	void operator()()
+	{ std::cout << "partial specialization <T, 10>\n"; }
+};
+
+template <int S>
+struct collection<int, S>
+{
+	void operator()()
+	{ std::cout << "partial specialization <int, S>\n"; }
+};
+
+template <typename T, int S>
+struct collection<T*, S>
+{
+	void operator()()
+	{ std::cout << "partial specialization <T*, S>\n"; }
+};
+\end{lstlisting}
+
+We have a primary template called collection that has two template arguments (a type template argument and a non-type template argument) and we have three partial specializations, as follows:
+
+\begin{itemize}
+\item 
+A specialization for the non-type template argument S with the value 10
+
+\item 
+A specialization for the int type
+
+\item 
+A specialization for the int type
+\end{itemize}
+
+These templates can be used as shown in the following snippet:
+
+\begin{lstlisting}[style=styleCXX]
+collection<char, 42> a; // primary template
+collection<int, 42> b; // partial specialization <int, S>
+collection<char, 10> c; // partial specialization <T, 10>
+collection<int*, 20> d; // partial specialization <T*, S>
+\end{lstlisting}
+
+As specified in the comments, a is instantiated from the primary template, b from the partial specialization for int (collection<int, S>), c from the partial specialization for 10 (collection<T, 10>), and d from the partial specialization for pointers (collection<T*, S>). However, some combinations are not possible because they are ambiguous and the compiler cannot select which template instantiation to use. Here are a couple of examples:
+
+\begin{lstlisting}[style=styleCXX]
+collection<int, 10> e; // error: collection<T,10> or
+                       // collection<int,S>
+collection<char*, 10> f; // error: collection<T,10> or
+                         // collection<T*,S>
+\end{lstlisting}
+
+In the first case, both collection<T, 10> and collection<int, S> partial specializations match the type collection<int, 10>, while in the second case it can be either collection<T, 10> or collection<T*, S>.
+
+When defining specializations of a primary template, you need to keep in mind the following:
+
+\begin{itemize}
+\item 
+Parameters in the template parameters list of the partial specialization cannot have default values.
+
+\item 
+The template parameters list implies an order of the arguments in the template arguments list, which is featured only in a partial specialization. This template arguments list of a partial specialization cannot be the same as the one implied by the template parameters list.
+
+\item 
+In the template argument list, you can only use identifiers for non-type template parameters. Expressions are not allowed in this context. This is demonstrated with the following example:
+\begin{lstlisting}[style=styleCXX]
+template <int A, int B> struct foo {};
+template <int A> struct foo<A, A> {}; // OK
+template <int A> struct foo<A, A + 1> {}; // error
+\end{lstlisting}
+\end{itemize}
+
+When a class template has partial specializations, the compiler must decide what is the best match to generate a definition from. For this purpose, it matches the template arguments of the template specialization with the template argument list of the primary template and partial specializations. Depending on the result of this matching process, the compiler does the following:
+
+\begin{itemize}
+\item 
+If no match is found, a definition is generated from the primary template.
+
+\item 
+If a single partial specialization is found, a definition is generated from that specialization.
+
+\item 
+If more than a single partial specialization is found, then a definition is generated from the most specialized partial specialization but only if it is unique. Otherwise, the compiler generates an error (as we have seen previously). A template A is considered more specialized than a template B if it accepts a subset of the types that B accepts, but not the other way around.
+\end{itemize}
+
+However, partial specializations are not found by name lookup and are considered only if the primary template is found by name lookup.
+
+To understand how partial specialization is useful, let's take a look at a real-world example.
+
+In this example, we want to create a function that formats the content of an array in a nice way and outputs it to a stream. The content of a formatted array should look like [1,2,3,4,5]. However, for arrays of char elements, the elements should not be separated by a comma but instead displayed as a string within square brackets, such as [demo]. For this purpose, we will consider the use of the std::array class. The following implementation formats the content of the array with delimiters between the elements:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T, size_t S>
+std::ostream& pretty_print(std::ostream& os,
+                           std::array<T, S> const& arr)
+{
+	os << '[';
+	if (S > 0)
+	{
+		size_t i = 0;
+		for (; i < S - 1; ++i)
+		os << arr[i] << ',';
+		os << arr[S-1];
+	}
+	os << ']';
+	
+	return os;
+}
+
+std::array<int, 9> arr {1, 1, 2, 3, 5, 8, 13, 21};
+pretty_print(std::cout, arr); // [1,1,2,3,5,8,13,21]
+
+std::array<char, 9> str;
+std::strcpy(str.data(), "template");
+pretty_print(std::cout, str); // [t,e,m,p,l,a,t,e]
+\end{lstlisting}
+
+In this snippet, pretty\_print is a function template with two template parameters, matching the template parameters of the std::array class. When called with the arr array as an argument, it prints [1,1,2,3,5,8,13,21]. When called with the str array as an argument, it prints [t,e,m,p,l,a,t,e]. However, our intention is to print [template] in this latter case. For this, we need another implementation, which is specialized for the char type:
+
+\begin{lstlisting}[style=styleCXX]
+template <size_t S>
+std::ostream& pretty_print(std::ostream& os,
+						   std::array<char, S> const& arr)
+{
+	os << '[';
+	for (auto const& e : arr)
+		os << e;
+	os << ']';
+	return os;
+}
+
+std::array<char, 9> str;
+std::strcpy(str.data(), "template");
+pretty_print(std::cout, str); // [template]
+\end{lstlisting}
+
+In this second implementation, pretty\_print is a function template with a single template parameter, which is a non-type template parameter indicating the size of the array. The type template parameter is explicitly specified as char, in std::array<char, S>. This time, the call to pretty\_print with the str array prints [template] to the console.
+
+What is key to understand here is that it's not the pretty\_print function template that is partially specialized but the std::array class template. Function templates cannot be specialized and what we have here are overloaded functions. However, std::array<char,S> is a specialization of the primary class template std::array<T, S>.
+
+All the examples we have seen in this chapter were either function templates or class templates. However, variables can also be templates and this will be the topic of the next section.
+
 

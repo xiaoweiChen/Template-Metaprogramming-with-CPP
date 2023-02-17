@@ -2,6 +2,8 @@
 
 *Learn everything about C++ templates and unlock the power of template metaprogramming*
 
+*详细的了解C++模板，解锁模板元编程的真正力量*
+
  <a href=""><img src="cover.jpg" height="256px" align="right"></a>
 
 * 作者：Marius Bancila   
@@ -14,44 +16,46 @@
 
 ## 本书概述
 
-Learn how the metaprogramming technique enables you to create data structures and functions that allow computation to happen at compile time. With this book, you'll realize how templates help you avoid writing duplicate code and are key to creating generic libraries, such as the standard library or Boost, that can be used in a multitude of programs.
+了解元编程技术，从而能够创建在编译时进行计算的数据结构和函数。通过这本书，您将了解模板如何避免编写重复的代码，并且作为创建通用库(如标准库或Boost)的关键(这些通用库可用于许多程序中)。
 
-The introductory chapters of this book will give you insights into the fundamentals of templates and metaprogramming. You'll then move on to practice writing complex templates and exploring advanced concepts such as template recursion, template argument deduction, forwarding references, type traits, and conditional compilation. Along the way, you'll learn how to write variadic templates and how to provide requirements to the template arguments with C++20 constraints and concepts. Finally, you'll apply your knowledge of C++ metaprogramming templates to implement various metaprogramming patterns and techniques.
+本书将带您深入了解模板和元编程的基础知识，再练习编写复杂的模板，并探索高级概念，如模板递归、模板参数推导、转发引用、类型特征和条件编译。在此过程中，将了解如何编写可变参数模板，以及如何使用C++20约束和概念为模板参数进行限制。最后，可以使用C++元编程模板的知识来实现各种元编程模式和技术。
 
-By the end of this book, you'll have learned how to write effective templates and implement metaprogramming in your everyday programming journey.
+本书的最后，将学习如何在日常编程之旅中编写有效的模板和实现元编程。
 
 #### 关键特性
 
-- Become familiar with the latest features of C++20 and write better code using the STL
+- 了解C++20的最新特性，并使用STL编写更好的代码
 
-- Reduce the development time for your applications and enable faster deployment
-- Get up and running with the new and leaner STL capabilities introduced in the latest release
+- 减少应用程序的开发时间，并更快的进行部署
+- 使用最新标准中引入的新的、精简的STL功能
 
 #### 将会学到
 
-- Understand the syntax for all types of templates 
+- 了解所有类型模板的语法
 
-- Discover how specialization and instantiation works 
+- 了解特化和实例化如何工作
 
-- Get to grips with template argument deduction and forwarding references 
+- 掌握模板参数推断和转发引用
 
-- Write variadic templates with ease
+- 轻松编写可变模板
 
-- Become familiar with type traits and conditional compilation 
+- 熟悉类型特征和条件编译
 
-- Restrict template arguments in C++20 with constraints and concepts 
+- 用约束和概念限制C++20中的模板参数
 
-- Implement patterns such as CRTP, mixins, and tag dispatching
+- 实现CRTP、mixins和标签调度等模式
 
   
 
 ## 适读人群
 
-This book is for beginner-to-intermediate C++ developers who want to learn about template metaprogramming as well as advanced C++ developers looking to get up to speed with the new C++20 features related to templates and the the various idioms and patterns. Basic C++ coding experience is necessary to get started with this book.
+这本书是为初学者到中级C++开发人员(学习模板元编程)，以及高级C++开发人员，希望了解与模板相关的新C++ 20特性、习语和模式。开始阅读这本书前，需要对基本的C++编程有所了解。
+
+
 
 ## 作者简介
 
-Marius Bancila is a software engineer with almost two decades of experience in developing solutions for the industrial and financial sectors. He is the author of The Modern C++ Challenge and co-author of Learn C# Programming. He works as a software architect and is focused on Microsoft technologies, mainly developing desktop applications with C++ and C#. He is passionate about sharing his technical expertise with others and, for that reason, he has been recognized as a Microsoft MVP for C++ and later developer technologies since 2006. Marius lives in Romania and is active in various online communities.
+Marius Bancila是一名软件工程师，为工业和金融部门开发解决方案方面，拥有近20年的经验。他是《现代C++挑战》的作者和《学习C#编程》的合著者。并且是一名软件架构师，专注于Microsoft技术，主要使用C++和C#开发桌面应用程序。他热衷于与他人分享他的技术专长，自2006年以来，他一直是微软C++和开发人员眼中的技术MVP。Marius住在罗马尼亚，并且活跃在各种网络社区。
 
 
 

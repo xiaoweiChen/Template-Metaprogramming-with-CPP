@@ -1,0 +1,112 @@
+In C++, an alias is a name used to refer to a type that has been previously defined, whether a built-in type or a user-defined type. The primary purpose of aliases is to give shorter names to types that have a long name or provide semantically meaningful names for some types. This can be done either with a typedef declaration or with a using declaration (the latter was introduced in C++11). Here are several examples using typedef:
+
+\begin{lstlisting}[style=styleCXX]
+typedef int index_t;
+typedef std::vector<
+			std::pair<int, std::string>> NameValueList;
+typedef int (*fn_ptr)(int, char);
+
+template <typename T>
+struct foo
+{
+	typedef T value_type;
+};
+\end{lstlisting}
+
+In this example, index\_t is an alias for int, NameValueList is an alias for std::vector<std::pair<int, std::string>>, while fn\_ptr is an alias for the type of a pointer to a function that returns an int and has two parameters of type int and char. Lastly, foo::value\_type is an alias for the type template T.
+
+Since C++11, these type aliases can be created with the help of using declarations, which look as follows:
+
+\begin{lstlisting}[style=styleCXX]
+using index_t = int;
+using NameValueList =
+	std::vector<std::pair<int, std::string>>;
+using fn_ptr = int(*)(int, char);
+
+template <typename T>
+struct foo
+{
+	using value_type = T;
+};
+\end{lstlisting}
+
+Using declarations are now preferred over typedef declarations because they are simpler to use and are also more natural to read (from left to right). However, they have an important advantage over typedefs as they allow us to create aliases for templates. An alias template is a name that refers not to a type but a family of types. Remember, a template is not a class, function, or variable but a blueprint that allows the creation of a family of types, functions, or variables.
+
+To understand how alias templates work, let's consider the following example:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+using customer_addresses_t =
+	std::map<int, std::vector<T>>; // [1]
+	
+struct delivery_address_t {};
+struct invoice_address_t {};
+
+using customer_delivery_addresses_t =
+	customer_addresses_t<delivery_address_t>; // [2]
+using customer_invoice_addresses_t =
+	customer_addresses_t<invoice_address_t>; // [3]
+\end{lstlisting}
+
+The declaration on line [1] introduces the alias template customer\_addresses\_t. It's an alias for a map type where the key type is int and the value type is std::vector<T>. Since std::vector<T> is not a type, but a family of types, customer\_addresses\_t<T> defines a family of types. The using declarations at [2] and [3] introduce two type aliases, customer\_delivery\_addresses\_t and customer\_invoice\_addresses\_t, from the aforementioned family of types.
+
+Alias templates can appear at namespace or class scope just like any template declaration. On the other hand, they can neither be fully nor partially specialized. However, there are ways to overcome this limitation. A solution is to create a class template with a type alias member and specialize the class. Then you can create an alias template that refers to the type alias member. Let's demonstrate this with the help of an example.
+
+Although the following is not valid C++ code, it represents the end goal I want to achieve, had the specialization of alias templates been possible:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T, size_t S>
+using list_t = std::vector<T>;
+
+template <typename T>
+using list_t<T, 1> = T;
+\end{lstlisting}
+
+In this example, list\_t is an alias template for std::vector<T> provided the size of the collection is greater than 1. However, if there is a single element, then list\_t should be an alias for the type template parameter T. The way this can be actually achieved is shown in the following snippet:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T, size_t S>
+struct list
+{
+	using type = std::vector<T>;
+};
+
+template <typename T>
+struct list<T, 1>
+{
+	using type = T;
+};
+
+template <typename T, size_t S>
+using list_t = typename list<T, S>::type;
+\end{lstlisting}
+
+In this example, list<T,S> is a class template that has a member type alias called T. In the primary template, this is an alias for std::vector<T>. In the partial specialization list<T,1> it's an alias for T. Then, list\_t is defined as an alias template for list<T, S>::type. The following asserts prove this mechanism works:
+
+\begin{lstlisting}[style=styleCXX]
+static_assert(std::is_same_v<list_t<int, 1>, int>);
+static_assert(std::is_same_v<list_t<int, 2>,
+std::vector<int>>);
+\end{lstlisting}
+
+Before we end this chapter, there is one more topic that needs to be addressed: generic lambdas and their C++20 improvement, lambda templates.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

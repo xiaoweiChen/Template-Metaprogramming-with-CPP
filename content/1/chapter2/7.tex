@@ -1,0 +1,169 @@
+Variable templates were introduced in C++14 and allow us to define variables that are templates either at namespace scope, in which case they represent a family of global variables, or at class scope, in which case they represent static data members.
+
+A variable template is declared at a namespace scope as shown in the following code snippet. This is a typical example that you can find in the literature, but we can use it to elaborate on the benefits of variable templates:
+
+\begin{lstlisting}[style=styleCXX]
+template<class T>
+constexpr T PI = T(3.1415926535897932385L);
+\end{lstlisting}
+
+The syntax is similar to declaring a variable (or data member) but combined with the syntax for declaring templates.
+
+The question that arises is how variable templates are actually helpful. To answer this, let's build up an example to demonstrate the point. Let's consider we want to write a function template that, given the radius of a sphere, returns its volume. The volume of a sphere is $\dfrac{4\pi r^{3}}{3}$. Therefore, a possible implementation is as follows:
+
+\begin{lstlisting}[style=styleCXX]
+constexpr double PI = 3.1415926535897932385L;
+
+template <typename T>
+T sphere_volume(T const r)
+{
+	return 4 * PI * r * r * r / 3;
+}
+\end{lstlisting}
+
+In this example, PI is defined as a compile-time constant of the double type. This will generate a compiler warning if we use float, for instance, for the type template parameter T:
+
+\begin{lstlisting}[style=styleCXX]
+float v1 = sphere_volume(42.0f); // warning
+double v2 = sphere_volume(42.0); // OK
+\end{lstlisting}
+
+A potential solution to this problem is to make PI a static data member of a template class with its type determined by the type template parameter. This implementation can look as follows:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+struct PI
+{
+	static const T value;
+};
+
+template <typename T>
+const T PI<T>::value = T(3.1415926535897932385L);
+
+template <typename T>
+T sphere_volume(T const r)
+{
+	return 4 * PI<T>::value * r * r * r / 3;
+}
+\end{lstlisting}
+
+This works, although the use of PI<T>::value is not ideal. It would be nicer if we could simply write PI<T>. This is exactly what the variable template PI shown at the beginning of the section allows us to do. Here it is again, with the complete solution:
+
+\begin{lstlisting}[style=styleCXX]
+template<class T>
+constexpr T PI = T(3.1415926535897932385L);
+
+template <typename T>
+T sphere_volume(T const r)
+{
+	return 4 * PI<T> * r * r * r / 3;
+}
+\end{lstlisting}
+
+The next example shows yet another possible use case and also demonstrates the explicit specialization of variable templates:
+
+\begin{lstlisting}[style=styleCXX]
+template<typename T>
+constexpr T SEPARATOR = '\n';
+
+template<>
+constexpr wchar_t SEPARATOR<wchar_t> = L'\n';
+
+template <typename T>
+std::basic_ostream<T>& show_parts(
+	std::basic_ostream<T>& s,
+	std::basic_string_view<T> const& str)
+{
+	using size_type =
+		typename std::basic_string_view<T>::size_type;
+	size_type start = 0;
+	size_type end;
+	do
+	{
+		end = str.find(SEPARATOR<T>, start);
+		s << '[' << str.substr(start, end - start) << ']'
+		<< SEPARATOR<T>;
+		start = end+1;
+	} while (end != std::string::npos);
+
+	return s;
+}
+
+show_parts<char>(std::cout, "one\ntwo\nthree");
+show_parts<wchar_t>(std::wcout, L"one line");
+\end{lstlisting}
+
+In this example, we have a function template called show\_parts that processes an input string after splitting it into parts delimited by a separator. The separator is a variable template defined at (global) namespace scope and is explicitly specialized for the wchar\_t type.
+
+As previously mentioned, variable templates can be members of classes. In this case, they represent static data members and need to be declared using the static keyword. The following example demonstrates this:
+
+\begin{lstlisting}[style=styleCXX]
+struct math_constants
+{
+	template<class T>
+	static constexpr T PI = T(3.1415926535897932385L);
+};
+
+template <typename T>
+T sphere_volume(T const r)
+{
+	return 4 * math_constants::PI<T> *r * r * r / 3;
+}
+\end{lstlisting}
+
+You can declare a variable template in a class and then provide its definition outside the class. Notice that in this case, the variable template must be declared with static const and not static constexpr, since the latter one requires in-class initialization:
+
+\begin{lstlisting}[style=styleCXX]
+struct math_constants
+{
+	template<class T>
+	static const T PI;
+};
+
+template<class T>
+const T math_constants::PI = T(3.1415926535897932385L);
+\end{lstlisting}
+
+Variable templates are used to simplify the use of type traits. The Explicit specialization section contained an example for a type trait called is\_floating\_point. Here is, again, the primary template:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+struct is_floating_point
+{
+	constexpr static bool value = false;
+};
+\end{lstlisting}
+
+There were several explicit specializations that I will not list here again. However, this type trait can be used as follows:
+
+\begin{lstlisting}[style=styleCXX]
+std::cout << is_floating_point<float>::value << '\n';
+\end{lstlisting}
+
+The use of is\_floating\_point<float>::value is rather cumbersome, but can be avoided with the help of a variable template that can be defined as follows:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+inline constexpr bool is_floating_point_v =
+	is_floating_point<T>::value;
+\end{lstlisting}
+
+This is\_floating\_point\_v variable template helps write code that is arguably simpler and easier to read. The following snippet is the form I prefer over the verbose variant with ::value:
+
+\begin{lstlisting}[style=styleCXX]
+std::cout << is_floating_point_v<float> << '\n';
+\end{lstlisting}
+
+The standard library defines a series of variable templates suffixed with\_v for ::value, just as in our example (such as std::is\_floating\_point\_v or std::is\_same\_v). We will discuss this topic in more detail in Chapter 5, Type Traits and Conditional Compilation. Variable templates are instantiated similarly to function templates and class templates.
+
+This happens either with an explicit instantiation or explicit specialization, or implicitly by the compiler. The compiler generates a definition when the variable template is used in a context where a variable definition must exist, or the variable is needed for constant evaluation of an expression.
+
+After this, we move to the topic of alias templates, which allow us to define aliases for class templates.
+
+
+
+
+
+
+
+

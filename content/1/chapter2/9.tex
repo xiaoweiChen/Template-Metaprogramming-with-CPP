@@ -1,0 +1,293 @@
+Lambdas, which are formally called lambda expressions, are a simplified way to define function objects in the place where they are needed. This typically includes predicates or comparison functions passed to algorithms. Although we will not discuss lambda expressions in general, let's take a look at the following examples:
+
+\begin{lstlisting}[style=styleCXX]
+int arr[] = { 1,6,3,8,4,2,9 };
+std::sort(
+	std::begin(arr), std::end(arr),
+	[](int const a, int const b) {return a > b; });
+	
+int pivot = 5;
+auto count = std::count_if(
+	std::begin(arr), std::end(arr),
+	[pivot](int const a) {return a > pivot; });
+\end{lstlisting}
+
+Lambda expressions are syntactic sugar, a simplified way of defining anonymous function objects. When encountering a lambda expression, the compiler generates a class with a function-call operator. For the previous example, these could look as follows:
+
+\begin{lstlisting}[style=styleCXX]
+struct __lambda_1
+{
+	inline bool operator()(const int a, const int b) const
+	{
+		return a > b;
+	}
+};
+
+struct __lambda_2
+{
+	__lambda_2(int & _pivot) : pivot{_pivot}
+	{}
+	
+	inline bool operator()(const int a) const
+	{
+		return a > pivot;
+	}
+private:
+	int pivot;
+};
+\end{lstlisting}
+
+The names chosen here are arbitrary and each compiler will generate different names. Also, the implementation details may differ and the ones seen here are the bare minimum a compiler is supposed to generate. Notice that the difference between the first lambda and the second is that the latter contains state that it captures by value.
+
+Lambda expressions, which were introduced in C++11, have received several updates in later versions of the standard. There are notably two, which will be discussed in this chapter:
+
+\begin{itemize}
+\item 
+Generic lambdas, introduced in C++14, allow us to use the auto specifier instead of explicitly specifying types. This transforms the generated function object into one with a template function-call operator.
+
+\item 
+Template lambdas, introduced in C++20, allow us to use the template syntax to explicitly specify the shape of the templatized function-call operator.
+\end{itemize}
+
+To understand the difference between these and how generic and template lambdas are helpful, let's explore the following examples:
+
+\begin{lstlisting}[style=styleCXX]
+auto l1 = [](int a) {return a + a; }; // C++11, regular
+                                      // lambda
+auto l2 = [](auto a) {return a + a; }; // C++14, generic
+                                       // lambda
+                                       
+auto l3 = []<typename T>(T a)
+          { return a + a; }; // C++20, template lambda
+
+auto v1 = l1(42); // OK
+auto v2 = l1(42.0); // warning
+auto v3 = l1(std::string{ "42" }); // error
+
+auto v5 = l2(42); // OK
+auto v6 = l2(42.0); // OK
+auto v7 = l2(std::string{"42"}); // OK
+
+auto v8 = l3(42); // OK
+auto v9 = l3(42.0); // OK
+auto v10 = l3(std::string{ "42" }); // OK
+\end{lstlisting}
+
+Here, we have three different lambdas: l1 is a regular lambda, l2 is a generic lambda, as at least one of the parameters is defined with the auto specifier, and l3 is a template lambda, defined with the template syntax but without the use of the template keyword.
+
+We can invoke l1 with an integer; we can also invoke it with a double, but this time the compiler will produce a warning about the possible loss of data. However, trying to invoke it with a string argument will produce a compile error, because std::string cannot be converted to int. On the other hand, l2 is a generic lambda. The compiler proceeds to instantiate specializations of it for all the types of the arguments it's invoked with, in this example int, double, and std::string. The following snippet shows how the generated function object may look, at least conceptually:
+
+\begin{lstlisting}[style=styleCXX]
+struct __lambda_3
+{
+	template<typename T1>
+	inline auto operator()(T1 a) const
+	{
+		return a + a;
+	}
+
+	template<>
+	inline int operator()(int a) const
+	{
+		return a + a;
+	}
+
+	template<>
+	inline double operator()(double a) const
+	{
+		return a + a;
+	}
+
+	template<>
+	inline std::string operator()(std::string a) const
+	{
+		return std::operator+(a, a);
+	}
+};
+\end{lstlisting}
+
+You can see here the primary template for the function-call operator, as well as the three specializations that we mentioned. Not surprisingly, the compiler will generate the same code for the third lambda expression, l3, which is a template lambda, only available in C++20. The question that arises from this is how are generic lambdas and lambda templates different? To answer this question, let's modify the previous example a bit:
+
+\begin{lstlisting}[style=styleCXX]
+auto l1 = [](int a, int b) {return a + b; };
+auto l2 = [](auto a, auto b) {return a + b; };
+auto l3 = []<typename T, typename U>(T a, U b)
+          { return a + b; };
+          
+auto v1 = l1(42, 1); // OK
+auto v2 = l1(42.0, 1.0); // warning
+auto v3 = l1(std::string{ "42" }, '1'); // error
+
+auto v4 = l2(42, 1); // OK
+auto v5 = l2(42.0, 1); // OK
+auto v6 = l2(std::string{ "42" }, '1'); // OK
+auto v7 = l2(std::string{ "42" }, std::string{ "1" }); // OK
+
+auto v8 = l3(42, 1); // OK
+auto v9 = l3(42.0, 1); // OK
+auto v10 = l3(std::string{ "42" }, '1'); // OK
+auto v11 = l3(std::string{ "42" }, std::string{ "42" }); // OK
+\end{lstlisting}
+
+The new lambda expressions take two parameters. Again, we can call l1 with two integers or an int and a double (although this again generates a warning) but we can't call it with a string and char. However, we can do all these with the generic lambda l2 and the lambda template l3. The code the compiler generates is identical for l2 and l3 and looks, semantically, as follows:
+
+\begin{lstlisting}[style=styleCXX]
+struct __lambda_4
+{
+	template<typename T1, typename T2>
+	inline auto operator()(T1 a, T2 b) const
+	{
+		return a + b;
+	}
+
+	template<>
+	inline int operator()(int a, int b) const
+	{
+		return a + b;
+	}
+
+	template<>
+	inline double operator()(double a, int b) const
+	{
+		return a + static_cast<double>(b);
+	}
+
+	template<>
+	inline std::string operator()(std::string a,
+	char b) const
+	{
+		return std::operator+(a, b);
+	}
+
+	template<>
+	inline std::string operator()(std::string a,
+	std::string b) const
+	{
+		return std::operator+(a, b);
+	}
+};
+\end{lstlisting}
+
+We see, in this snippet, the primary template for the function-call operator, and several full explicit specializations: for two int values, for a double and an int, for a string and a char, and for two string objects. But what if we want to restrict the use of the generic lambda l2 to arguments of the same type? This is not possible. The compiler cannot deduce our intention and, therefore, it would generate a different type template parameter for each occurrence of the auto specifier in the parameter list. However, the lambda templates from C++20 do allow us to specify the form of the function-call operator. Take a look at the following example:
+
+\begin{lstlisting}[style=styleCXX]
+auto l5 = []<typename T>(T a, T b) { return a + b; };
+
+auto v1 = l5(42, 1); // OK
+auto v2 = l5(42, 1.0); // error
+
+auto v4 = l5(42.0, 1.0); // OK
+auto v5 = l5(42, false); // error
+
+auto v6 = l5(std::string{ "42" }, std::string{ "1" }); // OK
+
+auto v6 = l5(std::string{ "42" }, '1'); // error
+\end{lstlisting}
+
+Invoking the lambda template with any two arguments of different types, even if they are implicitly convertible such as from int to double, is not possible. The compiler will generate an error. It's not possible to explicitly provide the template arguments when invoking the template lambda, such as in l5<double>(42, 1.0). This also generates a compiler error.
+
+The decltype type specifier allows us to tell the compiler to deduce the type from an expression. This topic is covered in detail in Chapter 4, Advanced Template Concepts. However, in C++14, we can use this in a generic lambda to declare the second parameter in the previous generic lambda expression to have the same type as the first parameter. More precisely, this would look as follows:
+
+\begin{lstlisting}[style=styleCXX]
+auto l4 = [](auto a, decltype(a) b) {return a + b; };
+\end{lstlisting}
+
+However, this implies that the type of the second parameter, b, must be convertible to the type of the first parameter, a. This allows us to write the following calls:
+
+\begin{lstlisting}[style=styleCXX]
+auto v1 = l4(42.0, 1); // OK
+auto v2 = l4(42, 1.0); // warning
+auto v3 = l4(std::string{ "42" }, '1'); // error
+\end{lstlisting}
+
+The first call is compiled without any problems because int is implicitly convertible to double. The second call compiles with a warning, because converting from double to int may incur a loss of data. The third call, however, generates an error, because char cannot be implicitly convertible to std::string. Although the l4 lambda is an improvement over the generic lambda l2 seen previously, it still does not help restrict calls completely if the arguments are of different types. This is only possible with lambda templates as shown earlier.
+
+Another example of a lambda template is shown in the next snippet. This lambda has a single argument, a std::array. However, the type of the elements of the array and the size of the array are specified as template parameters of the lambda template:
+
+\begin{lstlisting}[style=styleCXX]
+auto l = []<typename T, size_t N>(
+            std::array<T, N> const& arr)
+{
+	return std::accumulate(arr.begin(), arr.end(),
+	                       static_cast<T>(0));
+};
+
+auto v1 = l(1); // error
+auto v2 = l(std::array<int, 3>{1, 2, 3}); // OK
+\end{lstlisting}
+
+Attempting to call this lambda with anything other than an std::array object produces a compiler error. The compiler-generated function object may look as follows:
+
+\begin{lstlisting}[style=styleCXX]
+struct __lambda_5
+{
+	template<typename T, size_t N>
+	inline auto operator()(
+		const std::array<T, N> & arr) const
+	{
+		return std::accumulate(arr.begin(), arr.end(),
+							   static_cast<T>(0));
+	}
+
+	template<>
+	inline int operator()(
+		const std::array<int, 3> & arr) const
+	{
+		return std::accumulate(arr.begin(), arr.end(),
+							   static_cast<int>(0));
+	}
+};
+\end{lstlisting}
+
+An interesting benefit of generic lambdas over regular lambdas concerns recursive lambdas. Lambdas do not have names; they are anonymous, therefore, you cannot recursively call them directly. Instead, you have to define a std::function object, assign the lambda expression to it, and also capture it by reference in the capture list. The following is an example of a recursive lambda that computes the factorial of a number:
+
+\begin{lstlisting}[style=styleCXX]
+std::function<int(int)> factorial;
+factorial = [&factorial](int const n) {
+	if (n < 2) return 1;
+	else return n * factorial(n - 1);
+};
+
+factorial(5);
+\end{lstlisting}
+
+This can be simplified with the use of generic lambdas. They don't require a std::function and its capture. A recursive generic lambda can be implemented as follows:
+
+\begin{lstlisting}[style=styleCXX]
+auto factorial = [](auto f, int const n) {
+	if (n < 2) return 1;
+	else return n * f(f, n - 1);
+};
+
+factorial(factorial, 5);
+\end{lstlisting}
+
+If understanding how this works is hard, the compiler-generated code should help you figure it out:
+
+\begin{lstlisting}[style=styleCXX]
+struct __lambda_6
+{
+	template<class T1>
+	inline auto operator()(T1 f, const int n) const
+	{
+		if(n < 2) return 1;
+		else return n * f(f, n - 1);
+	}
+
+	template<>
+	inline int operator()(__lambda_6 f, const int n) const
+	{
+		if(n < 2) return 1;
+		else return n * f.operator()(__lambda_6(f), n - 1);
+	}
+};
+
+__lambda_6 factorial = __lambda_6{};
+factorial(factorial, 5);
+\end{lstlisting}
+
+A generic lambda is a function object with a template function-call operator. The first argument, specified with auto, can be anything, including the lambda itself. Therefore, the compiler will provide a full explicit specialization of the call operator for the type of the generated class.
+
+Lambda expressions help us avoid writing explicit code when we need to pass function objects as arguments to other functions. The compiler, instead, generates that code for us. Generic lambdas, introduced in C++14, help us avoid writing the same lambdas for different types. The lambda templates for C++20 allow us to specify the form of the generated call operator with the help of template syntax and semantics.
+
+

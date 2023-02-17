@@ -1,0 +1,87 @@
+So far, we have learned about function templates and class templates. It is possible to define member function templates too, both in non-template classes and class templates. In this section, we will learn how to do this. To understand the differences, let's start with the following example:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+class composition
+{
+public:
+	T add(T const a, T const b)
+	{
+		return a + b;
+	}
+};
+\end{lstlisting}
+
+The composition class is a class template. It has a single member function called add that uses the type parameter T. This class can be used as follows:
+
+\begin{lstlisting}[style=styleCXX]
+composition<int> c;
+c.add(41, 21);
+\end{lstlisting}
+
+We first need to instantiate an object of the composition class. Notice that we must explicitly specify the argument for the type parameter T because the compiler is not able to figure it out by itself (there is no context from which to infer it). When we invoke the add function, we just provide the arguments. Their type, represented by the T type template parameter that was previously resolved to int, is already known. A call such as c.add<int>(42, 21) would trigger a compiler error. The add function is not a function template, but a regular function that is a member of the composition class template.
+
+In the next example, the composition class changes slightly, but significantly. Let's see the definition first:
+
+\begin{lstlisting}[style=styleCXX]
+class composition
+{
+public:
+	template <typename T>
+	T add(T const a, T const b)
+	{
+		return a + b;
+	}
+};
+\end{lstlisting}
+
+This time, composition is a non-template class. However, the add function is a function template. Therefore, to call this function, we must do the following:
+
+\begin{lstlisting}[style=styleCXX]
+composition c;
+c.add<int>(41, 21);
+\end{lstlisting}
+
+The explicit specification of the int type for the T type template parameter is redundant since the compiler can deduce it by itself from the arguments of the call. However, it was shown here to better comprehend the differences between these two implementations.
+
+Apart from these two cases, member functions of class templates and member function templates of classes, we can also have member function templates of class templates. In this case, however, the template parameters of the member function template must differ from the template parameters of the class template; otherwise, the compiler will generate an error. Let's return to the wrapper class template example and modify it as follows:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+class wrapper
+{
+public:
+	wrapper(T const v) :value(v)
+	{}
+	
+	T const& get() const { return value; }
+	
+	template <typename U>
+	U as() const
+	{
+		return static_cast<U>(value);
+	}
+private:
+	T value;
+};
+\end{lstlisting}
+
+As you can see here, this implementation features one more member, a function called as. This is a function template and has a type template parameter called U. This function is used to cast the wrapped value from a type T to a type U, and return it to the caller. We can use this implementation as follows:
+
+
+\begin{lstlisting}[style=styleCXX]
+wrapper<double> a(42.0);
+auto d = a.get(); // double
+auto n = a.as<int>(); // int
+\end{lstlisting}
+
+Arguments for the template parameters were specified when instantiating the wrapper class (double) – although in C++17 this is redundant, and when invoking the as function (int) to perform the cast.
+
+Before we continue with other topics such as instantiation, specialization, and other forms of templates, including variables and aliases, it's important that we take the time to learn more about template parameters. This will make the subject of the next section.
+
+
+
+
+
+
+

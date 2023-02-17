@@ -1,7 +1,554 @@
+
+So far in the book, we have seen multiple examples of templates with one or more parameters. In all these examples, the parameters represented types supplied at instantiation, either explicitly by the user, or implicitly by the compiler when it could deduce them. These kinds of parameters are called type template parameters. However, templates can also have non-type template parameters and template template parameters. In the following sections, we'll explore all of them.
+
 \subsubsubsection{2.4.1\hspace{0.2cm}Type template parameters}
+
+As already mentioned, these are parameters representing types supplied as arguments during the template instantiation. They are introduced either with the typename or the class keyword. There is no difference between using these two keywords. A type template parameter can have a default value, which is a type. This is specified the same way you would specify a default value for a function parameter. Examples for these are shown in the following snippet:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+class wrapper { /* ... */ };
+template <typename T = int>
+class wrapper { /* ... */ };
+\end{lstlisting}
+
+The name of the type template parameter can be omitted, which can be useful in forwarding declarations:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename>
+class wrapper;
+
+template <typename = int>
+class wrapper;
+\end{lstlisting}
+
+C++11 has introduced variadic templates, which are templates with a variable number of arguments. A template parameter that accepts zero or more arguments is called a parameter pack. A type template parameter pack has the following form:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename... T>
+class wrapper { /* ... */ };
+\end{lstlisting}
+
+Variadic templates will be addressed in Chapter 3, Variadic Templates. Therefore, we will not get into details about these kinds of parameters at this point.
+
+C++20 has introduced concepts and constraints. Constraints specify requirements on template arguments. A named set of constraints is called a concept. Concepts can be specified as type template parameters. However, the syntax is a little bit different. The name of the concept (followed by a list of template arguments in angle brackets if the case) is used instead of the typename or the class keyword. Examples, including concepts with a default value and constrained type template parameter pack, are shown as follows:
+
+\begin{lstlisting}[style=styleCXX]
+template <WrappableType T>
+class wrapper { /* ... */ };
+
+template <WrappableType T = int>
+class wrapper { /* ... */ };
+
+template <WrappableType... T>
+class wrapper { /* ... */ };
+\end{lstlisting}
+
+Concepts and constraints are discussed in Chapter 6, Concepts and Constraints. We will learn more about these kinds of parameters in that chapter. For now, let's look at the second kind of template parameters, non-type template parameters.
+
 
 \subsubsubsection{2.4.2\hspace{0.2cm}Non-type template parameters}
 
+Template arguments don't always have to represent types. They can also be compile-time expressions, such as constants, addresses of functions or objects with external linkage, or addresses of static class members. Parameters supplied with compile-time expressions are called non-type template parameters. This category of parameters can only have a structural type. The following are the structural types:
+
+\begin{itemize}
+\item 
+Integral types
+
+\item 
+Floating-point types, as of C++20
+
+\item 
+Enumerations
+
+\item 
+Pointer types (either to objects or functions)
+
+\item 
+Pointer to member types (either to member objects or member functions)
+
+\item 
+Lvalue reference types (either to objects or functions)
+
+\item 
+A literal class type that meets the following requirements:
+\begin{itemize}
+\item 
+All base classes are public and non-mutable.
+
+\item 
+All non-static data members are public and non-mutable.
+
+\item 
+The types of all base classes and non-static data members are also structural types or arrays thereof.
+\end{itemize}
+\end{itemize}
+
+cv-qualified forms of these types can also be used for non-type template parameters. Non-type template parameters can be specified in different ways. The possible forms are shown in the following snippet:
+
+\begin{lstlisting}[style=styleCXX]
+template <int V>
+class foo { /*...*/ };
+
+template <int V = 42>
+class foo { /*...*/ };
+
+template <int... V>
+class foo { /*...*/ };
+\end{lstlisting}
+
+In all these examples, the type of the non-type template parameters is int. The first and second examples are similar, except that in the second example a default value is used. The third example is significantly different because the parameter is actually a parameter pack. This will be discussed in the next chapter.
+
+To understand non-type template parameters better, let's look at the following example, where we sketch a fixed-size array class, called buffer:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T, size_t S>
+class buffer
+{
+	T data_[S];
+public:
+	constexpr T const * data() const { return data_; }
+	
+	constexpr T& operator[](size_t const index)
+	{
+		return data_[index];
+	}
+
+	constexpr T const & operator[](size_t const index) const
+	{
+		return data_[index];
+	}
+};
+\end{lstlisting}
+
+This buffer class holds an internal array of S elements of type T. Therefore, S needs to be a compile-type value. This class can be instantiated as follows:
+
+\begin{lstlisting}[style=styleCXX]
+buffer<int, 10> b1;
+buffer<int, 2*5> b2;
+\end{lstlisting}
+
+These two definitions are equivalent, and both b1 and b2 are two buffers holding 10 integers. Moreover, they are of the same type, since 2*5 and 10 are two expressions evaluated to the same compile-time value. You can easily check this with the following statement:
+
+\begin{lstlisting}[style=styleCXX]
+static_assert(std::is_same_v<decltype(b1), decltype(b2)>);
+\end{lstlisting}
+
+This is not the case anymore, for the type of the b3 object is declared as follows:
+
+\begin{lstlisting}[style=styleCXX]
+buffer<int, 3*5> b3;
+\end{lstlisting}
+
+In this example, b3 is a buffer holding 15 integers, which is different from the buffer type from the previous example that held 10 integers. Conceptually, the compiler generates the following code:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T, size_t S>
+class buffer
+{
+	T data_[S];
+public:
+	constexpr T* data() const { return data_; }
+	
+	constexpr T& operator[](size_t const index)
+	{
+		return data_[index];
+	}
+
+	constexpr T const & operator[](size_t const index) const
+	{
+		return data_[index];
+	}
+};
+\end{lstlisting}
+
+This is the code for the primary template but there are also a couple of specializations shown next:
+
+\begin{lstlisting}[style=styleCXX]
+template<>
+class buffer<int, 10>
+{
+	int data_[10];
+public:
+	constexpr int * data() const;
+	constexpr int & operator[](const size_t index);
+	constexpr const int & operator[](
+		const size_t index) const;
+};
+
+template<>
+class buffer<int, 15>
+{
+	int data_[15];
+public:
+	constexpr int * data() const;
+	constexpr int & operator[](const size_t index);
+	constexpr const int & operator[](
+		const size_t index) const;
+};
+\end{lstlisting}
+
+The concept of specialization, seen in this code sample, is detailed further on in this chapter, in the Understanding template specialization section. For the time being, you should notice the two different buffer types. Again, it's possible to verify that the types of b1 and b3 are different with the following statement:
+
+\begin{lstlisting}[style=styleCXX]
+static_assert(!std::is_same_v<decltype(b1), decltype(b3)>);
+\end{lstlisting}
+
+The use of structural types such as integer, floating-point, or enumeration types is encountered in practice more often than the rest. It's probably easier to understand their use and find useful examples for them. However, there are scenarios where pointers or references are used. In the following example, we will examine the use of a pointer to function parameter. Let's see the code first:
+
+\begin{lstlisting}[style=styleCXX]
+struct device
+{
+	virtual void output() = 0;
+	virtual ~device() {}
+};
+
+template <void (*action)()>
+struct smart_device : device
+{
+	void output() override
+	{
+		(*action)();
+	}
+};
+\end{lstlisting}
+
+In this snippet, device is a base class with a pure virtual function called output (and a virtual destructor). This is the base class for a class template called smart\_device that implements the output virtual function by calling a function through a function pointer. This function pointer is passed an argument for the non-type template parameter of the class template. The following sample shows how it can be used:
+
+\begin{lstlisting}[style=styleCXX]
+void say_hello_in_english()
+{
+	std::cout << "Hello, world!\n";
+}
+
+void say_hello_in_spanish()
+{
+	std::cout << "Hola mundo!\n";
+}
+
+auto w1 =
+	std::make_unique<smart_device<&say_hello_in_english>>();
+w1->output();
+
+auto w2 =
+	std::make_unique<smart_device<&say_hello_in_spanish>>();
+w2->output();
+\end{lstlisting}
+
+Here, w1 and w2 are two unique\_ptr objects. Although, apparently, they point to objects of the same type, that is not true, because smart\_device<\&say\_hello\_in\_english> and smart\_device<\&say\_hello\_in\_spanish> are different types since they are instantiated with different values for the function pointer. This can be easily checked with the following statement:
+
+\begin{lstlisting}[style=styleCXX]
+static_assert(!std::is_same_v<decltype(w1), decltype(w2)>);
+\end{lstlisting}
+
+If we, on the other hand, change the auto specifier with std::unique\_ptr<device>, as shown in the following snippet, then w1 and w2 are smart pointers to the base class device, and therefore have the same type:
+
+\begin{lstlisting}[style=styleCXX]
+std::unique_ptr<device> w1 =
+	std::make_unique<smart_device<&say_hello_in_english>>();
+w1->output();
+
+std::unique_ptr<device> w2 =
+	std::make_unique<smart_device<&say_hello_in_spanish>>();
+w2->output();
+
+static_assert(std::is_same_v<decltype(w1), decltype(w2)>);
+\end{lstlisting}
+
+Although this example uses a pointer to function, a similar example can be conceived for pointer to member functions. The previous example can be transformed to the following (still using the same base class device):
+
+\begin{lstlisting}[style=styleCXX]
+template <typename Command, void (Command::*action)()>
+struct smart_device : device
+{
+	smart_device(Command& command) : cmd(command) {}
+	
+	void output() override
+	{
+		(cmd.*action)();
+	}
+private:
+	Command& cmd;
+};
+
+struct hello_command
+{
+	void say_hello_in_english()
+	{
+		std::cout << "Hello, world!\n";
+	}
+
+	void say_hello_in_spanish()
+	{
+		std::cout << "Hola mundo!\n";
+	}
+};
+\end{lstlisting}
+
+These classes can be used as follows:
+
+\begin{lstlisting}[style=styleCXX]
+hello_command cmd;
+
+auto w1 = std::make_unique<
+	smart_device<hello_command,
+		&hello_command::say_hello_in_english>>(cmd);
+w1->output();
+
+auto w2 = std::make_unique<
+	smart_device<hello_command,
+		&hello_command::say_hello_in_spanish>>(cmd);
+w2->output();
+\end{lstlisting}
+
+In C++17, a new form of specifying non-type template parameters was introduced, using the auto specifier (including the auto* and auto\& forms) or decltype(auto) instead of the name of the type. This allows the compiler to deduce the type of the parameter from the expression supplied as the argument. If the deduced type is not permitted for a non-type template parameter the compiler will generate an error. Let's see an example:
+
+\begin{lstlisting}[style=styleCXX]
+template <auto x>
+struct foo
+{ /* … */ };
+\end{lstlisting}
+
+This class template can be used as follows:
+
+\begin{lstlisting}[style=styleCXX]
+foo<42> f1;   // foo<int>
+foo<42.0> f2; // foo<double> in C++20, error for older
+              // versions
+foo<"42"> f3; // error
+\end{lstlisting}
+
+In the first example, for f1, the compiler deduces the type of the argument as int. In the second example, for f2, the compiler deduces the type as double. However, this is only the case for C++20. In previous versions of the standard, this line would yield an error, since floating-point types were not permitted as arguments for non-type template parameters prior to C++20. The last line, however, produces an error because "42" is a string literal and string literals cannot be used as arguments for non-type template parameters.
+
+The last example can be, however, worked around in C++20 by wrapping the literal string in a structural literal class. This class would store the characters of the string literal in a fixed-length array. This is exemplified in the following snippet:
+
+\begin{lstlisting}[style=styleCXX]
+template<size_t N>
+struct string_literal
+{
+	constexpr string_literal(const char(&str)[N])
+	{
+		std::copy_n(str, N, value);
+	}
+	char value[N];
+};
+\end{lstlisting}
+
+However, the foo class template shown previously needs to be modified to use string\_literal explicitly and not the auto specifier:
+
+\begin{lstlisting}[style=styleCXX]
+template <string_literal x>
+struct foo
+{
+};
+\end{lstlisting}
+
+With this is in place, the foo<"42"> f; declaration shown earlier will compile without any errors in C++20.
+
+The auto specifier can also be used with a non-type template parameter pack. In this case, the type is deduced independently for each template argument. The types of the template arguments do not need to be the same. This is shown in the following snippet:
+
+\begin{lstlisting}[style=styleCXX]
+template<auto... x>
+struct foo
+{ /* ... */ };
+foo<42, 42.0, false, 'x'> f;
+\end{lstlisting}
+
+In this example, the compiler deduces the types of the template arguments as int, double, bool, and char, respectively.
+
+The third and last category of template parameters are template template parameters. We will look at them next.
+
 \subsubsubsection{2.4.3\hspace{0.2cm}Template template parameters}
 
+Although the name may sound a bit strange, it refers to a category of template parameters that are themselves templates. These can be specified similarly to type template parameters, with or without a name, with or without a default value, and as a parameter pack with or without a name. As of C++17, both the keywords class and typename can be used to introduce a template template parameter. Prior to this version, only the class keyword could be used.
+
+To showcase the use of template template parameters, let's consider the following two class templates first:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+class simple_wrapper
+{
+public:
+	T value;
+};
+
+template <typename T>
+class fancy_wrapper
+{
+public:
+	fancy_wrapper(T const v) :value(v)
+	{
+	}
+
+	T const& get() const { return value; }
+	
+	template <typename U>
+	U as() const
+	{
+		return static_cast<U>(value);
+	}
+private:
+	T value;
+};
+\end{lstlisting}
+
+The simple\_wrapper class is a very simple class template that holds a value of the type template parameter T. On the other hand, fancy\_wrapper is a more complex wrapper implementation that hides the wrapped value and exposes member functions for data access. Next, we implement a class template called wrapping\_pair that contains two values of a wrapping type. This can be either simpler\_wrapper, fancy\_wrapper, or anything else that is similar:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T, typename U,
+		  template<typename> typename W = fancy_wrapper>
+class wrapping_pair
+{
+public:
+	wrapping_pair(T const a, U const b) :
+		item1(a), item2(b)
+	{
+	}
+
+	W<T> item1;
+	W<U> item2;
+};
+\end{lstlisting}
+
+The wrapping\_pair class template has three parameters. The first two are type template parameters, named T and U. The third parameter is a template template parameter, called W, that has a default value, which is the fancy\_wrapper type. We can use this class template as shown in the following snippet:
+
+\begin{lstlisting}[style=styleCXX]
+wrapping_pair<int, double> p1(42, 42.0);
+std::cout << p1.item1.get() << ' '
+		  << p1.item2.get() << '\n';
+
+wrapping_pair<int, double, simple_wrapper> p2(42, 42.0);
+std::cout << p2.item1.value << ' '
+		  << p2.item2.value << '\n';
+\end{lstlisting}
+
+In this example, p1 is a wrapping\_pair object that contains two values, an int and a double, each wrapped in a fancy\_wrapper object. This is not explicitly specified but is the default value of the template template parameter. On the other hand, p2 is also a wrapping\_pair object, also containing an int and a double, but these are wrapped by a simple\_wrapper object, which is now specified explicitly in the template instantiation.
+
+In this example, we have seen the use of a default template argument for a template parameter. This topic is explored in detail in the next section.
+
 \subsubsubsection{2.4.4\hspace{0.2cm}Default template arguments}
+
+Default template arguments are specified similarly to default function arguments, in the parameter list after the equal sign. The following rules apply to default template arguments:
+
+\begin{itemize}
+\item 
+They can be used with any kind of template parameters with the exception of parameter packs.
+
+\item 
+If a default value is specified for a template parameter of a class template, variable template, or type alias, then all subsequent template parameters must also have a default value. The exception is the last parameter if it is a template parameter pack.
+
+\item 
+If a default value is specified for a template parameter in a function template, then subsequent template parameters are not restricted to also have a default value.
+
+\item 
+In a function template, a parameter pack may be followed by more type parameters only if they have default arguments or their value can be deduced by the compiler from the function arguments.
+
+\item 
+They are not allowed in declarations of friend class templates.
+
+\item 
+They are allowed in the declaration of a friend function template only if the declaration is also a definition and there is no other declaration of the function in the same translation unit.
+
+\item 
+They are not allowed in the declaration or definition of an explicit specialization of a function template or member function template.
+\end{itemize}
+
+The following snippet shows examples for using default template arguments:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T = int>
+class foo { /*...*/ };
+
+template <typename T = int, typename U = double>
+class bar { /*...*/ };
+\end{lstlisting}
+
+As mentioned previously, a template parameter with a default argument cannot be followed by parameters without a default argument when declaring a class template but this restriction does not apply to function templates. This is shown in the next snippet:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T = int, typename U>
+class bar { }; // error
+
+template <typename T = int, typename U>
+void func() {} // OK
+\end{lstlisting}
+
+A template may have multiple declarations (but only one definition). The default template arguments from all the declarations and the definition are merged (the same way they are merged for default function arguments). Let's look at an example to understand how it works:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T, typename U = double>
+struct foo;
+
+template <typename T = int, typename U>
+struct foo;
+
+template <typename T, typename U>
+struct foo
+{
+	T a;
+	U b;
+};
+\end{lstlisting}
+
+This is semantically equivalent to the following definition:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T = int, typename U = double>
+struct foo
+{
+	T a;
+	U b;
+};
+\end{lstlisting}
+
+However, these multiple declarations with different default template arguments cannot be provided in any order. The rules mentioned earlier still apply. Therefore, a declaration of a class template where the first parameter has a default argument and the ensuing parameters do not have one is illegal:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T = int, typename U>
+struct foo; // error, U does not have a default argument
+
+template <typename T, typename U = double>
+struct foo;
+\end{lstlisting}
+
+Another restriction on default template arguments is that the same template parameter cannot be given multiple defaults in the same scope. Therefore, the next example will produce an error:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T = int>
+struct foo;
+
+template <typename T = int> // error redefinition
+                            // of default parameter
+struct foo {};
+\end{lstlisting}
+
+When a default template argument uses names from a class, the member access restrictions are checked at the declaration, not at the instantiation of the template:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+struct foo
+{
+	protected:
+	using value_type = T;
+};
+
+template <typename T, typename U = typename T::value_type>
+struct bar
+{
+	using value_type = U;
+};
+
+bar<foo<int>> x;
+\end{lstlisting}
+
+When the x variable is defined, the bar class template is instantiated, but the foo::value\_type typedef is protected and therefore cannot be used outside of foo. The result is a compiler error at the declaration of the bar class template.
+
+With these mentions, we wrap up the topic of template parameters. The next one we will explore in the following section is template instantiation, which is the creation of a new definition of a function, class, or variable from a template definition and a set of template arguments.
+
+
+
+
+
+
+
+

@@ -1,0 +1,138 @@
+Function templates are defined in a similar way to regular functions, except that the function declaration is preceded by the keyword template followed by a list of template parameters between angle brackets. The following is a simple example of a function template:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+T add(T const a, T const b)
+{
+	return a + b;
+}
+\end{lstlisting}
+
+This function has two parameters, called a and b, both of the same T type. This type is listed in the template parameters list, introduced with the keyword typename or class (the former is used in this example and throughout the book). This function does nothing more than add the two arguments and returns the result of this operation, which should have the same T type.
+
+Function templates are only blueprints for creating actual functions and only exist in source code. Unless explicitly called in your source code, the function templates will not be present in the compiled executable. However, when the compiler encounters a call to a function template and is able to match the supplied arguments and their types to a function template's parameters, it generates an actual function from the template and the arguments used to invoke it. To understand this, let's look at some examples:
+
+\begin{lstlisting}[style=styleCXX]
+auto a = add(42, 21)
+\end{lstlisting}
+
+In this snippet, we call the add function with two int parameters, 42 and 21. The compiler is able to deduce the template parameter T from the type of the supplied arguments, making it unnecessary to explicitly provide it. However, the following two invocations are also possible, and, in fact, identical to the earlier one:
+
+\begin{lstlisting}[style=styleCXX]
+auto a = add<int>(42, 21);
+auto a = add<>(42, 21);
+\end{lstlisting}
+
+From this invocation, the compiler will generate the following function (keep in mind that the actual code may differ for various compilers):
+
+\begin{lstlisting}[style=styleCXX]
+int add(const int a, const int b)
+{
+	return a + b;
+}
+\end{lstlisting}
+
+However, if we change the call to the following form, we explicitly provide the argument for the template parameter T, as the short type:
+
+\begin{lstlisting}[style=styleCXX]
+auto b = add<short>(42, 21);
+\end{lstlisting}
+
+In this case, the compiler will generate another instantiation of this function, with short instead of int. This new instantiation would look as follows:
+
+\begin{lstlisting}[style=styleCXX]
+short add(const short a, const int b)
+{
+	return static_cast<short>(a + b);
+}
+\end{lstlisting}
+
+If the type of the two parameters is ambiguous, the compiler will not be able to deduce them automatically. This is the case with the following invocation:
+
+\begin{lstlisting}[style=styleCXX]
+auto d = add(41.0, 21);
+\end{lstlisting}
+
+In this example, 41.0 is a double but 21 is an int. The add function template has two parameters of the same type, so the compiler is not able to match it with the supplied arguments and will issue an error. To avoid this, and suppose you expected it to be instantiated for double, you have to specify the type explicitly, as shown in the following snippet:
+
+\begin{lstlisting}[style=styleCXX]
+auto d = add<double>(41.0, 21);
+\end{lstlisting}
+
+As long as the two arguments have the same type and the + operator is available for the type of the arguments, you can call the function template add in the ways shown previously. However, if the + operator is not available, then the compiler will not be able to generate an instantiation, even if the template parameters are correctly resolved. This is shown in the following snippet:
+
+\begin{lstlisting}[style=styleCXX]
+class foo
+{
+	int value;
+public:
+	explicit foo(int const i):value(i)
+	{ }
+	
+	explicit operator int() const { return value; }
+};
+
+auto f = add(foo(42), foo(41));
+\end{lstlisting}
+
+In this case, the compiler will issue an error that a binary + operator is not found for arguments of type foo. Of course, the actual message differs for different compilers, which is the case for all errors. To make it possible to call add for arguments of type foo, you'd have to overload the + operator for this type. A possible implementation is the following:
+
+\begin{lstlisting}[style=styleCXX]
+foo operator+(foo const a, foo const b)
+{
+	return foo((int)a + (int)b);
+}
+\end{lstlisting}
+
+All the examples that we have seen so far represented templates with a single template parameter. However, a template can have any number of parameters and even a variable number of parameters. This latter topic will be addressed in Chapter 3, Variadic Templates. The next function is a function template that has two type template parameters:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename Input, typename Predicate>
+int count_if(Input start, Input end, Predicate p)
+{
+	int total = 0;
+	for (Input i = start; i != end; i++)
+	{
+		if (p(*i))
+			total++;
+	}
+	return total;
+}
+\end{lstlisting}
+
+This function takes two input iterators to the start and end of a range and a predicate and returns the number of elements in the range that match the predicate. This function, at least conceptually, is very similar to the std::count\_if general-purpose function from the <algorithm> header in the standard library and you should always prefer to use standard algorithms over hand-crafted implementations. However, for the purpose of this topic, this function is a good example to help you understand how templates work.
+
+We can use the count\_if function as follows:
+
+\begin{lstlisting}[style=styleCXX]
+int main()
+{
+	int arr[]{ 1,1,2,3,5,8,11 };
+	int odds = count_if(
+				std::begin(arr), std::end(arr),
+				[](int const n) { return n % 2 == 1; });
+	std::cout << odds << '\n';
+}
+\end{lstlisting}
+
+Again, there is no need to explicitly specify the arguments for the type template parameters (the type of the input iterator and the type of the unary predicate) because the compiler is able to infer them from the call.
+
+Although there are more things to learn about function templates, this section provided an introduction to working with them. Let's now learn the basics of defining class templates.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

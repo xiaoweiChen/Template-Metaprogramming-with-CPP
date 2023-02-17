@@ -1,0 +1,95 @@
+Class templates are declared in a very similar manner, with the template keyword and the template parameter list preceding the class declaration. We saw the first example in the introductory chapter. The next snippet shows a class template called wrapper. It has a single template parameter, a type called T, that is used as the type for data members, parameters, and function return types:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+class wrapper
+{
+public:
+	wrapper(T const v): value(v)
+	{ }
+	
+	T const& get() const { return value; }
+private:
+	T value;
+};
+\end{lstlisting}
+
+As long as the class template is not used anywhere in your source code, the compiler will not generate code from it. For that to happen, the class template must be instantiated and all its parameters properly matched to arguments either explicitly, by the user, or implicitly, by the compiler. Examples for instantiating this class template are shown next:
+
+\begin{lstlisting}[style=styleCXX]
+wrapper a(42); // wraps an int
+wrapper<int> b(42); // wraps an int
+wrapper<short> c(42); // wraps a short
+wrapper<double> d(42.0); // wraps a double
+wrapper e("42"); // wraps a char const *
+\end{lstlisting}
+
+The definitions of a and e in this snippet are only valid in C++17 and onward thanks to a feature called class template argument deduction. This feature enables us to use class templates without specifying any template argument, as long as the compiler is able to deduce them all. This will be discussed in Chapter 4, Advanced Template Concepts. Until then, all examples that refer to class templates will explicitly list the arguments, as in wrapper<int> or wrapper<char const*>.
+
+Class templates can be declared without being defined and used in contexts where incomplete types are allowed, such as the declaration of a function, as shown here:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+class wrapper;
+
+void use_foo(wrapper<int>* ptr);
+\end{lstlisting}
+
+However, a class template must be defined at the point where the template instantiation occurs; otherwise, the compiler will generate an error. This is exemplified with the following snippet:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+class wrapper; // OK
+
+void use_wrapper(wrapper<int>* ptr); // OK
+
+int main()
+{
+	wrapper<int> a(42); // error, incomplete type
+	use_wrapper(&a);
+}
+
+template <typename T>
+class wrapper
+{
+	// template definition
+};
+
+void use_wrapper(wrapper<int>* ptr)
+{
+	std::cout << ptr->get() << '\n';
+}
+\end{lstlisting}
+
+When declaring the use\_wrapper function, the class template wrapper is only declared, but not defined. However, incomplete types are allowed in this context, which makes it all right to use wrapper<T> at this point. However, in the main function we are instantiating an object of the wrapper class template. This will generate a compiler error because at this point the definition of the class template must be available. To fix this particular example, we'd have to move the definition of the main function to the end, after the definition of wrapper and use\_wrapper.
+
+In this example, the class template was defined using the class keyword. However, in C++ there is little difference between declaring classes with the class or struct keyword:
+
+\begin{itemize}
+\item 
+With struct, the default member access is public, whereas using class is private.
+
+\item 
+With struct, the default access specifier for base-class inheritance is public, whereas using class is private.
+\end{itemize}
+
+You can define class templates using the struct keyword the same way we did here using the class keyword. The differences between classes defined with the struct or the class keyword are also observed for class templates defined with the struct or class keyword.
+
+Classes, whether they are templates or not, may contain member function templates too. The way these are defined is discussed in the next section.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
