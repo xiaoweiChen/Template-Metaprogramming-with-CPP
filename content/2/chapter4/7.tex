@@ -1,0 +1,84 @@
+The std::declval is a utility type operation function, available in the <utility> header. It’s in the same category as functions such as std::move and std::forward that we have already seen. What it does is very simple: it adds an rvalue reference to its type template argument. The declaration of this function looks as follows:
+
+\begin{lstlisting}[style=styleCXX]
+template<class T>
+typename std::add_rvalue_reference<T>::type declval() noexcept;
+\end{lstlisting}
+
+This function has no definition and therefore it cannot be called directly. It can only be used in unevaluated contexts – decltype, sizeof, typeid, and noexcept. These are compile-time-only contexts that are not evaluated during runtime. The purpose of std::declval is to aid with dependent type evaluation for types that do not have a default constructor or have one but it cannot be accessed because it’s private or protected.
+
+To understand how this works, let’s consider a class template that does the composition of two values of different types, and we want to create a type alias for the result of applying the plus operator to two values of these types. How could such a type alias be defined?
+Let’s start with the following form:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T, typename U>
+struct composition
+{
+	using result_type = decltype(???);
+};
+\end{lstlisting}
+
+We can use the decltype specifier but we need to provide an expression. We cannot say decltype(T + U) because these are types, not values. We could invoke the default constructor and, therefore, use the expression decltype(T\{\} + U\{\}). This can work fine for built-in types such as int and double, as shown in the following snippet:
+
+\begin{lstlisting}[style=styleCXX]
+static_assert(
+	std::is_same_v<double,
+		composition<int, double>::result_type>);
+\end{lstlisting}
+
+It can also work for types that have an (accessible) default constructor. But it cannot work for types that don’t have a default constructor. The following type wrapper is such an example:
+
+\begin{lstlisting}[style=styleCXX]
+struct wrapper
+{
+	wrapper(int const v) : value(v){}
+	int value;
+	
+	friend wrapper operator+(int const a, wrapper const& w)
+	{
+		return wrapper(a + w.value);
+	}
+
+	friend wrapper operator+(wrapper const& w, int const a)
+	{
+		return wrapper(a + w.value);
+	}
+};
+
+// error, no appropriate default constructor available
+static_assert(
+	std::is_same_v<wrapper,
+		composition<int,wrapper>::result_type>);
+\end{lstlisting}
+
+The solution here is to use std::declval(). The implementation of the class template composition would change as follows:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T, typename U>
+struct composition
+{
+	using result_type = decltype(std::declval<T>() +
+								 std::declval<U>());
+};
+\end{lstlisting}
+
+With this change, both the static asserts previously shown compile without any error. This function avoids the need to use particular values to determine the type of an expression. It produces a value of a type T without involving a default constructor. The reason it returns an rvalue reference is to enable us to work with types that cannot be returned from a function, such as arrays and abstract types.
+
+The definition of the wrapper class earlier contained two friend operators. Friendship, when templates are involved, has some particularities. We will discuss this in the next section.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

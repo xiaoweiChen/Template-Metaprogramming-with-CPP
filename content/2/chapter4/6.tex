@@ -1,0 +1,303 @@
+This specifier, introduced in C++11, returns the type of an expression. It is usually used in templates together with the auto specifier. Together, they can be used to declare the return type of a function template that depends on its template arguments, or the return type of a function that wraps another function and returns the result from executing the wrapped function.
+
+The decltype specifier is not restricted for use in template code. It can be used with different expressions, and it yields different results based on the expression. The rules are as follows:
+
+\begin{enumerate}
+\item
+If the expression is an identifier or a class member access, then the result is the type of the entity that is named by the expression. If the entity does not exist, or it is a function that has an overload set (more than one function with the same name exists), then the compiler will generate an error.
+
+\item
+If the expression is a function call or an overloaded operator function, then the result is the return type of the function. If the overloaded operator is wrapped in parentheses, these are ignored.
+
+\item
+If the expression is an lvalue, then the result type is an lvalue reference to the type of expression.
+
+\item
+If the expression is something else, then the result type is the type of the expression.
+\end{enumerate}
+
+To understand these rules better, we’ll look at a set of examples. For these, we will consider the following functions and variables that we will use in decltype expressions:
+
+\begin{lstlisting}[style=styleCXX]
+int f() { return 42; }
+int g() { return 0; }
+int g(int a) { return a; }
+
+struct wrapper
+{
+	int val;
+	int get() const { return val; }
+};
+
+int a = 42;
+int& ra = a;
+const double d = 42.99;
+long arr[10];
+long l = 0;
+char* p = nullptr;
+char c = 'x';
+wrapper w1{ 1 };
+wrapper* w2 = new wrapper{ 2 };
+\end{lstlisting}
+
+The following listing shows multiple uses of the decltype specifier. The rule that applies in each case, as well as the deduced type, is specified on each line in a comment:
+
+\begin{lstlisting}[style=styleCXX]
+decltype(a) e1; // R1, int
+decltype(ra) e2 = a; // R1, int&
+decltype(f) e3; // R1, int()
+decltype(f()) e4; // R2, int
+decltype(g) e5; // R1, error
+decltype(g(1)) e6; // R2, int
+decltype(&f) e7 = nullptr; // R4, int(*)()
+decltype(d) e8 = 1; // R1, const double
+decltype(arr) e9; // R1, long[10]
+decltype(arr[1]) e10 = l; // R3, long&
+decltype(w1.val) e11; // R1, int
+decltype(w1.get()) e12; // R1, int
+decltype(w2->val) e13; // R1, int
+decltype(w2->get()) e14; // R1, int
+decltype(42) e15 = 1; // R4, int
+decltype(1 + 2) e16; // R4, int
+decltype(a + 1) e17; // R4, int
+decltype(a = 0) e18 = a; // R3, int&
+decltype(p) e19 = nullptr; // R1, char*
+decltype(*p) e20 = c; // R3, char&
+decltype(p[0]) e21 = c; // R3, char&
+\end{lstlisting}
+
+We will not elaborate on all these declarations. Most of these are relatively easy to follow based on the specified rules. A few notes, however, are worth considering for clarifying some of the deduced types:
+
+\begin{itemize}
+\item
+decltype(f) only names a function with an overloaded set, so rule 1 applies. decltype(g) also names a function but it has an overloaded set. Therefore, rule 1 applies and the compiler generates an error.
+
+\item
+decltype(f()) and decltype(g(1)) are both using function calls for the expression, so the second rule applies, and even if g has an overload set, the declaration is correct.
+
+\item
+decltype(\&f) uses the address of the function f, so the fourth rule applies, yielding int(*)().
+
+\item
+decltype(1+2) and decltype(a+1) use the overloaded operator + that returns an rvalue, so the fourth rule applies. The result is int. However, decltype(a = 1) uses the assignment operator that returns an lvalue, so the third rule applies, yielding the lvalue reference int\&.
+\end{itemize}
+
+The decltype specifier defines an unevaluated context. This means the expression used with the specifier is not evaluated since this specifier is only querying the properties of its operand. You can see this in the following snippet, where the assignment a=1 is used with the decltype specifier to declare the variable e, but after the declaration, the value of a is the one with which it was initialized:
+
+\begin{lstlisting}[style=styleCXX]
+int a = 42;
+decltype(a = 1) e = a;
+std::cout << a << '\n'; // prints 42
+\end{lstlisting}
+
+There is an exception to this rule concerning template instantiation. When the expression used with the decltype specifier contains a template, the template is instantiated before the expression is evaluated at compile time:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+struct wrapper
+{
+	T data;
+};
+
+decltype(wrapper<double>::data) e1; // double
+
+int a = 42;
+decltype(wrapper<char>::data, a) e2; // int&
+\end{lstlisting}
+
+The type of e1 is double, and wrapper<double> is instantiated for this to be deduced. On the other hand, the type of e2 is int\& (as the variable a is an lvalue). However, wrapper<char> is instantiated here even if the type is only deduced from the variable a (due to the use of the comma operator).
+
+The preceding rules mentioned are not the only ones used for determining the type. There are several more for data member access. These are as follows:
+
+\begin{itemize}
+\item
+The const or volatile specifiers of the object used in the decltype expression do not contribute to the deduced type.
+
+\item
+Whether the object or pointer expression is an lvalue or an rvalue does not affect the deduced type.
+
+\item
+If the data member access expression is parenthesized, such as decltype((expression)), then the previous two rules do not apply. The const or volatile qualifier of the object does affect the deduced type, including the valueness of the object.
+\end{itemize}
+
+The first two rules from this list are demonstrated with the following snippet:
+
+\begin{lstlisting}[style=styleCXX]
+struct foo
+{
+	int a = 0;
+	volatile int b = 0;
+	const int c = 42;
+};
+
+foo f;
+foo const cf;
+volatile foo* pf = &f;
+
+decltype(f.a) e1 = 0; // int
+decltype(f.b) e2 = 0; // int volatile
+decltype(f.c) e3 = 0; // int const
+
+decltype(cf.a) e4 = 0; // int
+decltype(cf.b) e5 = 0; // int volatile
+decltype(cf.c) e6 = 0; // int const
+
+decltype(pf->a) e7 = 0; // int
+decltype(pf->b) e8 = 0; // int volatile
+decltype(pf->c) e9 = 0; // int const
+
+decltype(foo{}.a) e10 = 0; // int
+decltype(foo{}.b) e11 = 0; // int volatile
+decltype(foo{}.c) e12 = 0; // int const
+\end{lstlisting}
+
+The deduced type for each case is mentioned on the right side in a comment. When the expression is parenthesized, these two rules are reversed. Let’s take a look at the following snippet:
+
+\begin{lstlisting}[style=styleCXX]
+foo f;
+foo const cf;
+volatile foo* pf = &f;
+
+int x = 1;
+int volatile y = 2;
+int const z = 3;
+
+decltype((f.a)) e1 = x; // int&
+decltype((f.b)) e2 = y; // int volatile&
+decltype((f.c)) e3 = z; // int const&
+
+decltype((cf.a)) e4 = x; // int const&
+decltype((cf.b)) e5 = y; // int const volatile&
+decltype((cf.c)) e6 = z; // int const&
+
+decltype((pf->a)) e7 = x; // int volatile&
+decltype((pf->b)) e8 = y; // int volatile&
+decltype((pf->c)) e9 = z; // int const volatile&
+
+decltype((foo{}.a)) e10 = 0; // int&&
+decltype((foo{}.b)) e11 = 0; // int volatile&&
+decltype((foo{}.c)) e12 = 0; // int const&&
+\end{lstlisting}
+
+Here, all the expressions used with decltype for declaring variables e1 to e9 are lvalues, so the deduced type is an lvalue reference. On the other hand, the expression used to declare the variables e10, e11, and e12 is an rvalue; therefore, the deduced type is an rvalue reference. Furthermore, cf is a constant object and foo::a has the type int. Therefore, the result type is const int\&. Similarly, foo::b has the type volatile int; therefore, the result type is const volatile int\&. These are just a few examples from this snippet, but the others follow the same rules for deduction.
+
+Because decltype is a type specifier, the redundant const and volatile qualifiers and reference specifiers are ignored. This is demonstrated with the following example:
+
+\begin{lstlisting}[style=styleCXX]
+int a = 0;
+int& ra = a;
+int const c = 42;
+int volatile d = 99;
+
+decltype(ra)& e1 = a; // int&
+decltype(c) const e2 = 1; // int const
+decltype(d) volatile e3 = 1; // int volatile
+\end{lstlisting}
+
+So far in this section, we have learned how the decltype specifier works. However, its real purpose is to be used in templates, where the return value of a function depends on its template arguments and is not known before instantiation. To understand this scenario, let’s start with the following example of a function template that returns the minimum of two values:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+T minimum(T&& a, T&& b)
+{
+	return a < b ? a : b;
+}
+\end{lstlisting}
+
+We can use this as follows:
+
+\begin{lstlisting}[style=styleCXX]
+auto m1 = minimum(1, 5); // OK
+auto m2 = minimum(18.49, 9.99);// OK
+auto m3 = minimum(1, 9.99);
+                    // error, arguments of different type
+\end{lstlisting}
+
+The first two calls are both correct, as the supplied arguments are of the same type. The third call, however, will produce a compiler error, because the arguments have different types. For this to work, we need to cast the integer value to a double. However, there is an alternative: we could write a function template that takes two arguments of potentially different types and returns the minimum of the two. This can look as follows:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T, typename U>
+??? minimum(T&& a, U&& b)
+{
+	return a < b ? a : b;
+}
+\end{lstlisting}
+
+The question is, what is the return type of this function? This can be implemented differently, depending on the standard version you are using.
+
+In C++11, we can use the auto specifier with a trailing return type, where we use the decltype specifier to deduce the return type from an expression. This would look as follows:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T, typename U>
+auto minimum(T&& a, U&& b) -> decltype(a < b ? a : b)
+{
+	return a < b ? a : b;
+}
+\end{lstlisting}
+
+This syntax can be simplified if you’re using C++14 or a newer version of the standard. The trailing return type is no longer necessary. You can write the same function as follows:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T, typename U>
+decltype(auto) minimum(T&& a, U&& b)
+{
+	return a < b ? a : b;
+}
+\end{lstlisting}
+
+It is possible to simplify this further and simply use auto for the return type, shown as follows:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T, typename U>
+auto minimum(T&& a, U&& b)
+{
+	return a < b ? a : b;
+}
+\end{lstlisting}
+
+Although decltype(auto) and auto have the same effect in this example, this is not always the case. Let’s consider the following example where we have a function returning a reference, and another function that calls it perfectly forwarding the argument:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+T const& func(T const& ref)
+{
+	return ref;
+}
+
+template <typename T>
+auto func_caller(T&& ref)
+{
+return func(std::forward<T>(ref));
+}
+
+int a = 42;
+decltype(func(a)) r1 = func(a); // int const&
+decltype(func_caller(a)) r2 = func_caller(a); // int
+\end{lstlisting}
+
+The function func returns a reference, and func\_caller is supposed to do a perfect forwarding to this function. By using auto for the return type, it is inferred as int in the preceding snippet (see variable r2). In order to do a perfect forwarding of the return type, we must use decltype(auto) for it, as shown next:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+decltype(auto) func_caller(T&& ref)
+{
+	return func(std::forward<T>(ref));
+}
+
+int a = 42;
+decltype(func(a)) r1 = func(a); // int const&
+decltype(func_caller(a)) r2 = func_caller(a); // int const&
+\end{lstlisting}
+
+This time, the result is as intended, and the type of both r1 and r2 in this snippet is int const\&.
+
+As we have seen in this section, decltype is a type specifier used to deduce the type of an expression. It can be used in different contexts, but its purpose is for templates to determine the return type of a function and to ensure the perfect forwarding of it. Another feature that comes together with decltype is std::declval, which we will look at in the following section.
+
+
+
+
+
+
+
+
+

@@ -316,9 +316,157 @@ int main()
 
 Although the compiler is able to deduce many types of template parameters, as previously seen, there are also limitations to what it can do. These are exemplified in the following list:
 
+\begin{itemize}
+\item
+The compiler cannot deduce the type of a type template argument, from the type of a non-type template argument. In the following example, process is a function template with two template parameters: a type template called T, and a non-type template i of the type T. Calling the function with an array of five doubles does not allow the compiler to determine the type of T, even though this is the type of the value specifying the size of the array:
 
+\begin{lstlisting}[style=styleCXX]
+template <typename T, T i>
+void process(double arr[i])
+{
+	using index_type = T;
+	std::cout << "processing " << i
+	          << " doubles" << '\n';
+	          
+	std::cout << "index type is "
+              << typeid(T).name() << '\n';
+}
 
+int main()
+{
+	double arr[5]{};
+	process(arr); // error
+	process<int, 5>(arr); // OK
+}
+\end{lstlisting}
 
+\item
+The compiler is not able to determine the type of a template argument from the type of a default value. This is exemplified ahead in the code with the function template process, which has a single type template parameter, but two function parameters, both of type T and both with default values.
+
+The process() call (without any arguments) fails because the compiler cannot deduce the type of the type template parameter T from the default values of the function parameters. The process<int>() call is OK because the template argument is explicitly provided. The process(6) call is also OK, because the type of the first function parameter can be deduced from the supplied argument, and, therefore, the type template argument can also be deduced:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+void process(T a = 0, T b = 42)
+{
+	std::cout << a << "," << b << '\n';
+}
+
+int main()
+{
+	process(); // [1] error
+	process<int>(); // [2] OK
+	process(10); // [3] OK
+}
+\end{lstlisting}
+
+\item
+Although the compiler can deduce function template arguments from pointer to functions or pointer to member functions, as we have seen earlier, there are a couple of restrictions to this capability: it cannot deduce arguments from pointers to function templates, nor from a pointer to a function that has an overloaded set with more than one overloaded function matching the required type.
+
+In the code ahead, the function template invoke takes a pointer to a function that has two arguments, the first of the type template parameter T, and the second an int, and returns void. This function template cannot be passed a pointer to alpha (see [1]) because this is a function template, nor to beta (see [2]), because this has more than one overload that can match the type T. However, it is possible to call it with a pointer to gamma (see [3]), and it will correctly deduce the type of the second overload:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+void invoke(void(*pfun)(T, int))
+{
+	pfun(T{}, 42);
+}
+
+template <typename T>
+void alpha(T, int)
+{ std::cout << "alpha(T,int)" << '\n'; }
+
+void beta(int, int)
+{ std::cout << "beta(int,int)" << '\n'; }
+
+void beta(short, int)
+{ std::cout << "beta(short,int)" << '\n'; }
+
+void gamma(short, int, long long)
+{ std::cout << "gamma(short,int,long long)" << '\n'; }
+
+void gamma(double, int)
+{ std::cout << "gamma(double,int)" << '\n'; }
+
+int main()
+{
+	invoke(&alpha); // [1] error
+	invoke(&beta); // [2] error
+	invoke(&gamma); // [3] OK
+}
+\end{lstlisting}
+
+\item
+Another limitation of the compiler is the argument deduction of the primary dimension of an array. The reason is this is not part of function parameter types. The exceptions to this limitation are the cases when the dimension refers to a reference or pointer type. The following code snippet demonstrates these restrictions:
+
+\begin{itemize}
+\item
+The call to process1() at [1] generates an error because the compiler is not able to deduce the value of the non-type template argument Size, since this refers to the primary dimension of an array.
+
+\item
+The call to process2() at the point marked with [2] is correct because the non-type template parameter Size refers to the second dimension of an array.
+
+\item 
+On the other hand, the calls to process3() (at [3]) and process4() (at [4]) are both successful, since the function argument is either a reference or a pointer to a single-dimensional array:
+
+\begin{lstlisting}[style=styleCXX]
+template <size_t Size>
+void process1(int a[Size])
+{ std::cout << "process(int[Size])" << '\n'; };
+
+template <size_t Size>
+void process2(int a[5][Size])
+{ std::cout << "process(int[5][Size])" << '\n'; };
+
+template <size_t Size>
+void process3(int(&a)[Size])
+{ std::cout << "process(int[Size]&)" << '\n'; };
+
+template <size_t Size>
+void process4(int(*a)[Size])
+{ std::cout << "process(int[Size]*)" << '\n'; };
+
+int main()
+{
+	int arr1[10];
+	int arr2[5][10];
+	process1(arr1); // [1] error
+	process2(arr2); // [2] OK
+	process3(arr1); // [3] OK
+	process4(&arr1); // [4] OK
+}
+\end{lstlisting}
+
+\end{itemize}
+
+\item
+If a non-type template argument is used in an expression in the function template parameter list, then the compiler cannot deduce its value.
+
+In the following snippet, ncube is a class template with a non-type template parameter N representing a number of dimensions. The function template process also has a non-type template parameter N, but this is used in an expression in the template parameter list of the type of its single parameter. As a result, the compiler cannot deduce the value of N from the type of the function argument (as seen at [1]) and this must be specified explicitly (as seen at [2]):
+
+\begin{lstlisting}[style=styleCXX]
+template <size_t N>
+struct ncube
+{
+	static constexpr size_t dimensions = N;
+};
+
+template <size_t N>
+void process(ncube<N - 1> cube)
+{
+	std::cout << cube.dimensions << '\n';
+}
+
+int main()
+{
+	ncube<5> cube;
+	process(cube); // [1] error
+	process<6>(cube); // [2] OK
+}
+\end{lstlisting}
+\end{itemize}
+
+All the rules for template argument deduction discussed in this section also apply to variadic function templates. However, everything that was discussed was in the context of function templates. Template argument deduction works for class templates too and we will explore this topic in the next section.
 
 
 

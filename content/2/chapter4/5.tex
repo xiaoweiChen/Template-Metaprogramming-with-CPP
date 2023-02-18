@@ -1,0 +1,300 @@
+One of the most important features that were added to the language in C++11 is move semantics, which helps improve performance by avoiding making unnecessary copies. Move semantics are supported by another C++11 feature called rvalue references. Before discussing these, it is worth mentioning that, in C++, we have two kinds of values:
+
+\begin{itemize}
+\item
+lvalues are values that refer to a memory location and, therefore, we can take their address with the \& operator. lvalues can appear both on the left and right sides of an assignment expression.
+
+\item
+rvalues are values that are not lvalues. They are defined by exclusion. rvalues do not refer to a memory location and you can’t take their address with the \& operator. rvalues are literals and temporary objects and can only appear on the right side of an assignment expression.
+
+\begin{tcolorbox}[breakable,enhanced jigsaw,colback=blue!5!white,colframe=blue!75!black,title={Note}]
+In C++11, there are a few other value categories, glvalue, prvalue, and xvalue. Discussing them here would not benefit the current topic. However, you can read more about them at \url{https://en.cppreference.com/w/cpp/ language/value_category}.
+\end{tcolorbox}
+
+\end{itemize}
+
+References are aliases to already existing objects or functions. Just as we have two kinds of values, in C++11 we have two kinds of references:
+
+\begin{itemize}
+\item
+lvalue references, denoted with a \&, such as in \&x, are references to lvalues.
+
+\item
+rvalue references, denoted with \&\&, such as in \&\&x, are references to rvalues.
+\end{itemize}
+
+Let’s look at some examples to understand these concepts better:
+
+\begin{lstlisting}[style=styleCXX]
+struct foo
+{
+	int data;
+};
+
+void f(foo& v)
+{ std::cout << "f(foo&)\n"; }
+
+void g(foo& v)
+{ std::cout << "g(foo&)\n"; }
+
+void g(foo&& v)
+{ std::cout << "g(foo&&)\n"; }
+
+void h(foo&& v)
+{ std::cout << "h(foo&&)\n"; }
+
+foo x = { 42 }; // x is lvalue
+foo& rx = x; // rx is lvalue
+\end{lstlisting}
+
+We have three functions here: f, which takes an lvalue reference (that is, int\&); g, which has two overloads, one for an lvalue reference, and one for an rvalue reference (that is, int\&\&); and h, which takes an rvalue reference. We also have two variables, x and rx. Here, x is an lvalue, whose type is foo. We can take its address with \&x. An lvalue is also rx, which is an lvalue reference, whose type is foo\&. Now, let’s see how we can call each of the f, g, and h functions:
+
+\begin{lstlisting}[style=styleCXX]
+f(x); // f(foo&)
+f(rx); // f(foo&)
+f(foo{42}); // error: a non-const reference
+            // may only be bound to an lvalue
+\end{lstlisting}
+
+Because x and rx are both lvalues, passing them to f is OK since this function takes an lvalue reference. However, foo\{42\} is a temporary object, as it does not exist outside the context of the call to f. That means, it is an rvalue, and passing it to f will result in a compiler error, because the parameter of the function is of the type foo\& and non-constant references may only be bound to lvalues. This would work if the signature of the function f was changed to f(int const \&v). Next, let’s discuss the g function:
+
+\begin{lstlisting}[style=styleCXX]
+g(x); // g(foo&)
+g(rx); // g(foo&)
+g(foo{ 42 }); // g(foo&&)
+\end{lstlisting}
+
+In the preceding snippet, calling g with either x or rx will resolve to the first overload, which takes an lvalue reference. However, calling it with foo\{42\}, which is a temporary object, therefore an rvalue, will resolve to the second overload, which takes an rvalue reference. Let’s see what happens when we want to make the same calls to the h function:
+
+\begin{lstlisting}[style=styleCXX]
+h(x); // error, cannot bind an lvalue to an rvalue ref
+h(rx); // error
+h(foo{ 42 }); // h(foo&&)
+h(std::move(x)); // h(foo&&)
+\end{lstlisting}
+
+This function takes an rvalue reference. The attempts to pass either x or rx to it result in compiler errors because lvalues cannot be bound to rvalue references. The expression foo\{42\}, being an rvalue, can be passed as an argument. We can also pass the lvalue x to the function h if we change its semantic from an lvalue to an rvalue. That is done with the help of std::move. This function does not really move anything; it only makes a sort of a cast from an lvalue to an rvalue.
+
+However, it is important to understand that passing rvalues to a function has two purposes: either the object is temporary and does not exist outside the call and the function can do anything with it, or the function is supposed to take ownership of the object that is received. This is the purpose of the move constructor and the move assignment operator and it’s rare that you will see other functions taking rvalue references. In our last example, within the function h, the parameter v is an lvalue but it is bound to an rvalue. The variable x existed outside the call to h but passing it to std::move transformed it into an rvalue. It still exists as an lvalue after the call to h returns but you should assume the function h did something with it and its state can be anything.
+
+One purpose of rvalue references is, therefore, to enable move semantics. But it has yet another one and that is to enable perfect forwarding. To understand this, let’s consider the following modified scenario of the previous functions g and h:
+
+\begin{lstlisting}[style=styleCXX]
+void g(foo& v) { std::cout << "g(foo&)\n"; }
+void g(foo&& v) { std::cout << "g(foo&&)\n"; }
+
+void h(foo& v) { g(v); }
+void h(foo&& v) { g(v); }
+\end{lstlisting}
+
+In this snippet, the implementation of g is identical to the one seen earlier. However, h also has two overloads, one that takes an lvalue reference and calls g and another one that takes an rvalue reference and also calls g. In other words, the function h is just forwarding the argument to g. Now, let’s consider the following calls:
+
+\begin{lstlisting}[style=styleCXX]
+foo x{ 42 };
+h(x); // g(foo&)
+h(foo{ 42 }); // g(foo&)
+\end{lstlisting}
+
+From this, you would expect that the call h(x) will result in a call to the g overload taking an lvalue reference and the call to h(foo\{42\}) will result in a call to the g overload taking an rvalue reference. However, in fact, both of them will call the first overload of g, therefore printing g(foo\&) to the console. The explanation is actually simple once you understand how references work: in the context h(foo\&\& v), the parameter v is actually an lvalue (it has a name and you can take its address) so calling g with it invokes the overload that takes an lvalue reference. To make it work as intended, we need to change the implementation of the h functions as follows:
+
+\begin{lstlisting}[style=styleCXX]
+void h(foo& v) { g(std::forward<foo&>(v)); }
+void h(foo&& v) { g(std::forward<foo&&>(v)); }
+\end{lstlisting}
+
+The std::forward is a function that enables the correct forwarding of values. What the function does is as follows:
+
+\begin{itemize}
+\item
+If the argument is an lvalue reference, then the function behaves just as a call to std::move (changing the semantics from an lvalue to an rvalue).
+
+\item
+If the argument is an rvalue reference, then it does nothing.
+\end{itemize}
+
+Everything that we discussed so far is unrelated to templates, which are the subject of this book. However, function templates can also be used to take lvalue and rvalue references and it’s important to understand first how these work in non-templates scenarios. This is because, in templates, rvalue references work slightly differently, and sometimes they are rvalue references, but other times they are actually lvalue references.
+
+References that exhibit this behavior are called forwarding references. However, they are often referred to as universal references. This was a term coined by Scott Meyers shortly after C++11 when there was no term in the standard for this type of reference. In order to address this shortcoming, and because it didn’t feel the term universal references properly described their semantics, the C++ standard committee called these forwarding references in C++14. Yet, both terms are equally present in literature. For the sake of being true to the standard terminology, we’ll call them forwarding references in this book.
+
+To begin the discussion on forwarding references, let’s consider the following overloaded function templates and class templates:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+void f(T&& arg) // forwarding reference
+{ std::cout << "f(T&&)\n"; }
+
+template <typename T>
+void f(T const&& arg) // rvalue reference
+{ std::cout << "f(T const&&)\n"; }
+
+template <typename T>
+void f(std::vector<T>&& arg) // rvalue reference
+{ std::cout << "f(vector<T>&&)\n"; }
+
+template <typename T>
+struct S
+{
+	void f(T&& arg) // rvalue reference
+	{ std::cout << "S.f(T&&)\n"; }
+};
+\end{lstlisting}
+
+We can make calls to these functions as follows:
+
+\begin{lstlisting}[style=styleCXX]
+int x = 42;
+f(x); // [1] f(T&&)
+f(42); // [2] f(T&&)
+
+int const cx = 100;
+f(cx); // [3] f(T&&)
+f(std::move(cx)); // [4] f(T const&&)
+
+std::vector<int> v{ 42 };
+f(v); // [5] f(T&&)
+f(std::vector<int>{42});// [6] f(vector<T>&&)
+
+S<int> s;
+s.f(x); // [7] error
+s.f(42); // [8] S.f(T&&)
+\end{lstlisting}
+
+From this snippet, we can notice that:
+
+\begin{itemize}
+\item
+Calling f with an lvalue or rvalue at [1] and [2] resolves to the first overload, f(T\&\&).
+
+\item
+Calling f with a constant lvalue at [3] also resolves to the first overload, but calling f with a constant rvalue at [4] resolves to the second overload, f(T const\&\&), because it’s a better match.
+
+\item
+Calling f with an lvalue std::vector object at [5] resolves to the first overload, but calling f with an rvalue std::vector object at [6] resolves to the third overload, f(vector<T>\&\&), because it’s a better match.
+
+\item
+Calling S::f with an lvalue at [7] is an error because lvalues cannot be bound to rvalue references, but calling it with an rvalue at [8] is correct.
+\end{itemize}
+
+All the f function overloads in this example take an rvalue reference. However, the \&\& in the first overload does not necessarily mean an rvalue reference. It means an rvalue reference if an rvalue was passed or an lvalue reference if an lvalue was passed. Such a reference is called a forwarding reference. However, forwarding references are only present in the context of an rvalue reference to a template parameter. It has to have the form T\&\& and nothing else. T const\&\& or std::vector<T>\&\& are not forwarding references, but normal rvalue references. Similarly, the T\&\& in the f function member of the class template S is also an rvalue reference because f is not a template but a non-template member function of a class template, so this rule for forwarding references does not apply.
+
+Forwarding references are a special case of function template argument deduction, a topic that we previously discussed in this chapter. Their purpose is to enable perfect forwarding with templates and they are made possible by a new C++11 feature called reference collapsing. Let’s look at this first, before showing how they solve the perfect forwarding problem.
+
+Prior to C++11, it was not possible to take a reference to a reference. However, that is now possible in C++11 for typedefs and templates. Here is an example:
+
+\begin{lstlisting}[style=styleCXX]
+using lrefint = int&;
+using rrefint = int&&;
+int x = 42;
+lrefint& r1 = x; // type of r1 is int&
+lrefint&& r2 = x; // type of r2 is int&
+rrefint& r3 = x; // type of r3 is int&
+rrefint&& r4 = 1; // type of r4 is int&&
+\end{lstlisting}
+
+The rule is pretty simple: an rvalue reference to an rvalue reference collapses to an rvalue reference; all other combinations collapse to an lvalue reference. This can be put in a tabular form as follows:
+
+\begin{table}[H]
+\centering
+	\begin{tabular}{|l|l|l|}
+		\hline
+		\textbf{Type} & \textbf{Type of reference} & \textbf{Type of variable} \\ \hline
+		T\&           & T\&                        & T\&                       \\ \hline
+		T\&           & T\&\&                      & T\&                       \\ \hline
+		T\&\&         & T\&                        & T\&                       \\ \hline
+		T\&\&         & T\&\&                      & T\&\&                     \\ \hline
+	\end{tabular}
+\end{table}
+
+\begin{center}
+Table 4.2
+\end{center}
+
+Any other combinations, shown in the following table, do not involve reference collapsing rules. These only apply when both types are references:
+
+\begin{table}[H]
+\centering
+	\begin{tabular}{|l|l|l|}
+		\hline
+		\textbf{Type} & \textbf{Type of reference} & \textbf{Type of variable} \\ \hline
+		T             & T                          & T                         \\ \hline
+		T             & T\&                        & T\&                       \\ \hline
+		T             & T\&\&                      & T\&\&                     \\ \hline
+		T\&           & T                          & T\&                       \\ \hline
+		T\&\&         & T                          & T\&\&                     \\ \hline
+	\end{tabular}
+\end{table}
+
+\begin{center}
+	Table 4.3
+\end{center}
+
+Forwarding references work not only for templates but also with auto deduction rules. When auto\&\& is found, it means a forwarding reference. The same does not apply for anything else, such as cv-qualified forms like auto const\&\&. Here are some examples:
+
+\begin{lstlisting}[style=styleCXX]
+int x = 42;
+auto&& rx = x; // [1] int&
+auto&& rc = 42; // [2] int&&
+auto const&& rcx = x; // [3] error
+
+std::vector<int> v{ 42 };
+auto&& rv = v[0]; // [4] int&
+\end{lstlisting}
+
+In the first two examples, rx and rc are both forwarding references and are bound to an lvalue and an rvalue respectively. However, rcx is an rvalue reference because auto const\&\& does not denote a forwarding reference. Therefore, trying to bind it to an lvalue is an error. Similarly, rv is a forwarding reference and is bound to an lvalue.
+
+As previously mentioned, the purpose of forwarding references is to enable perfect forwarding. We have seen the concept of perfect forwarding earlier but in a non-template context. It works, however, in a similar manner with templates. To demonstrate this, let’s redefine the function h as a template function. It would look as follows:
+
+\begin{lstlisting}[style=styleCXX]
+void g(foo& v) { std::cout << "g(foo&)\n"; }
+void g(foo&& v) { std::cout << "g(foo&&)\n"; }
+
+template <typename T> void h(T& v) { g(v); }
+template <typename T> void h(T&& v) { g(v); }
+
+foo x{ 42 };
+h(x); // g(foo&)
+h(foo{ 42 }); // g(foo&)
+\end{lstlisting}
+
+The implementation of the g overloads is the same, but the h overloads are now function templates. However, calling h with an lvalue and an rvalue actually resolves to the same call to g, the first overload taking an lvalue. This is because in the context of the function h, v is an lvalue so passing it to g will call the overload taking an lvalue.
+
+The solution to this problem is the same as what we already saw before discussing templates. However, there is a difference: we no longer need two overloads, but a single one taking a forwarding reference:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+void h(T&& v)
+{
+	g(std::forward<T>(v));
+}
+\end{lstlisting}
+
+This implementation is using std::forward to pass lvalues as lvalues and rvalues as rvalues. It works similarly for variadic function templates. The following is a conceptual implementation of the std::make\_unique function that creates a std::unique\_ptr object:
+
+\begin{lstlisting}[style=styleCXX]
+	void g(foo& v) { std::cout << "g(foo&)\n"; }
+	void g(foo&& v) { std::cout << "g(foo&&)\n"; }
+	
+	template <typename T> void h(T& v) { g(v); }
+	template <typename T> void h(T&& v) { g(v); }
+	
+	foo x{ 42 };
+	h(x); // g(foo&)
+	h(foo{ 42 }); // g(foo&)
+\end{lstlisting}
+
+To summarize this section, remember that forwarding references (also known as universal references) are basically a special deduction rule for function template arguments. They work based on the rules of reference collapsing and their purpose is to enable perfect forwarding. That is passing forward to another function a reference by preserving its valueness semantics: rvalues should be passed as rvalues and lvalues as lvalues.
+
+The next topic that we will address in this chapter is the decltype specifier.
+
+
+
+
+
+
+
+
+
+
+
+
+

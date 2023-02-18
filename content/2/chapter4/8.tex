@@ -1,0 +1,249 @@
+When you define a class, you can restrict access to its member data and member functions with the protected and private access specifiers. If a member is private, it can only be accessed within the class. If a member is protected, it can be accessed from derived classes with public or protected access. However, a class can grant access to its private or protected members to other functions or classes with the help of the friend keyword. These functions or classes, to which special access has been granted, are called friends. Let’s take a look at a simple example:
+
+\begin{lstlisting}[style=styleCXX]
+struct wrapper
+{
+	wrapper(int const v) :value(v) {}
+private:
+	int value;
+	
+	friend void print(wrapper const & w);
+};
+
+void print(wrapper const& w)
+{ std::cout << w.value << '\n'; }
+
+wrapper w{ 42 };
+print(w);
+\end{lstlisting}
+
+The wrapper class has a private data member called value. There is a free function called print that takes an argument of the type wrapper and prints the wrapped value to the console. However, in order to be able to access it, the function is declared a friend of the wrapper class.
+
+We will not focus on the way friendship works for non-templates. You should be familiar with this feature to proceed to discuss it in the context of templates. When it comes to templates, things get a bit complicated. We will look into this with the help of several examples. Let’s start with the following:
+
+\begin{lstlisting}[style=styleCXX]
+struct wrapper
+{
+	wrapper(int const v) :value(v) {}
+private:
+	int value;
+	
+	template <typename T>
+	friend void print(wrapper const&);
+	
+	template <typename T>
+	friend struct printer;
+};
+
+template <typename T>
+void print(wrapper const& w)
+{ std::cout << w.value << '\n'; }
+
+template <typename T>
+struct printer
+{
+	void operator()(wrapper const& w)
+	{ std::cout << w.value << '\n'; }
+};
+
+wrapper w{ 42 };
+print<int>(w);
+print<char>(w);
+printer<int>()(w);
+printer<double>()(w);
+\end{lstlisting}
+
+The print function is now a function template. It has a type template parameter, but that’s not really used anywhere. That may look a bit odd, but it’s a valid code, and we need to invoke it by specifying the template argument. However, it helps us make a point: any template instantiation of print, regardless of the template argument, can access the private members of the wrapper class. Notice the syntax used to declare it as a friend of the wrapper class: it uses the template syntax. The same applies to the class template printer. It’s declared as a friend of the wrapper class and any template instantiation, regardless of the template argument, can access its private parts.
+
+What if we wanted to restrict access to only some instances of these templates? Such as only the specializations for the int type? Then, we can declare these specializations as friends, as shown here:
+
+\begin{lstlisting}[style=styleCXX]
+struct wrapper;
+
+template <typename T>
+void print(wrapper const& w);
+
+template <typename T>
+struct printer;
+
+struct wrapper
+{
+	wrapper(int const v) :value(v) {}
+private:
+	int value;
+	
+	friend void print<int>(wrapper const&);
+	friend struct printer<int>;
+};
+
+template <typename T>
+void print(wrapper const& w)
+{ std::cout << w.value << '\n'; /* error */ }
+
+template <>
+void print<int>(wrapper const& w)
+{ std::cout << w.value << '\n'; }
+
+template <typename T>
+struct printer
+{
+	void operator()(wrapper const& w)
+	{ std::cout << w.value << '\n'; /* error*/ }
+};
+
+template <>
+struct printer<int>
+{
+void operator()(wrapper const& w)
+{ std::cout << w.value << '\n'; }
+};
+
+wrapper w{ 43 };
+print<int>(w);
+print<char>(w);
+printer<int>()(w);
+printer<double>()(w);
+\end{lstlisting}
+
+In this snippet, the wrapper class is the same as previously. For both the print function template and the printer class template, we have a primary template and a full specialization for the int type. Only the int instantiations are declared friends of the wrapper class. Attempting to access the private parts of the wrapper class in the primary templates generates compiler errors.
+
+In these examples, the class that granted friendship to its private parts was a non-template class. But class templates can also declare friends. Let’s see how it works in this case. We will start with the case of a class template and a non-template function:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+struct wrapper
+{
+	wrapper(T const v) :value(v) {}
+private:
+	T value;
+	
+	friend void print(wrapper<int> const&);
+};
+
+void print(wrapper<int> const& w)
+{ std::cout << w.value << '\n'; }
+
+void print(wrapper<char> const& w)
+{ std::cout << w.value << '\n'; /* error */ }
+\end{lstlisting}
+
+In this implementation, the wrapper class template declares the overload of print that takes a wrapper<int> as a parameter as being a friend. Therefore, in this overloaded function, we can access the private data member value, but not in any other overload. A similar case occurs when the friend function or class is a template and we want only one specialization to access the private parts. Let’s see the following snippet:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+struct printer;
+
+template <typename T>
+struct wrapper
+{
+	wrapper(T const v) :value(v) {}
+private:
+	T value;
+	
+	friend void print<int>(wrapper<int> const&);
+	friend struct printer<int>;
+};
+
+template <typename T>
+void print(wrapper<T> const& w)
+{ std::cout << w.value << '\n'; /* error */ }
+
+template<>
+void print(wrapper<int> const& w)
+{ std::cout << w.value << '\n'; }
+
+template <typename T>
+struct printer
+{
+	void operator()(wrapper<T> const& w)
+	{ std::cout << w.value << '\n'; /* error */ }
+};
+
+template <>
+struct printer<int>
+{
+	void operator()(wrapper<int> const& w)
+	{ std::cout << w.value << '\n'; }
+};
+\end{lstlisting}
+
+This implementation of the wrapper class template grants friendship to the int specializations of the print function template and printer class template. The attempt to access the private data member value in the primary templates (or any other specialization) would generate a compiler error.
+
+If the intention is that the wrapper class template gives friend access to any instantiation of the print function template or printer class template, then the syntax to do so is as follows:
+
+\begin{lstlisting}[style=styleCXX]
+	template <typename T>
+	struct printer;
+	
+	template <typename T>
+	struct wrapper
+	{
+		wrapper(T const v) :value(v) {}
+		private:
+		T value;
+		
+		template <typename U>
+		friend void print(wrapper<U> const&);
+		
+		template <typename U>
+		friend struct printer;
+	};
+	
+	template <typename T>
+	void print(wrapper<T> const& w)
+	{ std::cout << w.value << '\n'; }
+	
+	template <typename T>
+	struct printer
+	{
+		void operator()(wrapper<T> const& w)
+		{ std::cout << w.value << '\n'; }
+	};
+\end{lstlisting}
+
+Notice that in declaring the friends, the syntax is template <typename U> and not template <typename T>. The name of the template parameter, U, can be anything except for T. That would shadow the name of the template parameter of the wrapper class template and that is an error. Keep in mind though that with this syntax, any specialization of print or printer has access to the private members of any specialization of the wrapper class template. If you want that only the specializations of the friends that meet the template argument of the wrapper class have access to its private parts, then you must use the following syntax:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+struct wrapper
+{
+	wrapper(T const v) :value(v) {}
+private:
+	T value;
+	
+	friend void print<T>(wrapper<T> const&);
+	friend struct printer<T>;
+};
+\end{lstlisting}
+
+This is similar to what we have seen previously when access was granted only to the int specializations, except that now it’s for any specialization that matches T.
+
+Apart from these cases, it’s also possible for a class template to grant friendship to a type template parameter. This is demonstrated with the following example:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+struct connection
+{
+	connection(std::string const& host, int const port)
+		:ConnectionString(host + ":" + std::to_string(port))
+	{}
+private:
+	std::string ConnectionString;
+	friend T;
+};
+
+struct executor
+{
+	void run()
+	{
+		connection<executor> c("localhost", 1234);
+		std::cout << c.ConnectionString << '\n';
+	}
+};
+\end{lstlisting}
+
+The connection class template has a private data member called ConnectionString. The type template parameter T is a friend of the class. The executor class uses the instantiation connection<executor>, which means the executor type is the template argument and benefits from the friendship with the connection class so that it can access the private data member ConnectionString.
+ 
+As can be seen from all these examples, friendship with templates is slightly different than friendship among non-template entities. Remember that friends have access to all the non-public members of a class. Therefore, friendship should be granted with care. On the other hand, if you need to grant access to some private members but not all, this is possible with the help of the client-attorney pattern. This pattern allows you to control the granularity of access to the private parts of a class. You can learn more about this pattern at this URL: \url{https://en.wikibooks.org/wiki/ More_C%2B%2B_Idioms/Friendship_and_the_Attorney-Client}.
+
+
