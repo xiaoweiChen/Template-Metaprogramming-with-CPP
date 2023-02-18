@@ -1,0 +1,191 @@
+In Chapter 3, Variadic Templates, we discussed variadic templates and saw that they are implemented with a mechanism that looks like recursion. In fact, it is overloaded functions and class template specializations respectively. However, it is possible to create recursive templates. To demonstrate how this works, we’ll look at implementing a compile-time version of the factorial function. This is typically implemented in a recursive manner, and a possible implementation is the following:
+
+\begin{lstlisting}[style=styleCXX]
+constexpr unsigned int factorial(unsigned int const n)
+{
+	return n > 1 ? n * factorial(n - 1) : 1;
+}
+\end{lstlisting}
+
+This should be trivial to understand: return the result of multiplying the function argument with the value returned by calling the function recursively with the decremented argument, or return the value 1 if the argument is 0 or 1. The type of the argument (and the return value) is unsigned int to avoid calling it for negative integers.
+
+To compute the value of the factorial function at compile time, we need to define a class template that contains a data member holding the value of the function. The implementation looks as follows:
+
+\begin{lstlisting}[style=styleCXX]
+template <unsigned int N>
+struct factorial
+{
+	static constexpr unsigned int value =
+		N * factorial<N - 1>::value;
+};
+
+template <>
+struct factorial<0>
+{
+	static constexpr unsigned int value = 1;
+};
+
+int main()
+{
+	std::cout << factorial<4>::value << '\n';
+}
+\end{lstlisting}
+
+The first definition is the primary template. It has a non-type template parameter representing the value whose factorial needs to be computed. This class contains a static constexpr data member called value, initialized with the result of multiplying the argument N and the value of the factorial class template instantiated with the decremented argument. The recursion needs an end case and that is provided by the explicit specialization for the value 0 (of the non-type template argument), in which case the member value is initialized with 1.
+
+When encountering the instantiation factorial<4>::value in the main function, the compiler generates all the recursive instantiations from factorial<4> to factorial<0>. These look as follows:
+
+\begin{lstlisting}[style=styleCXX]
+template<>
+struct factorial<4>
+{
+	inline static constexpr const unsigned int value =
+	4U * factorial<3>::value;
+};
+
+template<>
+struct factorial<3>
+{
+	inline static constexpr const unsigned int value =
+		3U * factorial<2>::value;
+};
+
+template<>
+struct factorial<2>
+{
+	inline static constexpr const unsigned int value =
+		2U * factorial<1>::value;
+};
+
+template<>
+struct factorial<1>
+{
+	inline static constexpr const unsigned int value =
+		1U * factorial<0>::value;
+};
+
+template<>
+struct factorial<0>
+{
+	inline static constexpr const unsigned int value = 1;
+};
+\end{lstlisting}
+
+From these instantiations, the compiler is able to compute the value of the data member factorial<N>::value. It should be mentioned again that when optimizations are enabled, this code would not even be generated, but the resulting constant is used directly in the generated assembly code.
+
+The implementation of the factorial class template is relatively trivial, and the class template is basically only a wrapper over the static data member value. We can actually avoid it altogether by using a variable template instead. This can be defined as follows:
+
+\begin{lstlisting}[style=styleCXX]
+template <unsigned int N>
+inline constexpr unsigned int factorial = N * factorial<N - 1>;
+
+template <>
+inline constexpr unsigned int factorial<0> = 1;
+
+int main()
+{
+	std::cout << factorial<4> << '\n';
+}
+\end{lstlisting}
+
+There is a striking similarity between the implementation of the factorial class template and the factorial variable template. For the latter, we have basically taken out the data member value and called it factorial. On the other hand, this may also be more convenient to use because it does not require accessing the data member value as in factorial<4>::value.
+
+There is a third approach for computing the factorial at compile time: using function templates. A possible implementation is shown next:
+
+\begin{lstlisting}[style=styleCXX]
+template <unsigned int n>
+constexpr unsigned int factorial()
+{
+	return n * factorial<n - 1>();
+}
+
+template<> constexpr unsigned int factorial<1>() {
+												return 1; }
+template<> constexpr unsigned int factorial<0>() {
+												return 1; }
+
+int main()
+{
+	std::cout << factorial<4>() << '\n';
+}
+\end{lstlisting}
+
+You can see there is a primary template that calls the factorial function template recursively, and we have two full specializations for the values 1 and 0, both returning 1.
+
+Which of these three different approaches is the best is probably arguable. Nevertheless, the complexity of the recursive instantiations of the factorial templates remained the same. However, this depends on the nature of the template. The following snippet shows an example of when complexity increases:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+struct wrapper {};
+
+template <int N>
+struct manyfold_wrapper
+{
+	using value_type =
+		wrapper<
+			typename manyfold_wrapper<N - 1>::value_type>;
+};
+
+template <>
+struct manyfold_wrapper<0>
+{
+	using value_type = unsigned int;
+};
+
+int main()
+{
+	std::cout <<
+		typeid(manyfold_wrapper<0>::value_type).name() << '\n';
+	std::cout <<
+		typeid(manyfold_wrapper<1>::value_type).name() << '\n';
+	std::cout <<
+		typeid(manyfold_wrapper<2>::value_type).name() << '\n';
+	std::cout <<
+		typeid(manyfold_wrapper<3>::value_type).name() << '\n';
+}
+\end{lstlisting}
+
+There are two class templates in this example. The first is called wrapper and has an empty implementation (it doesn’t actually matter what it contains) but it represents a wrapper class over some type (or more precisely a value of some type). The second template is called manyfold\_wrapper. This represents a wrapper over a wrapper over a type many times over, hence the name manyfold\_wrapper. There is no end case for an upper limit of this number of wrappings, but there is a start case for the lower limit. The full specialization for value 0 defines a member type called value\_type for the unsigned int type. As a result, manyfold\_wrapper<1> defines a member type called value\_type for wrapper<unsigned int>, manyfold\_wrapper<2> defines a member type called value\_type for wrapper<wrapper<unsigned int>>, and so on. Therefore, executing the main function will print the following to the console:
+
+\begin{lstlisting}[style=styleCXX]
+unsigned int
+struct wrapper<unsigned int>
+struct wrapper<struct wrapper<unsigned int> >
+struct wrapper<struct wrapper<struct wrapper<unsigned int> > >
+\end{lstlisting}
+
+The C++ standard does not specify a limit for the recursively nested template instantiations but does recommend a minimum limit of 1,024. However, this is only a recommendation and not a requirement. Therefore, different compilers have implemented different limits. The VC++ 16.11 compiler has the limit set at 500, GCC 12 at 900, and Clang 13 at 1,024. A compiler error is generated when this limit is exceeded. Some examples are shown here: 
+
+For VC++:
+
+\begin{tcblisting}{commandshell={}}
+fatal error C1202: recursive type or function dependency
+context too complex
+\end{tcblisting}
+
+For GCC:
+
+\begin{tcblisting}{commandshell={}}
+fatal error: template instantiation depth exceeds maximum of
+900 (use '-ftemplate-depth=' to increase the maximum)
+\end{tcblisting}
+
+For Clang:
+
+\begin{tcblisting}{commandshell={}}
+fatal error: recursive template instantiation exceeded maximum
+depth of 1024
+use -ftemplate-depth=N to increase recursive template
+instantiation depth
+\end{tcblisting}
+
+For GCC and Clang, the compiler option -ftemplate-depth=N can be used to increase this maximum value for nested template instantiations. Such an option is not available for the Visual C++ compiler.
+
+Recursive templates help us solve some problems in a recursive manner at compile time. Whether you use recursive function templates, variable templates, or class templates depends on the problem you are trying to solve or perhaps your preference. However, you should keep in mind there are limits to the depth template recursion works. Nevertheless, use template recursion judiciously.
+
+The next advanced topic to address in this chapter is template argument deduction, both for functions and classes. We start next with the former.
+
+
+
+
+

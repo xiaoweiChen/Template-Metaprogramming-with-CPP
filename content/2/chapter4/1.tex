@@ -1,7 +1,472 @@
+
+The term name binding refers to the process of finding the declaration of each name that is used within a template. There are two kinds of names used within a template: dependent names and non-dependent names. The former are names that depend on the type or value of a template parameter that can be a type, non-type, or template parameter. Names that don’t depend on template parameters are called non-dependent. The name lookup is performed differently for dependent and non-dependent names:
+
+\begin{itemize}
+\item
+For dependent names, it is performed at the point of template instantiation.
+
+\item
+For non-dependent names, it is performed at the point of the template definition.
+\end{itemize}
+
+We will first look at non-dependent names. As previously mentioned, name lookup happens at the point of the template definition. This is located immediately before the template definition. To understand how this works, let’s consider the following example:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+struct processor; // [1] template declaration
+void handle(double value) // [2] handle(double) definition
+{
+	std::cout << "processing a double: " << value << '\n';
+}
+
+template <typename T>
+struct parser // [3] template definition
+{
+	void parse()
+	{
+		handle(42); // [4] non-dependent name
+	}
+};
+
+void handle(int value) // [5] handle(int) definition
+{
+	std::cout << "processing an int: " << value << '\n';
+}
+
+int main()
+{
+	parser<int> p; // [6] template instantiation
+	p.parse();
+}
+\end{lstlisting}
+
+There are several points of reference that are marked in the comments on the right side. At point [1], we have the declaration of a class template called parser. This is followed at point [2] by the definition of a function called handle that takes a double as its argument. The definition of the class template follows at point [3]. This class contains a single method called run that invokes a function called handle with the value 42 as its argument, at point [4].
+
+The name handle is a non-dependent name because it does not depend on any template parameter. Therefore, name lookup and binding are performed at this point. handle must be a function known at point [3] and the function defined at [2] is the only match. After the class template definition, at point [5] we have the definition of an overload for the function handle, which takes an integer as its argument. This is a better match for handle(42), but it comes after the name binding has been performed, and therefore it will be ignored. In the main function, at point [6], we have an instantiation of the parser class template for the type int. Upon calling the run function, the text processing a double: 42 will be printed to the console output.
+The next example is designed to introduce you to the concept of dependent names.
+
+Let’s look at the code first:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+struct handler // [1] template definition
+{
+	void handle(T value)
+	{
+		std::cout << "handler<T>: " << value << '\n';
+	}
+};
+
+template <typename T>
+struct parser // [2] template definition
+{
+	void parse(T arg)
+	{
+		arg.handle(42); // [3] dependent name
+	}
+};
+
+template <>
+struct handler<int> // [4] template specialization
+{
+	void handle(int value)
+	{
+		std::cout << "handler<int>: " << value << '\n';
+	}
+};
+
+int main()
+{
+	handler<int> h; // [5] template instantiation
+	parser<handler<int>> p; // [6] template instantiation
+	p.parse(h);
+}
+\end{lstlisting}
+
+This example is slightly different from the previous one. The parser class template is very similar, but the handle functions have become members of another class template. Let’s analyze it point by point.
+
+At the point mark with [1] in the comments, we have the definition of a class template called handler. This contains a single, public method called handle that takes an argument of the T type and prints its value to the console. Next, at point [2], we have the definition of the class template called parser. This is similar to the previous one, except for one key aspect: at point [3], it invokes a method called handle on its argument. Because the type of the argument is the template parameter T, it makes handle a dependent name. Dependent names are looked up at the point of template instantiation, so handle is not bound at this point. Continuing with the code, at point [4], there is a template specialization for the handler class template for the type int. As a specialization, this is a better match for the dependent name. Therefore, when the template instantiation happens at point [6], handler<int>::handle is the name that is bound to the dependent name used at [3]. Running this program will print handler<int>: 42 to the console.
+
+Now that we’ve seen how name binding occurs, let’s learn how this relates to template instantiation.
+
 \subsubsubsection{4.1.1\hspace{0.2cm}Two-phase name lookup}
+
+The key takeaway from the previous section is that name lookup happens differently for dependent names (those that depend on a template parameter) and non-dependent names (those that do not depend on a template parameter, plus the template name and names defined in the current template instantiation). When the compiler passes through the definition of a template it needs to figure out whether a name is dependent or non-dependent. Further name lookup depends on this categorization and happens either at the template definition point (for non-dependent names) or the template instantiation point (for dependent names). Therefore, instantiation of a template happens in two phases:
+
+\begin{itemize}
+\item
+The first phase occurs at the point of the definition when the template syntax is checked and names are categorized as dependent or non-dependent.
+
+\item
+The second phase occurs at the point of instantiation when the template arguments are substituted for the template parameters. Name binding for dependent names happens at this point.
+\end{itemize}
+
+This process in two steps is called two-phase name lookup. To understand it better, let’s consider another example:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+struct base_parser
+{
+	void init()
+	{
+		std::cout << "init\n";
+	}
+};
+
+template <typename T>
+struct parser : base_parser<T>
+{
+	void parse()
+	{
+		init(); // error: identifier not found
+		std::cout << "parse\n";
+	}
+};
+
+int main()
+{
+	parser<int> p;
+	p.parse();
+}
+\end{lstlisting}
+
+In this snippet, we have two class templates: base\_parser, which contains a public method called init, and parser, which derives from base\_parser and contains a public method called parse. The parse member function calls a function called init and the intention is that it’s the base-class method init that is invoked here. However, the compiler will issue an error, because it’s not able to find init. The reason this happens is that init is a non-dependent name (as it does not depend on a template parameter). Therefore, it must be known at the point of the definition of the parser template. Although a base\_parser<T>::init exists, the compiler cannot assume it’s what we want to call because the primary template base\_parser can be later specialized and init can be defined as something else (such as a type, or a variable, or another function, or it may be missing entirely). Therefore, name lookup does not happen in the base class, only on its enclosing scope, and there is no function called init in parser.
+ 
+This problem can be fixed by making init a dependent name. This can be done either by prefixing with this-> or with base\_parser<T>::. By turning init into a dependent name, its name binding is moved from the point of template definition to the point of template instantiation. In the following snippet, this problem is solved by invoking init through the this pointer:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+struct parser : base_parser<T>
+{
+	void parse()
+	{
+		this->init(); // OK
+		std::cout << "parse\n";
+	}
+};
+\end{lstlisting}
+
+Continuing this example, let’s consider that a specialization of base\_parser for the int type is made available after the definition of the parser class template. This can look as follows:
+
+\begin{lstlisting}[style=styleCXX]
+template <>
+struct base_parser<int>
+{
+	void init()
+	{
+		std::cout << "specialized init\n";
+	}
+};
+\end{lstlisting}
+
+Furthermore, let’s consider the following use of the parser class template:
+
+\begin{lstlisting}[style=styleCXX]
+int main()
+{
+	parser<int> p1;
+	p1.parse();
+	parser<double> p2;
+	p2.parse();
+}
+\end{lstlisting}
+
+When you run this program, the following text will be printed to the console:
+
+\begin{tcblisting}{commandshell={}}
+specialized init
+parse
+init
+parse
+\end{tcblisting}
+
+The reason for this behavior is that p1 is an instance of parser<int> and there is a specialization of its base class, base\_parser<int> that implements the init function and prints specialized init to the console. On the other hand, p2 is an instance of parser<double>. Since a specialization of base\_parser for the double type is not available, the init function from the primary template is being called and this only prints init to the console.
+
+The next subject of this broader topic is using dependent names that are types. Let’s learn how that works.
 
 \subsubsubsection{4.1.2\hspace{0.2cm}Dependent type names}
 
+In the examples seen so far, the dependent name was a function or a member function. However, there are cases when a dependent name is a type. This is demonstrated with the following example:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+struct base_parser
+{
+	using value_type = T;
+};
+
+template <typename T>
+struct parser : base_parser<T>
+{
+	void parse()
+	{
+		value_type v{}; // [1] error
+		// or
+		base_parser<T>::value_type v{}; // [2] error
+		std::cout << "parse\n";
+	}
+};
+\end{lstlisting}
+
+In this snippet, base\_parser is a class template that defines a type alias for T called value\_type. The parser class template, which derives from base\_parser, needs to use this type within its parse method. However, both value\_type and base\_parser<T>::value\_type do not work, and the compiler is issuing an error. value\_type does not work because it’s a non-dependent name and therefore it will not be looked up in the base class, only in the enclosing scope. base\_parser<T>::value\_type does not work either because the compiler cannot assume this is actually a type. A specialization of base\_parser may follow and value\_type could be defined as something else than a type.
+
+In order to fix this problem, we need to tell the compiler the name refers to a type. Otherwise, by default, the compiler assumes it’s not a type. This is done with the typename keyword, at the point of definition, shown as follows:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+struct parser : base_parser<T>
+{
+	void parse()
+	{
+		typename base_parser<T>::value_type v{}; // [3] OK
+		std::cout << "parse\n";
+	}
+};
+\end{lstlisting}
+
+There are actually two exceptions to this rule:
+
+\begin{itemize}
+\item
+When specifying a base class
+
+\item
+When initializing class members
+\end{itemize}
+
+Let’s see an example for these two exceptions:
+
+\begin{lstlisting}[style=styleCXX]
+struct dictionary_traits
+{
+	using key_type = int;
+	using map_type = std::map<key_type, std::string>;
+	static constexpr int identity = 1;
+};
+
+template <typename T>
+struct dictionary : T::map_type // [1]
+{
+	int start_key { T::identity }; // [2]
+	typename T::key_type next_key; // [3]
+};
+
+int main()
+{
+	dictionary<dictionary_traits> d;
+}
+\end{lstlisting}
+
+The dictionay\_traits is a class used as the template argument for the dictionary class template. This class derives from T::map\_type (see line [1]) but the use of the typename keyword is not required here. The dictionary class defines a member called start\_key, which is an int initialized with the value of T::identity (see line [2]). Again, the typename keyword is not needed here. However, if we want to define yet another member of the type T::key\_type (see line [3]) we do need to use typename.
+
+The requirements for using typename have been relaxed in C++20 making the use of type names easier. The compiler is now able to deduce that we are referring to a type name in a multitude of contexts. For instance, defining a member variable as we did on line [3] previously no longer requires prefixing with the typename keyword.
+
+In C++20, typename is implicit (can be deduced by the compiler) in the following contexts:
+
+\begin{itemize}
+\item
+In using declarations
+
+\item
+In the declaration of data members
+
+\item
+In the declaration or definition of function parameters
+
+\item
+In trailing return types
+
+\item
+In default arguments of type-parameters of a template
+
+\item
+In the type-id of a static\_cast, const\_cast, reinterpret\_cast, or dynamic\_cast statement
+\end{itemize}
+
+Some of these contexts are exemplified in the following snippet:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+struct dictionary : T::map_type
+{
+	int start_key{ T::identity };
+	T::key_type next_key; // [1]
+	
+	using value_type = T::map_type::mapped_type; // [2]
+	
+	void add(T::key_type const&, value_type const&) {} // [3]
+};
+\end{lstlisting}
+
+At all the lines marked with [1], [2], and [3] in this snippet, prior to C++20, the typename keyword was required to indicate a type name (such as T::key\_type or T::map\_type::mapped\_type). When compiled with C++20, this is no longer necessary.
+
+\begin{tcolorbox}[breakable,enhanced jigsaw,colback=blue!5!white,colframe=blue!75!black,title={Note}]
+In Chapter 2, Template Fundamentals, we have seen that the keywords
+typename and class can be used to introduce type template parameters
+and they are interchangeable. The keyword typename here, although it has
+a similar purpose, cannot be substituted with the keyword class.
+\end{tcolorbox}
+
+Not only types can be dependent names but other templates too. We look at this topic in the next subsection.
+
 \subsubsubsection{4.1.3\hspace{0.2cm}Dependent template names}
 
+There are cases when the dependent name is a template, such as a function template or a class template. However, the default behavior of the compiler is to interpret the dependent name as a non-type, which leads to errors concerning the usage of the comparison operator <. Let’s demonstrate this with an example:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+struct base_parser
+{
+	template <typename U>
+	void init()
+	{
+		std::cout << "init\n";
+	}
+};
+
+template <typename T>
+struct parser : base_parser<T>
+{
+	void parse()
+	{
+		// base_parser<T>::init<int>(); // [1] error
+		base_parser<T>::template init<int>(); // [2] OK
+		std::cout << "parse\n";
+	}
+};
+\end{lstlisting}
+
+This is similar to the previous snippets, but the init function in base\_parser is also a template. The attempt to call it using the base\_parser<T>::init<int>() syntax, as seen at point [1], results in a compiler error. Therefore, we must use the template keyword to tell the compiler the dependent name is a template. This is done as shown at point [2].
+
+Keep in mind that the template keyword can only follow the scope resolution operator (::), member access through pointer (->), and the member access (.). Examples of correct usage are X::template foo<T>(), this->template foo<T>(), and obj.template foo<T>().
+
+The dependent name does not have to be a function template. It can also be a class template, shown as follows:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+struct base_parser
+{
+	template <typename U>
+	struct token {};
+};
+
+template <typename T>
+struct parser : base_parser<T>
+{
+	void parse()
+	{
+		using token_type =
+			base_parser<T>::template token<int>; // [1]
+		token_type t1{};
+		
+		typename base_parser<T>::template token<int> t2{};
+		                     // [2]
+		std::cout << "parse\n";
+	}
+};
+\end{lstlisting}
+
+The token class is an inner class template of the base\_parser class template. It can be either used as in the line marked with [1], where a type alias is defined (which is then used to instantiate an object) or as at line [2], where it is used directly to declare a variable. Notice that the typename keyword is not necessary at [1], where the using declaration indicates we are dealing with a type, but is required at [2] because the compiler would otherwise assume it’s a non-type name.
+
+The use of the typename and template keywords is not required in some contexts of the current template instantiation being observed. This will be the topic of the next subsection.
+
 \subsubsubsection{4.1.4\hspace{0.2cm}Current instantiation}
+
+The requirement to use the typename and template keywords to disambiguate dependent names may be avoided in the context of a class template definition where the compiler is able to deduce some dependent names (such as the name of a nested class) to refer to the current instantiation. This means some errors can be identified sooner, at the point of definition instead of the point of instantiation.
+
+The complete list of names that can refer to the current instantiation, according to the C++ Standard, §13.8.2.1 - Dependent Types, is presented in the following table:
+
+\begin{table}[H]
+\centering
+	\begin{tabular}{|l|l|}
+		\hline
+		\textbf{Context} &
+		\textbf{Names} \\ \hline
+		Class template definition &
+		\begin{tabular}[c]{@{}l@{}}Nested class\\ Member of class template\\ Member of a nested class\\ Injected class-name of the template\\ Injected class-name of a nested class\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}Primary class template definition\\ or\\ Definition of members of a \\ primary class template\end{tabular} &
+		\begin{tabular}[c]{@{}l@{}}Name of the class template followed by a template\\ argument list for the primary template where\\ each argument is equivalent to its corresponding\\ parameter\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}Definition of a nested class or\\ class template\end{tabular} &
+		\begin{tabular}[c]{@{}l@{}}Name of a nested class used as a member of the\\ current instantiation\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}Definition of a partial\\ specialization\\ or\\ Definition of a member of a\\ partial specialization\end{tabular} &
+		\begin{tabular}[c]{@{}l@{}}Name of the class template followed by a template\\ argument list for the partial specialization, where\\ each argument is equivalent to its corresponding\\ parameter\end{tabular} \\ \hline
+	\end{tabular}
+\end{table}
+
+\begin{center}
+Table 4.1
+\end{center}
+
+The following are the rules for considering a name as part of the current instantiation:
+
+\begin{itemize}
+\item
+An unqualified name (that does not appear on the right side of the scope resolution operator ::) found in the current instantiation or its non-dependent base
+
+\item
+A qualified name (that appears on the right side of the scope resolution operator ::) if its qualifier (the part that appears on the left side of the scope resolution operator) names the current instantiation and is found in the current instantiation or its non-dependent base
+
+\item
+A name used in a class member access expression where the object expression is the current instantiation and the name is found in the current instantiation or its non-dependent base
+\end{itemize}
+
+\begin{tcolorbox}[breakable,enhanced jigsaw,colback=blue!5!white,colframe=blue!75!black,title={Note}]
+It is said that a base class is a dependent class if it is a dependent type (depends on a template parameter) and is not in the current instantiation. Otherwise, a base class is said to be a non-dependent class.
+\end{tcolorbox}
+
+These rules may sound a bit harder to comprehend; therefore, let’s try to understand them with the help of several examples, as follows:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+struct parser
+{
+	parser* p1; // parser is the CI
+	parser<T>* p2; // parser<T> is the CI
+	::parser<T>* p3; // ::parser<T> is the CI
+	parser<T*> p4; // parser<T*> is not the CI
+	
+	struct token
+	{
+		token* t1; // token is the CI
+		parser<T>::token* t2; // parser<T>::token is the CI
+		typename parser<T*>::token* t3;
+		// parser<T*>::token is not the CI
+	};
+};
+
+template <typename T>
+struct parser<T*>
+{
+	parser<T*>* p1; // parser<T*> is the CI
+	parser<T>* p2; // parser<T> is not the CI
+};
+\end{lstlisting}
+
+In the primary template parser, the names parser, parser<T>, and ::parser<T> all refer to the current instantiation. However, parser<T*> does not. The class token is a nested class of the primary template parser. In the scope of this class, token and parser<T>::token are both denoting the current instantiation. The same is not true for parser<T*>::token. This snippet also contains a partial specialization of the primary template for the pointer type T*. In the context of this partial specialization, parser<T*> is the current instantiation, but parser<T> is not.
+
+Dependent names are an important aspect of template programming. The key takeaway from this section is that names are categorized as dependent (those that depend on a template parameter) and non-dependent (those that don’t depend on a template parameter). Name binding happens at the point of definition for non-dependent types and at the point of instantiation for dependent types. In some cases, the keywords typename and template are required to disambiguate the use of names and tell the compiler that a name refers to a type or a template. In the context of a class template definition, the compiler is, however, able to figure out that some dependent names refer to the current instantiation, which enables it to identify errors sooner.
+
+In the next section, we move our attention to a topic that we briefly touched already, which is template recursion.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

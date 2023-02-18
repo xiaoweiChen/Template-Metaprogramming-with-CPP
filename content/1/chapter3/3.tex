@@ -1,1 +1,439 @@
+
+A template or function parameter pack can accept zero, one, or more arguments. The standard does not specify any upper limit for the number of arguments, but in practice, compilers may have some. What the standard does is recommend minimum values for these limits but it does not require any compliance on them. These limits are as follows:
+
+\begin{itemize}
+\item
+For a function parameter pack, the maximum number of arguments depends on the limit of arguments for a function call, which is recommended to be at least 256.
+
+\item
+For a template parameter pack, the maximum number of arguments depends on the limit of template parameters, which is recommended to be at least 1,024.
+\end{itemize}
+
+The number of arguments in a parameter pack can be retrieved at compile time with the sizeof… operator. This operator returns a constexpr value of the std::size\_t type. Let's see this at work in a couple of examples.
+
+In the first example, the sizeof… operator is used to implement the end of the recursion pattern of the variadic function template sum with the help of a constexpr if statement. If the number of the arguments in the parameter pack is zero (meaning there is a single argument to the function) then we are processing the last argument, so we just return the value. Otherwise, we add the first argument to the sum of the remaining ones. The implementation looks as follows:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T, typename... Args>
+T sum(T a, Args... args)
+{
+	if constexpr (sizeof...(args) == 0)
+		return a;
+	else
+		return a + sum(args...);
+}
+\end{lstlisting}
+
+This is semantically equivalent, but on the other hand more concise, than the following classical approach for the variadic function template implementation:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+T sum(T a)
+{
+	return a;
+}
+
+template <typename T, typename... Args>
+T sum(T a, Args... args)
+{
+	return a + sum(args...);
+}
+\end{lstlisting}
+
+Notice that sizeof…(args) (the function parameter pack) and sizeof…(Args) (the template parameter pack) return the same value. On the other hand, sizeof…(args) and sizeof(args)... are not the same thing. The former is the sizeof operator used on the parameter pack args. The latter is an expansion of the parameter pack args on the sizeof operator. These are both shown in the following example:
+
+\begin{lstlisting}[style=styleCXX]
+template<typename... Ts>
+constexpr auto get_type_sizes()
+{
+	return std::array<std::size_t,
+	sizeof...(Ts)>{sizeof(Ts)...};
+}
+
+auto sizes = get_type_sizes<short, int, long, long long>();
+\end{lstlisting}
+
+In this snippet, sizeof…(Ts) evaluates to 4 at compile-time, while sizeof(Ts)... is expanded to the following comma-separated pack of arguments: sizeof(short), sizeof(int), sizeof(long), sizeof(long long). Conceptually, the preceding function template, get\_type\_sizes, is equivalent to the following function template with four template parameters:
+
+\begin{lstlisting}[style=styleCXX]
+template<typename T1, typename T2,
+         typename T3, typename T4>
+constexpr auto get_type_sizes()
+{
+	return std::array<std::size_t, 4> {
+		sizeof(T1), sizeof(T2), sizeof(T3), sizeof(T4)
+	};
+}
+\end{lstlisting}
+
+Typically, the parameter pack is the trailing parameter of a function or template. However, if the compiler can deduce the arguments, then a parameter pack can be followed by other parameters including more parameter packs. Let's consider the following example:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename... Ts, typename... Us>
+constexpr auto multipacks(Ts... args1, Us... args2)
+{
+	std::cout << sizeof...(args1) << ','
+	          << sizeof...(args2) << '\n';
+}
+\end{lstlisting}
+
+This function is supposed to take two sets of elements of possibly different types and do something with them. It can be invoked such as in the following examples:
+
+\begin{lstlisting}[style=styleCXX]
+multipacks<int>(1, 2, 3, 4, 5, 6);
+                // 1,5
+multipacks<int, int, int>(1, 2, 3, 4, 5, 6);
+                // 3,3
+multipacks<int, int, int, int>(1, 2, 3, 4, 5, 6);
+                // 4,2
+multipacks<int, int, int, int, int, int>(1, 2, 3, 4, 5, 6);
+                // 6,0
+\end{lstlisting}
+
+For the first call, the args1 pack is specified at the function call (as in multipacks<int>) and contains 1, and args2 is deduced to be 2, 3, 4, 5, 6 from the function arguments. Similarly, for the second call, the two packs will have an equal number of arguments, more precisely 1, 2, 3 and 3, 4, 6. For the last call, the first pack contains all the elements, and the second pack is empty. In all these examples, all the elements are of the int type. However, in the following examples, the two packs contain elements of different types:
+
+\begin{lstlisting}[style=styleCXX]
+multipacks<int, int>(1, 2, 4.0, 5.0, 6.0); // 2,3
+multipacks<int, int, int>(1, 2, 3, 4.0, 5.0, 6.0); // 3,3
+\end{lstlisting}
+
+For the first call, the args1 pack will contain the integers 1, 2 and the args2 pack will be deduced to contain the double values 4.0, 5.0, 6.0. Similarly, for the second call, the args1 pack will be 1, 2, 3 and the args2 pack will contain 4.0, 5.0, 6.0.
+
+However, if we change the function template multipacks a bit by requiring that the packs be of equal size, then only some of the calls shown earlier would still be possible. This is shown in the following example:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename... Ts, typename... Us>
+constexpr auto multipacks(Ts... args1, Us... args2)
+{
+	static_assert(
+	sizeof...(args1) == sizeof...(args2),
+	"Packs must be of equal sizes.");
+}
+
+multipacks<int>(1, 2, 3, 4, 5, 6); // error
+multipacks<int, int, int>(1, 2, 3, 4, 5, 6); // OK
+multipacks<int, int, int, int>(1, 2, 3, 4, 5, 6); // error
+multipacks<int, int, int, int, int, int>(1, 2, 3, 4, 5, 6); // error
+
+multipacks<int, int>(1, 2, 4.0, 5.0, 6.0); // error
+multipacks<int, int, int>(1, 2, 3, 4.0, 5.0, 6.0); // OK
+\end{lstlisting}
+
+In this snippet, only the second and the sixth calls are valid. In these two cases, the two deduced packs have three elements each. In all the other cases, as resulting from the prior example, the packs have different sizes and the static\_assert statement will generate an error at compile-time.
+
+Multiple parameter packs are not specific to variadic function templates. They can also be used for variadic class templates in partial specialization, provided that the compiler can deduce the template arguments. To exemplify this, we'll consider the case of a class template that represents a pair of function pointers. The implementation should allow for storing pointers to any function. To implement this, we define a primary template, called here func\_pair, and a partial specialization with four template parameters:
+
+\begin{itemize}
+\item
+A type template parameter for the return type of the first function
+
+\item
+A template parameter pack for the parameter types of the first function
+
+\item
+A second type template parameter for the return type of the second function
+
+\item
+A second template parameter pack for the parameter types of the second function
+\end{itemize}
+
+The func\_pair class template is shown in the next listing:
+
+\begin{lstlisting}[style=styleCXX]
+template<typename, typename>
+struct func_pair;
+
+template<typename R1, typename... A1,
+         typename R2, typename... A2>
+struct func_pair<R1(A1...), R2(A2...)>
+{
+	std::function<R1(A1...)> f;
+	std::function<R2(A2...)> g;
+};
+\end{lstlisting}
+
+To demonstrate the use of this class template, let's also consider the following two functions:
+
+\begin{lstlisting}[style=styleCXX]
+bool twice_as(int a, int b)
+{
+	return a >= b*2;
+}
+
+double sum_and_div(int a, int b, double c)
+{
+	return (a + b) / c;
+}
+\end{lstlisting}
+
+We can instantiate the func\_pair class template and use it to call these two functions as shown in the following snippet:
+
+\begin{lstlisting}[style=styleCXX]
+func_pair<bool(int, int), double(int, int, double)> funcs{
+	twice_as, sum_and_div };
+
+funcs.f(42, 12);
+funcs.g(42, 12, 10.0);
+\end{lstlisting}
+
+Parameter packs can be expanded in a variety of contexts and this will make the topic of the next section.
+
 \subsubsubsection{3.3.1\hspace{0.2cm}Understanding parameter packs expansion}
+
+Parameter packs can appear in a multitude of contexts. The form of their expansion may depend on this context. These possible contexts are listed ahead along with examples:
+
+\begin{itemize}
+\item
+Template parameter list: This is for when you specify parameters for a template:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename... T>
+struct outer
+{
+	template <T... args>
+	struct inner {};
+};
+
+outer<int, double, char[5]> a;
+\end{lstlisting}
+
+\item
+Template argument list: This is when you specify arguments for a template:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename... T>
+struct tag {};
+
+template <typename T, typename U, typename ... Args>
+void tagger()
+{
+	tag<T, U, Args...> t1;
+	tag<T, Args..., U> t2;
+	tag<Args..., T, U> t3;
+	tag<U, T, Args...> t4;
+}
+\end{lstlisting}
+
+\item
+Function parameter list: This is for when you specify parameters for a function template:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename... Args>
+void make_it(Args... args)
+{ }
+make_it(42);
+make_it(42, 'a');
+\end{lstlisting}
+
+\item
+Function argument list: When the expansion pack appears inside the parenthesis of a function call, the largest expression or brace initialization list to the left of the ellipsis is the pattern that is expanded:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+T step_it(T value)
+{
+	return value+1;
+}
+
+template <typename... T>
+int sum(T... args)
+{
+	return (... + args);
+}
+
+template <typename... T>
+void do_sums(T... args)
+{
+	auto s1 = sum(args...);
+	// sum(1, 2, 3, 4)
+	
+	auto s2 = sum(42, args...);
+	// sum(42, 1, 2, 3, 4)
+	
+	auto s3 = sum(step_it(args)...);
+	// sum(step_it(1), step_it(2),... step_it(4))
+}
+
+do_sums(1, 2, 3, 4);
+\end{lstlisting}
+
+\item
+Parenthesized initializers: When the expansion pack appears inside the parenthesis of a direct initializer, function-style cast, member initializer, new expression, and other similar contexts, the rules are the same as for the context of function argument lists:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename... T>
+struct sum_wrapper
+{
+	sum_wrapper(T... args)
+	{
+		value = (... + args);
+	}
+
+	std::common_type_t<T...> value;
+};
+
+template <typename... T>
+void parenthesized(T... args)
+{
+	std::array<std::common_type_t<T...>,
+	           sizeof...(T)> arr {args...};
+	// std::array<int, 4> {1, 2, 3, 4}
+	
+	sum_wrapper sw1(args...);
+	// value = 1 + 2 + 3 + 4
+	
+	sum_wrapper sw2(++args...);
+	// value = 2 + 3 + 4 + 5
+}
+parenthesized(1, 2, 3, 4);
+\end{lstlisting}
+
+\item
+Brace-enclosed initializers: This is when you perform initialization using the brace notation:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename... T>
+void brace_enclosed(T... args)
+{
+	int arr1[sizeof...(args) + 1] = {args..., 0};
+	// arr1: {1,2,3,4,0}
+	
+	int arr2[sizeof...(args)] = { step_it(args)... };
+	// arr2: {2,3,4,5}
+}
+
+brace_enclosed(1, 2, 3, 4);
+\end{lstlisting}
+
+\item
+Base specifiers and member initializer lists: A pack expansion may specify the list of base classes in a class declaration. In addition, it may also appear in the member initializer list, as this may be necessary to call the constructors of the base classes:
+
+\begin{lstlisting}[style=styleCXX]
+struct A {};
+struct B {};
+struct C {};
+
+template<typename... Bases>
+struct X : public Bases...
+{
+	X(Bases const & ... args) : Bases(args)...
+	{ }
+};
+
+A a;
+B b;
+C c;
+X x(a, b, c);
+\end{lstlisting}
+
+\item
+Using declarations: In the context of deriving from a pack of base classes, it may also be useful to be able to introduce names from the base classes into the definition of the derived class. Therefore, a pack expansion may also appear in a using declaration. This is demonstrated based on the previous example:
+
+\begin{lstlisting}[style=styleCXX]
+struct A
+{
+	void execute() { std::cout << "A::execute\n"; }
+};
+
+struct B
+{
+	void execute() { std::cout << "B::execute\n"; }
+};
+
+struct C
+{
+	void execute() { std::cout << "C::execute\n"; }
+};
+
+template<typename... Bases>
+struct X : public Bases...
+{
+	X(Bases const & ... args) : Bases(args)...
+	{}
+	
+	using Bases::execute...;
+};
+
+A a;
+B b;
+C c;
+X x(a, b, c);
+
+x.A::execute();
+x.B::execute();
+x.C::execute();
+\end{lstlisting}
+
+\item
+Lambda captures: The capture clause of a lambda expression may contain a pack expansion, as shown in the following example:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename... T>
+void captures(T... args)
+{
+	auto l = [args...]{
+		        return sum(step_it(args)...); };
+	auto s = l();
+}
+
+captures(1, 2, 3, 4);
+\end{lstlisting}
+
+\item
+Fold expressions: These will be discussed in detail in the following section in this chapter:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename... T>
+int sum(T... args)
+{
+	return (... + args);
+}
+\end{lstlisting}
+
+\item
+The sizeof… operator: Examples have already been shown earlier in this section. Here is one again:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename... T>
+auto make_array(T... args)
+{
+	return std::array<std::common_type_t<T...>,
+	                  sizeof...(T)> {args...};
+};
+
+auto arr = make_array(1, 2, 3, 4);
+\end{lstlisting}
+
+\item
+Alignment specifier: A pack expansion in an alignment specifier has the same effect as having multiple alignas specifiers applied to the same declaration. The parameter pack can be either a type or non-type pack. Examples for both cases are listed here:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename... T>
+struct alignment1
+{
+	alignas(T...) char a;
+};
+
+template <int... args>
+struct alignment2
+{
+	alignas(args...) char a;
+};
+
+alignment1<int, double> al1;
+alignment2<1, 4, 8> al2;
+\end{lstlisting}
+
+\item
+Attribute list: This is not supported by any compiler yet.
+\end{itemize}
+
+Now that we have learned more about parameter packs and their expansion we can move forward and explore variadic class templates.
+
+
+
+
+
+
+
+

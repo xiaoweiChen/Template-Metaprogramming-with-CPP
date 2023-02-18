@@ -1,0 +1,65 @@
+As mentioned before, variable templates may also be variadic. However, variables cannot be defined recursively, nor can they be specialized like class templates. Fold expressions, which simplify generating expressions from a variable number of arguments, are very handy for creating variadic variable templates.
+
+In the following example, we define a variadic variable template called Sum that is initialized at compile-time with the sum of all integers supplied as non-type template arguments:
+
+\begin{lstlisting}[style=styleCXX]
+template <int... R>
+constexpr int Sum = (... + R);
+int main()
+{
+	std::cout << Sum<1> << '\n';
+	std::cout << Sum<1,2> << '\n';
+	std::cout << Sum<1,2,3,4,5> << '\n';
+}
+\end{lstlisting}
+
+This is similar to the sum function written with the help of fold expressions. However, in that case, the numbers to add were provided as function arguments. Here, they are provided as template arguments to the variable template. The difference is mostly syntactic; with optimizations enabled, the end result is likely the same in terms of generated assembly code, and therefore performance.
+
+Variadic variable templates follow the same patterns as all the other kinds of templates although they are not used as much as the others. However, by concluding this topic we have now completed the learning of variadic templates in C++.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

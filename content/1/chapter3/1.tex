@@ -1,0 +1,114 @@
+One of the most famous C and C++ functions is printf, which writes formatted output to the stdout standard output stream. There is actually a family of functions in the I/O library for writing formatted output, which also includes fprintf (which writes to a file stream), sprint, and snprintf (which write to a character buffer). These functions are similar because they take a string defining the output format and a variable number of arguments. The language, however, provides us with the means to write our own functions with variable numbers of arguments. Here is an example of a function that takes one or more arguments and returns the minimum value:
+
+\begin{lstlisting}[style=styleCXX]
+#include<stdarg.h>
+
+int min(int count, ...)
+{
+	va_list args;
+	va_start(args, count);
+	
+	int val = va_arg(args, int);
+	for (int i = 1; i < count; i++)
+	{
+		int n = va_arg(args, int);
+		if (n < val)
+			val = n;
+	}
+
+	va_end(args);
+	
+	return val;
+}
+
+int main()
+{
+	std::cout << "min(42, 7)=" << min(2, 42, 7) << '\n';
+	std::cout << "min(1,5,3,-4,9)=" <<
+				  min(5, 1, 5, 3, -4,
+	           9) << '\n';
+}
+\end{lstlisting}
+
+This implementation is specific for values of the int type. However, it is possible to write a similar function that is a function template. The transformation requires minimal changes and the result is as follows:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+T min(int count, ...)
+{
+	va_list args;
+	va_start(args, count);
+	
+	T val = va_arg(args, T);
+	for (int i = 1; i < count; i++)
+	{
+		T n = va_arg(args, T);
+		if (n < val)
+		val = n;
+	}
+
+	va_end(args);
+	
+	return val;
+}
+
+int main()
+{
+	std::cout << "min(42.0, 7.5)="
+		      << min<double>(2, 42.0, 7.5) << '\n';
+	std::cout << "min(1,5,3,-4,9)="
+  	          << min<int>(5, 1, 5, 3, -4, 9) << '\n';
+}
+\end{lstlisting}
+
+Writing code like this, whether generic or not, has several important drawbacks:
+
+\begin{itemize}
+\item
+It requires the use of several macros: va\_list (which provides access to the information needed by the others), va\_start (starts the iterating of the arguments), va\_arg (provides access to the next argument), and va\_end (stops the iterating of the arguments).
+
+\item
+Evaluation happens at runtime, even though the number and the type of the arguments passed to the function are known at compile-time.
+
+\item
+Variadic functions implemented in this manner are not type-safe. The va\_macros perform low-memory manipulation and type-casts are done in va\_arg at runtime. These could lead to runtime exceptions.
+
+\item
+These variadic functions require specifying in some way the number of variable arguments. In the implementation of the earlier min function, there is a first parameter that indicates the number of arguments. The printf-like functions take a formatting string from which the number of expected arguments is determined. The printf function, for example, evaluates and then ignores additional arguments (if more are supplied than the number specified in the formatting string) but has undefined behavior if fewer arguments are supplied.
+\end{itemize}
+
+In addition to all these things, only functions could be variadic, prior to C++11. However, there are classes that could also benefit from being able to have a variable number of data members. Typical examples are the tuple class, which represents a fixed-size collection of heterogeneous values, and variant, which is a type-safe union.
+
+Variadic templates help address all these issues. They are evaluated at compile-time, are type-safe, do not require macros, do not require explicitly specifying the number of arguments, and we can write both variadic function templates and variadic class templates. Moreover, we also have variadic variable templates and variadic alias templates.
+
+In the next section, we will start looking into variadic function templates.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

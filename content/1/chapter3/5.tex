@@ -1,0 +1,180 @@
+A fold expression is an expression involving a parameter pack that folds (or reduces) the elements of the parameter pack over a binary operator. To understand how this works, we will look at several examples. Earlier in this chapter, we implemented a variable function template called sum that returned the sum of all its supplied arguments. For convenience, we will show it again here:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+T sum(T a)
+{
+	return a;
+}
+
+template <typename T, typename... Args>
+T sum(T a, Args... args)
+{
+	return a + sum(args...);
+}
+\end{lstlisting}
+
+With fold expressions, this implementation that requires two overloads can be reduced to the following form:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename... T>
+int sum(T... args)
+{
+	return (... + args);
+}
+\end{lstlisting}
+
+There is no need for overloaded functions anymore. The expression (... + args) represents the fold expression, which upon evaluation becomes ((((arg0 + arg1) + arg2) + … ) + argN). The enclosing parentheses are part of the fold expression. We can use this new implementation, just as we would use the initial one, as follows:
+
+\begin{lstlisting}[style=styleCXX]
+int main()
+{
+	std::cout << sum(1) << '\n';
+	std::cout << sum(1,2) << '\n';
+	std::cout << sum(1,2,3,4,5) << '\n';
+}
+\end{lstlisting}
+
+There are four different types of folds, which are listed as follows:
+
+\begin{table}[H]
+\centering
+	\begin{tabular}{|l|l|l|}
+		\hline
+		\textbf{Fold}    & \textbf{Syntax} & \textbf{Expansion}                  \\ \hline
+		Unary right fold & (pack op ...)   & (arg1 op (... op (argN-1 op argN))) \\ \hline
+		Unary left fold  & (... op pack)   & (((arg1 op arg2) op ...) op argN)   \\ \hline
+		Binary right fold &
+		\begin{tabular}[c]{@{}l@{}}(pack op ... op\\ init)\end{tabular} &
+		\begin{tabular}[c]{@{}l@{}}(arg1 op (... op (argN-1 op (argN\\ op init))))\end{tabular} \\ \hline
+		Binary left fold &
+		\begin{tabular}[c]{@{}l@{}}(init op ... op\\ pack)\end{tabular} &
+		\begin{tabular}[c]{@{}l@{}}((((init op arg1) op arg2) op ...)\\ op argN)\end{tabular} \\ \hline
+	\end{tabular}
+\end{table}
+
+\begin{center}
+Table 3.1
+\end{center}
+
+In this table, the following names are used:
+
+\begin{itemize}
+\item
+pack is an expression that contains an unexpanded parameter pack, and arg1, arg2, argN-1, and argN are the arguments contained in this pack.
+
+\item
+op is one of the following binary operators: + - * / \% \^ \& | = < > << >> += -= *= /= \%= \^= \&= |= <<= >>= == != <= >= \&\& || , .* ->*.
+
+\item
+init is an expression that does not contain an unexpanded parameter pack.
+\end{itemize}
+
+In a unary fold, if the pack does not contain any elements, only some operators are allowed. These are listed in the following table, along with the value of the empty pack:
+
+\begin{table}[]
+	\begin{tabular}{|l|l|}
+		\hline
+		\textbf{Operator}  & \textbf{Value of the empty pack} \\ \hline
+		\&\& (logical AND) & true                             \\ \hline
+		|| (logical OR)    & false                            \\ \hline
+		, (comma operator) & void()                           \\ \hline
+	\end{tabular}
+\end{table}
+
+\begin{center}
+Table 3.2
+\end{center}
+
+Unary and binary folds differ in the use of an initialization value, that is present only for binary folds. Binary folds have the binary operator repeated twice (it must be the same operator). We can transform the variadic function template sum from using a unary right fold expression into one using a binary right fold by including an initialization value. Here is an example:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename... T>
+int sum_from_zero(T... args)
+{
+	return (0 + ... + args);
+}
+\end{lstlisting}
+
+One could say there is no difference between the sum and sum\_from\_zero function templates. That is not actually true. Let's consider the following invocations:
+
+\begin{lstlisting}[style=styleCXX]
+int s1 = sum(); // error
+int s2 = sum_from_zero(); // OK
+\end{lstlisting}
+
+Calling sum without arguments will produce a compiler error, because unary fold expressions (over the operator + in this case) must have non-empty expansions. However, binary fold expressions do not have this problem, so calling sum\_from\_zero without arguments works and the function will return 0.
+
+In these two examples with sum and sum\_from\_zero, the parameter pack args appears directly within the fold expression. However, it can be part of an expression, as long as it is not expanded. This is shown in the following example:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename... T>
+void printl(T... args)
+{
+	(..., (std::cout << args)) << '\n';
+}
+
+template <typename... T>
+void printr(T... args)
+{
+	((std::cout << args), ...) << '\n';
+}
+\end{lstlisting}
+
+Here, the parameter pack args is part of the (std::cout << args) expression. This is not a fold expression. A fold expression is ((std::cout << args), ...). This is a unary left fold over the comma operator. The printl and printr functions can be used as in the following snippet:
+
+\begin{lstlisting}[style=styleCXX]
+printl('d', 'o', 'g'); // dog
+printr('d', 'o', 'g'); // dog
+\end{lstlisting}
+
+In both these cases, the text printed to the console is dog. This is because the unary left fold expands to (((std::cout << 'd'), std::cout << 'o'), << std::cout << 'g') and the unary right fold expands to (std::cout << 'd', (std::cout << 'o', (std::cout << 'g'))) and these two are evaluated in the same way. This is because a pair of expressions separated by a comma is evaluated left to right. This is true for the built-in comma operator. For types that overload the comma operator, the behavior depends on how the operator is overloaded. However, there are very few corner cases for overloading the comma operator (such as simplifying indexing multi-dimensional arrays). Libraries such as Boost.Assign and SOCI overload the comma operator, but, in general, this is an operator you should avoid overloading.
+
+Let's consider another example for using the parameter pack in an expression inside a fold expression. The following variadic function template inserts multiple values to the end of a std::vector:
+
+\begin{lstlisting}[style=styleCXX]
+template<typename T, typename... Args>
+void push_back_many(std::vector<T>& v, Args&&... args)
+{
+	(v.push_back(args), ...);
+}
+
+push_back_many(v, 1, 2, 3, 4, 5); // v = {1, 2, 3, 4, 5}
+\end{lstlisting}
+
+The parameter pack args is used with the v.push\_back(args) expression that is folded over the comma operator. The unary left fold expression is (v.push\_back(args), ...).
+
+Fold expressions have several benefits over the use of recursion to implement variadic templates. These benefits are as follows:
+
+\begin{itemize}
+\item
+Less and simpler code to write.
+
+\item
+Fewer template instantiations, which leads to faster compile times.
+
+\item
+Potentially faster code since multiple function calls are replaced with a single expression. However, this point may not be true in practice, at least not when optimizations are enabled. We have already seen that the compilers optimize code by removing these function calls.
+\end{itemize}
+
+Now that we have seen how to create variadic function templates, variadic class templates, and how to use fold expressions, we are left to discuss the other kinds of templates that can be variadic: alias templates and variable templates. We will start with the former.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

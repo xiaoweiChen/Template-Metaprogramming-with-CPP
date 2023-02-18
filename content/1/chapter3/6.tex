@@ -1,0 +1,77 @@
+Everything that can be templatized can also be made variadic. An alias template is an alias (another name) for a family of types. A variadic alias template is a name for a family of types with a variable number of template parameters. With the knowledge accumulated so far, it should be fairly trivial to write alias templates. Let's see an example:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T, typename... Args>
+struct foo
+{
+};
+
+template <typename... Args>
+using int_foo = foo<int, Args...>;
+\end{lstlisting}
+
+The class template foo is variadic and takes at least one type template argument. int\_foo, on the other hand, is only a different name for a family of types instantiated from the foo type with int as the first type template arguments. These could be used as follows:
+
+\begin{lstlisting}[style=styleCXX]
+foo<double, char, int> f1;
+foo<int, char, double> f2;
+int_foo<char, double> f3;
+static_assert(std::is_same_v<decltype(f2), decltype(f3)>);
+\end{lstlisting}
+
+In this snippet, f1 on one hand and f2 and f3 on the other are instances of different foo types, as they are instantiated from different sets of template arguments for foo. However, f2 and f3 are instances of the same type, foo<int, char, double>, since int\_foo<char, double> is just an alias for this type.
+
+A similar example, although a bit more complex, is presented ahead. The standard library contains a class template called std::integer\_sequence, which represents a compile-time sequence of integers, along with a bunch of alias templates to help create various kinds of such integer sequences. Although the code shown here is a simplified snippet, their implementation can, at least conceptually, be as follows:
+
+\begin{lstlisting}[style=styleCXX]
+template<typename T, T... Ints>
+struct integer_sequence
+{};
+
+template<std::size_t... Ints>
+using index_sequence = integer_sequence<std::size_t,
+								        Ints...>;
+
+template<typename T, std::size_t N, T... Is>
+struct make_integer_sequence :
+	make_integer_sequence<T, N - 1, N - 1, Is...>
+{};
+
+template<typename T, T... Is>
+struct make_integer_sequence<T, 0, Is...> :
+	integer_sequence<T, Is...>
+{};
+
+template<std::size_t N>
+using make_index_sequence = make_integer_sequence<std::size_t,
+												  N>;
+
+template<typename... T>
+using index_sequence_for =
+	make_index_sequence<sizeof...(T)>;
+\end{lstlisting}
+
+There are three alias templates here:
+
+\begin{itemize}
+\item
+index\_sequence, which creates an integer\_sequence for the size\_t type; this is a variadic alias template.
+
+\item
+index\_sequence\_for, which creates an integer\_sequence from a parameter pack; this is also a variadic alias template.
+
+\item
+make\_index\_sequence, which creates an integer\_sequence for the size\_t type with the values 0, 1, 2, …, N-1. Unlike the previous ones, this is not an alias for a variadic template.
+\end{itemize}
+
+The last subject to address in this chapter is variadic variable templates.
+
+
+
+
+
+
+
+
+
+
