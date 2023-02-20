@@ -1,0 +1,192 @@
+When we write templates, we sometimes need to restrict the template arguments. For instance, we have a function template that should work for any numeric type, therefore integral and floating-point, but should not work with anything else. Or we may have a class template that should only accept trivial types for an argument.
+
+There are also cases when we may have overloaded function templates that should each work with some types only. For instance, one overload should work for integral types and the other for floating-point types only. There are different ways to achieve this goal and we will explore them in this chapter and the next.
+
+Type traits, however, are involved in one way or another in all of them. The first one that will be discussed in this chapter is a feature called SFINAE. Another approach, superior to SFINAE, is represented by concepts, which will be discussed in the next chapter.
+
+SFINAE stands for Substitution Failure Is Not An Error. When the compiler encounters the use of a function template, it substitutes the arguments in order to instantiate the template. If an error occurs at this point, it is not regarded as ill-informed code, only as a deduction failure. The function is removed from the overload set instead of causing an error. Only if there is no match in the overload set does an error occur.
+
+It’s difficult to really understand SFINAE without concrete examples. Therefore, we will go through several examples to explain the concept.
+
+Every standard container, such as std::vector, std::array, and std::map, not only has iterators that enable us to access its elements but also modify the container (such as inserting after the element pointed by an iterator). Therefore, these containers have member functions to return iterators to the first and the one-past-last elements of the container. These methods are called begin and end.
+
+There are other methods such as cbegin and cend, rbegin and rend, and crbegin and crend but these are beyond the purpose of this topic. In C++11, there are also free functions, std:begin and std::end, that do the same. However, these work not just with standard containers but also with arrays. One benefit of these is enabling rangebased for loops for arrays. The question is how this non-member function could be implemented to work with both containers and arrays? Certainly, we need two overloads of a function template. A possible implementation is the following:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+auto begin(T& c) { return c.begin(); } // [1]
+
+template <typename T, size_t N>
+T* begin(T(&arr)[N]) {return arr; } // [2]
+\end{lstlisting}
+
+The first overload calls the member function begin and returns the value. Therefore, this overload is restricted to types that have a member function begin; otherwise, a compiler error would occur. The second overload simply returns a pointer to the first element of the array. This is restricted to array types; anything else would produce a compiler error.
+We can use these overloads as follows:
+
+\begin{lstlisting}[style=styleCXX]
+std::array<int, 5> arr1{ 1,2,3,4,5 };
+std::cout << *begin(arr1) << '\n'; // [3] prints 1
+
+int arr2[]{ 5,4,3,2,1 };
+std::cout << *begin(arr2) << '\n'; // [4] prints 5
+\end{lstlisting}
+
+If you compile this piece of code, no error, not even a warning, occurs. The reason for that is SFINAE. When resolving the call to begin(arr1), substituting std::array<int, 5> to the first overload (at [1]) succeeds, but the substitution for the second (at [2]) fails. Instead of issuing an error at this point, the compiler just ignores it, so it builds an overload set with a single instantiation and, therefore, it can successfully find a match for the invocation. Similarly, when resolving the call to begin(arr2), the substitution of int[5] for the first overload fails and is ignored, but it succeeds for the second and is added to the overload set, eventually finding a good match for the invocation. Therefore, both calls can be successfully made. Should one of the two overloads not be present, either begin(arr1) or begin(arr2) would fail to match the function template and a compiler error would occur.
+
+SFINAE only applies in the so-called immediate context of a function. The immediate context is basically the template declaration (including the template parameter list, the function return type, and the function parameter list). Therefore, it does not apply to the body of a function. Let’s consider the following example:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+void increment(T& val) { val++; }
+
+int a = 42;
+increment(a); // OK
+
+std::string s{ "42" };
+increment(s); // error
+\end{lstlisting}
+
+There are no restrictions on the type T in the immediate context of the increment function template. However, in the body of the function, the parameter val is incremented with the post-fix operator++. That means, substituting for T any type for which the post-fix operator++ is not implemented is a failure. However, this failure is an error and will not be ignored by the compiler.
+
+The C++ standard (license usage link: \url{http://creativecommons.org/licenses/by-sa/3.0/}) defines the list of errors that are considered SFINAE errors (in paragraph §13.10.2, Template argument deduction, the C++20 standard version). These SFINAE errors are the following attempts:
+
+
+\begin{itemize}
+\item
+Creating an array of void, an array of reference, an array of function, an array of negative size, an array of size zero, and an array of non-integral size
+
+\item
+Using a type that is not a class or enum on the left side of the scope resolution operator :: (such as in T::value\_type with T being a numeric type for instance)
+
+\item
+Creating a pointer to reference
+
+\item
+Creating a reference to void
+
+\item
+Creating a pointer to member of T, where T is not a class type
+
+\item
+Using a member of a type when the type does not contain that member
+
+\item
+Using a member of a type where a type is required but the member is not a type
+
+\item
+Using a member of a type where a template is required but the member is not a template
+
+\item
+Using a member of a type where a non-type is required but the member is not a non-type
+
+\item
+Creating a function type with a parameter of type void
+
+\item
+Creating a function type that returns an array type or another function type
+
+\item
+Performing an invalid conversion in a template argument expression or an expression used in a function declaration
+
+\item
+Supplying an invalid type to a non-type template parameter
+
+\item
+Instantiating a pack expansion containing multiple packs of different lengths
+\end{itemize}
+
+The last error in this list was introduced in C++11 together with variadic templates. The others were defined before C++11. We will not go on to exemplify all of these errors, but we can take a look at a couple more examples. The first concerns attempting to create an array of size zero. Let’s say we want to have two function template overloads, one that handles arrays of even sizes and one that handles arrays of odd sizes. A solution to this is the following:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T, size_t N>
+void handle(T(&arr)[N], char(*)[N % 2 == 0] = 0)
+{
+	std::cout << "handle even array\n";
+}
+
+template <typename T, size_t N>
+void handle(T(&arr)[N], char(*)[N % 2 == 1] = 0)
+{
+	std::cout << "handle odd array\n";
+}
+
+int arr1[]{ 1,2,3,4,5 };
+handle(arr1);
+
+int arr2[]{ 1,2,3,4 };
+handle(arr2);
+\end{lstlisting}
+
+The template arguments and the first function parameter are similar to what we saw with the begin overload for arrays. However, these overloads for handle have a second anonymous parameter with the default value 0. The type of this parameter is a pointer to an array of type char and a size specified with the expressions N\%2==0 and N\%2==1. For every possible array, one of these two is true and the other is false. Therefore, the second parameter is either char(*)[1] or char(*)[0], the latter being an SFINAE error (an attempt to create an array of size zero). Therefore, we are able to call either one of the other overloads without generating compiler errors, thanks to SFINAE.
+
+The last example that we will look at in this section will show SFINAE with an attempt to use a member of a class that does not exist. Let’s start with the following snippet:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+struct foo
+{
+	using foo_type = T;
+};
+
+template <typename T>
+struct bar
+{
+	using bar_type = T;
+};
+
+struct int_foo : foo<int> {};
+struct int_bar : bar<int> {}
+\end{lstlisting}
+
+Here we have two classes, foo, which has a member type called foo\_type, and bar, which has a member type called bar\_type. There are also classes that derive from these two. The goal is to write two function templates, one that handles the foo hierarchy of classes, and one that handles the bar hierarchy of classes. A possible implementation is the following:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+decltype(typename T::foo_type(), void()) handle(T const& v)
+{
+	std::cout << "handle a foo\n";
+}
+
+template <typename T>
+decltype(typename T::bar_type(), void()) handle(T const& v)
+{
+	std::cout << "handle a bar\n";
+}
+\end{lstlisting}
+
+Both overloads have a single template parameter and a single function parameter of type T const\&. They also return the same type, and that type is void. The expression decltype(typename T::foo\_type(), void()) may need a little consideration to understand better. We discussed decltype in Chapter 4, Advanced Template Concepts. Remember that this is a type specifier that deduces the type of an expression. We use the comma operator, so the first argument is evaluated but then discarded, so decltype will only deduce the type from void(), and the deduced type is void. However, the arguments typename T::foo\_type() and typename T::bar\_type() do use an inner type, and this only exists either for foo or bar. This is where SFINAE manifests itself, as shown in the following snippet:
+
+\begin{lstlisting}[style=styleCXX]
+int_foo fi;
+int_bar bi;
+int x = 0;
+handle(fi); // OK
+handle(bi); // OK
+handle(x); // error
+\end{lstlisting}
+
+Calling handle with an int\_foo value will match the first overload, while the second is discarded because of a substitution failure. Similarly, calling handle with an int\_bar value will match the second overload, while the first is discarded because of a substitution failure. However, calling handle with an int will cause substitution failure for both overloads so the final overload set for substituting int will be empty, which means there is no match for the call. Therefore, a compiler error occurs.
+
+SFINAE is not the best way to achieve conditional compilation. However, in modern C++ it’s probably best used together with a type trait called enable\_if. This is what we will discuss next.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

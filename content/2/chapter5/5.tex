@@ -1,6 +1,160 @@
+
+The standard library features a series of type traits for querying properties of types as well as performing transformations on types. These type traits are available in the <type\_ traits> header as part of the type support library. There are several categories of type traits including the following:
+
+\begin{itemize}
+\item
+Querying the type category (primary or composite)
+
+\item
+Querying type properties
+
+\item
+Querying supported operations
+
+\item
+Querying type relationships
+
+\item
+Modifying cv-specifiers, references, pointers, or a sign
+
+\item
+Miscellaneous transformations
+\end{itemize}
+
+Although looking at every single type trait is beyond the scope of this book, we will explore all these categories to see what they contain. In the following subsections, we will list the type traits (or most of them) that make up each of these categories. These lists as well as detailed information about each type trait can be found in the C++ standard (see the Further reading section at the end of the chapter for a link to a freely available draft version) or on the cppreference.com website at \url{https://en.cppreference.com/w/cpp/header/type_traits} (license usage link:\url{http://creativecommons.org/licenses/by-sa/3.0/}).
+
+We will start with the type traits for querying the type category
+
 \subsubsubsection{5.5.1\hspace{0.2cm}Querying the type category}
 
+Throughout this book so far, we have used several type traits, such as std::is\_integral, std::is\_floating\_point, and std::is\_arithmetic. These are just some of the standard type traits used for querying primary and composite type categories. The following table lists the entire set of such type traits:
+
+\begin{table}[H]
+\centering
+	\begin{tabular}{|l|l|}
+		\hline
+		\textbf{Name} &
+		\textbf{Description} \\ \hline
+		is\_void &
+		Checks whether a type is the void type. \\ \hline
+		is\_null\_pointer &
+		Checks whether a type is the std::nullptr\_t type. \\ \hline
+		is\_integral &
+		\begin{tabular}[c]{@{}l@{}}Checks whether a type is an integral type, including signed,\\ unsigned, and cv-qualified variants. The integral types are:\\ ·bool, char, char8\_t(since C++20), char16\_t,\\   char32\_t, wchar\_t, short, int, long, and long long\\ ·Any implementation-defined extended integer type\end{tabular} \\ \hline
+		is\_floating\_point &
+		\begin{tabular}[c]{@{}l@{}}Checks whether a type is a floating-point type, including\\ cv-qualified variants. The possiable types are float,\\ double, and long double.\end{tabular} \\ \hline
+		is\_array &
+		Checks whether a type is an array type. \\ \hline
+		is\_enum &
+		Checks whether a type is an enumeration type. \\ \hline
+		is\_union &
+		Checks whether a type is a union type. \\ \hline
+		is\_class &
+		Checks whether a type is a class type, but not a union type. \\ \hline
+		is\_function &
+		\begin{tabular}[c]{@{}l@{}}Checks whether a type is a function type. This excludes\\ lambdas, classes with overloaded call operator, pointers to \\ functions, but the std::function type.\end{tabular} \\ \hline
+	\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+	\begin{tabular}{|l|l|}
+		\hline
+		\textbf{Name} &
+		\textbf{Description} \\ \hline
+		is\_pointer &
+		\begin{tabular}[c]{@{}l@{}}Checks whether a type is a pointer to object or a pointer\\ to function or a cv-qualified variant. This does not include\\ pointer to member object or pointer to member function.\end{tabular} \\ \hline
+		is\_member\_pointer &
+		\begin{tabular}[c]{@{}l@{}}Checks whether a type is a pointer to a non-static member\\ object or pointer to a non-static member function.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}is\_member\_object\_\\ pointer\end{tabular} &
+		Checks whether a type is a non-static member object pointer. \\ \hline
+		\begin{tabular}[c]{@{}l@{}}is\_member\_function\_\\ pointer\end{tabular} &
+		\begin{tabular}[c]{@{}l@{}}Checks whether a type is a non-static member function\\ pointer.\end{tabular} \\ \hline
+		is\_lvalue\_reference &
+		Checks whether a type is an lvalue reference type. \\ \hline
+		is\_rvalue\_reference &
+		Checks whether a type is an rvalue reference type. \\ \hline
+		is\_reference &
+		\begin{tabular}[c]{@{}l@{}}Checks whether a type is a reference type. This can be either\\ an lvalue or rvalue reference type.\end{tabular} \\ \hline
+		is\_fundamental &
+		\begin{tabular}[c]{@{}l@{}}Checks whether a type is a fundamental type. Fundamental types \\ are the arithmetic types., the void type, and the std::nullptr\_t\\ type.\end{tabular} \\ \hline
+		is\_scalar &
+		\begin{tabular}[c]{@{}l@{}}Checks whether a type is a scalar type or a cv-qualifier\\ version of one. Scalar types are:\\ ·The arithmetic types\\ ·Pointer types\\ ·Pointer to member types\\ ·Enumeration types\\ ·the std::nullptr\_t type\end{tabular} \\ \hline
+	\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+	\begin{tabular}{|l|l|}
+		\hline
+		\textbf{Name} &
+		\textbf{Description} \\ \hline
+		is\_object &
+		\begin{tabular}[c]{@{}l@{}}Checks whether a type is an object type of a cv-qualifier\\ version. An object type is a type that is not a function type,\\ a reference type, or the void type.\end{tabular} \\ \hline
+		is\_compound &
+		\begin{tabular}[c]{@{}l@{}}Checks whether a type is a compound type or any\\ cv-qualified variant of one. Compound types are types that\\ are not fundamental. These are:\\ ·Array types\\ ·Function types\\ ·Class types\\ ·Union types\\ ·Object pointer and function pointer types\\ ·Member object pointer and member function pointer types\\ ·Reference types\\ ·Enumeration types\end{tabular} \\ \hline
+	\end{tabular}
+\end{table}
+
+\begin{center}
+Table 5.1
+\end{center}
+
+All these type traits are available in C++11. For each of them, starting with C++17, a variable template is available to simplify the access to the Boolean member called value. For a type trait with the name is\_abc, a variable template with the name is\_abc\_v exists. This is true for all the type traits that have a Boolean member called value. The definition of these variables is very simple. The next snippet shows the definition for the is\_arithmentic\_v variable template:
+
+\begin{lstlisting}[style=styleCXX]
+template< class T >
+inline constexpr bool is_arithmetic_v =
+	is_arithmetic<T>::value;
+\end{lstlisting}
+
+Here is an example of using some of these type traits:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+std::string as_string(T value)
+{
+	if constexpr (std::is_null_pointer_v<T>)
+		return "null";
+	else if constexpr (std::is_arithmetic_v<T>)
+		return std::to_string(value);
+	else
+		static_assert(always_false<T>);
+}
+
+std::cout << as_string(nullptr) << '\n'; // prints null
+std::cout << as_string(true) << '\n'; // prints 1
+std::cout << as_string('a') << '\n'; // prints a
+std::cout << as_string(42) << '\n'; // prints 42
+std::cout << as_string(42.0) << '\n'; // prints 42.000000
+std::cout << as_string("42") << '\n'; // error
+\end{lstlisting}
+
+The function template as\_string returns a string containing the value pass as an argument. It works with arithmetic types only and with the nullptr\_t for which it returns the value "null".
+
+You must have noticed the statement, static\_assert(always\_false<T>), and wondering what this always\_false<T> expression actually is. It is a variable template of the bool type that evaluates to false. Its definition is as simple as the following:
+
+\begin{lstlisting}[style=styleCXX]
+template<class T>
+constexpr bool always_false = std::false_type::value;
+\end{lstlisting}
+
+This is needed because the statement, static\_assert(false), would make the program ill-formed. The reason for this is that its condition would not depend on a template argument but evaluate to false. When no valid specialization can be generated for a sub-statement of a constexpr if statement within a template, the program is ill-formed (and no diagnostic is required). To avoid this, the condition of the static\_assert statement must depend on a template argument. With static\_assert(always\_false<T>), the compiler does not know whether this would evaluate to true or false until the template is instantiated.
+
+The next category of type traits we explore allows us to query properties of types.
+
 \subsubsubsection{5.5.2\hspace{0.2cm}Querying type properties}
+
+The type traits that enable us to query properties of types are the following:
+
+\begin{table}[H]
+	\begin{tabular}{|l|l|l|}
+		\hline
+		\textbf{Name} & \textbf{C++ Version} & \textbf{Description}                                                                                                      \\ \hline
+		is\_const     & C++11                & \begin{tabular}[c]{@{}l@{}}Checks whether a type is const-qualified(either\\ const or const volatile).\end{tabular}       \\ \hline
+		is\_volatile  & C++11                & \begin{tabular}[c]{@{}l@{}}Checks whether a type is volatile-qualified(either\\ volatile or const volatile).\end{tabular} \\ \hline
+	\end{tabular}
+\end{table}
 
 \subsubsubsection{5.5.3\hspace{0.2cm}Querying supported operations}
 

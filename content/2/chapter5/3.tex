@@ -1,0 +1,225 @@
+The C++ standard library is a family of sub-libraries. One of these is the type support library. This library defines types such as std::size\_t, std::nullptr\_t, and std::byte, run-time type identification support with classes such as std::type\_info, as well as a collection of type traits. There are two categories of type traits:
+
+\begin{itemize}
+\item
+Type traits that enable us to query properties of types at compile-time.
+
+\item
+Type traits that enable us to perform type transformations at compile-time (such as adding or removing the const qualifier, or adding or removing pointer or reference from a type). These type traits are also called metafunctions.
+\end{itemize}
+
+One type trait from the second category is std::enable\_if. This is used to enable SFINAE and remove candidates from a function’s overload set. A possible implementation is the following:
+
+\begin{lstlisting}[style=styleCXX]
+template<bool B, typename T = void>
+struct enable_if {};
+
+template<typename T>
+struct enable_if<true, T> { using type = T; };
+\end{lstlisting}
+
+There is a primary template, with two template parameters, a Boolean non-type template, and a type parameter with void as the default argument. This primary template is an empty class. There is also a partial specialization for the true value of the non-type template parameter. This, however, defines a member type simply called type, which is an alias template for the template parameter T.
+
+The enable\_if metafunction is intended to be used with a Boolean expression. When this Boolean expression is evaluated as true, it defines a member type called type. If the Boolean expression is false, this member type is not defined. Let’s see how it works.
+
+Remember the example from the Understanding and defining type traits section at the beginning of the chapter, where we had classes that provided a write method to write their content to an output stream, and classes for which the operator<{}< was overloaded for the same purpose? In that section, we defined a type trait called uses\_write and wrote a serialize function template that allowed us to serialize, in a uniform manner, both types of objects (widget and gadget). However, the implementation was rather complex. With enable\_if, we can implement that function in a simple manner. A possible implementation is shown in the next snippet:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T,
+		  typename std::enable_if<
+			uses_write_v<T>>::type* = nullptr>
+void serialize(std::ostream& os, T const& value)
+{
+	value.write(os);
+}
+
+template <typename T,
+		  typename std::enable_if<
+			!uses_write_v<T>>::type*=nullptr>
+void serialize(std::ostream& os, T const& value)
+{
+	os << value;
+}
+\end{lstlisting}
+
+There are two overloaded function templates in this implementation. They both have two template parameters. The first parameter is a type template parameter, called T. The second is an anonymous non-type template parameter of a pointer type that also has the default value nullptr. We use enable\_if to define the member called type only if the uses\_write\_v variable evaluates to true. Therefore, for classes that have the member function write, the substitution succeeds for the first overload but fails for the second overload, because typename * = nullptr is not a valid parameter. For classes for which the operator<{}< is overloaded, we have the opposite situation.
+
+The enable\_if metafunction can be used in several scenarios:
+
+\begin{itemize}
+\item
+To define a template parameter that has a default argument, which we saw earlier
+
+\item
+To define a function parameter that has a default argument
+
+\item
+To specify the return type of a function
+\end{itemize}
+
+For this reason, I mentioned earlier that the provided implementation of the serialize overloads is just one of the possibilities. A similar one that uses enable\_if to define a function parameter with a default argument is shown next:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+void serialize(
+	std::ostream& os, T const& value,
+	typename std::enable_if<
+				uses_write_v<T>>::type* = nullptr)
+{
+	value.write(os);
+}
+
+template <typename T>
+void serialize(
+	std::ostream& os, T const& value,
+	typename std::enable_if<
+				!uses_write_v<T>>::type* = nullptr)
+{
+	os << value;
+}
+\end{lstlisting}
+
+You will notice here that we basically moved the parameter from the template parameter list to the function parameter list. There is no other change, and the usage is the same, such as follows:
+
+\begin{lstlisting}[style=styleCXX]
+widget w{ 1, "one" };
+gadget g{ 2, "two" };
+
+serialize(std::cout, w);
+serialize(std::cout, g);
+\end{lstlisting}
+
+The third alternative is to use enable\_if to wrap the return type of the function. This implementation is only slightly different (the default argument does not make sense for a return type). Here is how it looks:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+typename std::enable_if<uses_write_v<T>>::type serialize(
+	std::ostream& os, T const& value)
+{
+	value.write(os);
+}
+
+template <typename T>
+typename std::enable_if<!uses_write_v<T>>::type serialize(
+	std::ostream& os, T const& value)
+{
+	os << value;
+}
+\end{lstlisting}
+
+The return type, in this implementation, is defined if uses\_write\_v<T> is true. Otherwise, a substitution failure occurs and SFINAE takes place.
+
+Although in all these examples, the enable\_if type trait was used to enable SFINAE during the overload resolution for function templates, this type trait can also be used to restrict instantiations of class templates. In the following example, we have a class called integral\_wrapper that is supposed to be instantiated only with integral types, and a class called floating\_wrapper that is supposed to be instantiated only with floating-point types:
+
+\begin{lstlisting}[style=styleCXX]
+template <
+	typename T,
+	typename=typenamestd::enable_if_t<
+						 std::is_integral_v<T>>>
+struct integral_wrapper
+{
+	T value;
+};
+
+template <
+	typename T,
+	typename=typename std::enable_if_t<
+						 std::is_floating_point_v<T>>>
+struct floating_wrapper
+{
+	T value;
+};
+\end{lstlisting}
+
+Both these class templates have two type template parameters. The first one is called T, but the second one is anonymous and has a default argument. The value of this argument is defined or not with the help of the enable\_if type trait, based on the value of a Boolean expression.
+
+In this implementation, we can see:
+
+\begin{itemize}
+\item
+An alias template called std::enable\_if\_t, which is a convenient way to access the std::enable\_if<B, T>::type member type. This is defined as follows:
+
+\begin{lstlisting}[style=styleCXX]
+template <bool B, typename T = void>
+using enable_if_t = typename enable_if<B,T>::type;
+\end{lstlisting}
+
+\item
+Two variable templates, std::is\_integral\_v and std::is\_floating\_point\_v, which are convenient ways to access the data members, std::is\_integral<T>::value and std::is\_floating\_point<T>::value. The std::is\_integral and std::is\_floating\_point classes are standard type traits that check whether a type is an integral type or a floating-point type respectively.
+\end{itemize}
+
+The two wrapper class templates shown previously can be used as follows:
+
+\begin{lstlisting}[style=styleCXX]
+integral_wrapper w1{ 42 }; // OK
+integral_wrapper w2{ 42.0 }; // error
+integral_wrapper w3{ "42" }; // error
+
+floating_wrapper w4{ 42 }; // error
+floating_wrapper w5{ 42.0 }; // OK
+floating_wrapper w6{ "42" }; // error
+\end{lstlisting}
+
+Only two of these instantiations work, w1, because integral\_wrapper is instantiated with the int type, and w5, because floating\_wrapper is instantiated with the double type. All the others generate compiler errors.
+
+It should be pointed out that this code samples only work with the provided definitions of integral\_wrapper and floating\_wrapper in C++20. For previous versions of the standard, even the definitions of w1 and w5 would generate compiler errors because the compiler wasn’t able to deduce the template arguments. In order to make them work, we’d have to change the class templates to include a constructor, as follows:
+
+\begin{lstlisting}[style=styleCXX]
+template <
+	typename T,
+	typename=typenamestd::enable_if_t<
+						 std::is_integral_v<T>>>
+struct integral_wrapper
+{
+	T value;
+	
+	integral_wrapper(T v) : value(v) {}
+};
+
+template <
+	typename T,
+	typename=typename std::enable_if_t<
+						 std::is_floating_point_v<T>>>
+struct floating_wrapper
+{
+	T value;
+	
+	floating_wrapper(T v) : value(v) {}
+};
+\end{lstlisting}
+
+Although enable\_if helps achieve SFINAE with simpler and more readable code, it’s still rather complicated. Fortunately, in C++17 there is a better alternative with constexpr if statements. Let’s explore this alternative next.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,217 @@
+In a nutshell, type traits are small class templates that contain a constant value whose value represents the answer to a question we ask about a type. An example of such a question is: is this type a floating-point type? The technique for building type traits that provide such information about types relies on template specialization: we define a primary template as well as one or more specializations.
+
+Let’s see how we can build a type trait that tells us, at compile-time, whether a type is a floating-point type:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+struct is_floating_point
+{
+	static const bool value = false;
+};
+
+template <>
+struct is_floating_point<float>
+{
+	static const bool value = true;
+};
+
+template <>
+struct is_floating_point<double>
+{
+	static const bool value = true;
+};
+
+template <>
+struct is_floating_point<long double>
+{
+	static const bool value = true;
+};
+\end{lstlisting}
+
+There are two things to notice here:
+
+\begin{itemize}
+\item
+We have defined a primary template as well as several full specializations, one for each type that is a floating-point type.
+
+\item
+The primary template has a static const Boolean member initialized with the false value; the full specializations set the value of this member to true.
+\end{itemize}
+
+There is nothing more to building a type trait than this. is\_floating\_point<T> is a type trait that tells us whether a type is a floating-point type or not. We can use it as follows:
+
+\begin{lstlisting}[style=styleCXX]
+int main()
+{
+	static_assert(is_floating_point<float>::value);
+	static_assert(is_floating_point<double>::value);
+	static_assert(is_floating_point<long double>::value);
+	static_assert(!is_floating_point<int>::value);
+	static_assert(!is_floating_point<bool>::value);
+}
+\end{lstlisting}
+
+This proves that we have built the type trait correctly. But it does not show a real use-case scenario. For this type trait to be really useful, we need to use it at compile-time to do something with the information it provides. 
+
+Let’s suppose we want to build a function that does something with a floating-point value. There are multiple floating-point types, such as float, double, and long double. For us to avoid writing multiple implementations, we would build this as a template function. However, that means we could actually pass other types as template arguments, so we need a way to prevent that. A simple solution is to use the static\_assert() statement we saw earlier and produce an error should the user supply a value that is not a floating-point value. This can look as follows:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+void process_real_number(T const value)
+{
+	static_assert(is_floating_point<T>::value);
+	std::cout << "processing a real number: " << value
+			  << '\n';
+}
+int main()
+{
+	process_real_number(42.0);
+	process_real_number(42); // error:
+	// static assertion failed
+}
+\end{lstlisting}
+
+This is a really simple example but it demonstrates the use of type traits to do conditional compilation. There are other approaches than using static\_assert() and we will explore them throughout this chapter. For the time being, let’s look at a second example.
+
+Suppose we have classes that define operations for writing to an output stream. This is basically a form of serialization. However, some support this with an overloaded operator<{}<, others with the help of a member function called write. The following listing shows two such classes:
+
+\begin{lstlisting}[style=styleCXX]
+struct widget
+{
+	int id;
+	std::string name;
+	
+	std::ostream& write(std::ostream& os) const
+	{
+		os << id << ',' << name << '\n';
+		return os;
+	}
+};
+
+struct gadget
+{
+	int id;
+	std::string name;
+	
+	friend std::ostream& operator <<(std::ostream& os,
+	                                 gadget const& o);
+};
+
+std::ostream& operator <<(std::ostream& os,
+gadget const& o)
+{
+	os << o.id << ',' << o.name << '\n';
+	return os;
+}
+\end{lstlisting}
+
+In this example, the widget class contains a member function, write. However, for the gadget class, the stream operator, <{}<, is overloaded for the same purpose. We can write the following code using these classes:
+
+\begin{lstlisting}[style=styleCXX]
+widget w{ 1, "one" };
+w.write(std::cout);
+
+gadget g{ 2, "two" };
+std::cout << g;
+\end{lstlisting}
+
+However, our goal would be to define a function template that enables us to treat them the same way. In other words, instead of using either write or the << operator, we should be able to write the following:
+
+\begin{lstlisting}[style=styleCXX]
+serialize(std::cout, w);
+serialize(std::cout, g);
+\end{lstlisting}
+
+This brings up some questions. First, how would such a function template look, and second, how can we know whether a type provides a write method or has the << operator overloaded? The answer to the second question is type traits. We can build a type trait to help us answer this latter question at compile-time. This is how such a type trait may look:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+struct uses_write
+{
+	static constexpr bool value = false;
+};
+
+template <>
+struct uses_write<widget>
+{
+	static constexpr bool value = true;
+};
+\end{lstlisting}
+
+This is very similar to the type trait we defined previously. uses\_write tells us whether a type defines the write member function. The primary template sets the data member called value to false, but the full specialization for the widget class sets it to true. In order to avoid the verbose syntax uses\_write<T>::value, we can also define a variable template, reducing the syntax to the form uses\_write\_v<T>. This variable template will look as follows:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+inline constexpr bool uses_write_v = uses_write<T>::value;
+\end{lstlisting}
+
+To make the exercise simple, we’ll assume that the types that don’t provide a write member function overload the output stream operator. In practice, this is would not be the case, but for the sake of simplicity, we will build on this assumption.
+
+The next step in defining the function template serialize that provides a uniform API for serializing all classes is to define more class templates. However, these would follow the same path – a primary template that provides one form of serialization and a full specialization that provides a different form. Here is the code for it:
+
+\begin{lstlisting}[style=styleCXX]
+template <bool>
+struct serializer
+{
+	template <typename T>
+	static void serialize(std::ostream& os, T const& value)
+	{
+		os << value;
+	}
+};
+
+template<>
+struct serializer<true>
+{
+	template <typename T>
+	static void serialize(std::ostream& os, T const& value)
+	{
+		value.write(os);
+	}
+};
+\end{lstlisting}
+
+The serializer class template has a single template parameter, which is a non-type template parameter. It is also an anonymous template parameter because we don’t use it anywhere in the implementation. This class template contains a single member function.
+It is actually a member function template with a single type template parameter. This parameter defines the type of value we would serialize. The primary template uses the << operator to output the value to the provided stream. On the other hand, the full specialization of the serializer class template uses the member function write to do the same. Notice that we fully specialize the serializer class template and not the serialize member function template.
+
+The only thing left now is to implement the desired free function serialize.
+Its implementation will be based on the serializer<T>::serialize function.
+Let’s see how:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+void serialize(std::ostream& os, T const& value)
+{
+	serializer<uses_write_v<T>>::serialize(os, value);
+}
+\end{lstlisting}
+
+The signature of this function template is the same as the one of the serialize member function from the serializer class template. The selection between the primary template and the full specialization is done with the help of the variable template uses\_write\_v, which provides a convenient way to access the value data member of the uses\_write type trait.
+
+In these examples, we have seen how to implement type traits and use the information they provide at compile-time to either impose restrictions on types or select between one implementation or the other. A similar purpose has another metaprogramming technique called SFINAE, which we will cover next.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

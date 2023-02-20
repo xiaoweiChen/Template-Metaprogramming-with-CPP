@@ -1,0 +1,168 @@
+A C++17 feature makes SFINAE much easier. It’s called constexpr if and it’s a compile-time version of the if statement. It helps replace complex template code with simpler versions. Let’s start by looking at a C++17 implementation of the serialize function that can uniformly serialize both widgets and gadgets:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+void serialize(std::ostream& os, T const& value)
+{
+	if constexpr (uses_write_v<T>)
+		value.write(os);
+	else
+		os << value;
+}
+\end{lstlisting}
+
+The syntax for constexpr if is if constexpr(condition). The condition must be a compile-time expression. There is no short-circuit logic performed when evaluating the expression. This means that if the expression has the form a \&\& b or a || b, then both a and b must be well-formed.
+
+constexpr if enables us to discard a branch, at compile-time, based on the value of the expression. In our example, when the uses\_write\_v variable is true, the else branch is discarded, and the body of the first branch is retained. Otherwise, the opposite occurs. Therefore, we end up with the following specializations for the widget and gadget classes:
+
+\begin{lstlisting}[style=styleCXX]
+template<>
+void serialize<widget>(std::ostream & os,
+                      widget const & value)
+{
+	if constexpr(true)
+	{
+		value.write(os);
+	}
+}
+
+template<>
+void serialize<gadget>(std::ostream & os,
+                      gadget const & value)
+{
+	if constexpr(false)
+	{
+	}
+	else
+	{
+		os << value;
+	}
+}
+\end{lstlisting}
+
+Of course, this code is likely to be further simplified by the compiler. Therefore, eventually, these specializations would simply look like the following:
+
+\begin{lstlisting}[style=styleCXX]
+template<>
+void serialize<widget>(std::ostream & os,
+                       widget const & value)
+{
+	value.write(os);
+}
+
+template<>
+void serialize<gadget>(std::ostream & os,
+					   gadget const & value)
+{
+	os << value;
+}
+\end{lstlisting}
+
+The end result is the same as the one we achieved with SFINAE and enable\_if, but the actual code we wrote here was simpler and easier to understand.
+
+constexpr if is a great tool for simplifying code and we actually saw it earlier in Chapter 3, Variadic Templates, in the Parameter packs paragraph, when we implemented a function called sum. This is shown again here:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T, typename... Args>
+T sum(T a, Args... args)
+{
+	if constexpr (sizeof...(args) == 0)
+		return a;
+	else
+		return a + sum(args...);
+}
+\end{lstlisting}
+
+In this example, constexpr if helps us to avoid having two overloads, one for the general case and one for ending the recursion. Another example presented already in this book where constexpr if can simplify the implementation is the factorial function template from Chapter 4, Advanced Template Concepts, in the Exploring template recursion section. That function looked as follows:
+
+\begin{lstlisting}[style=styleCXX]
+template <unsigned int n>
+constexpr unsigned int factorial()
+{
+	return n * factorial<n - 1>();
+}
+
+template<>
+constexpr unsigned int factorial<1>() { return 1; }
+
+template<>
+constexpr unsigned int factorial<0>() { return 1; }
+\end{lstlisting}
+
+With constexpr if, we can replace all this with a single template and let the compiler take care of providing the right specializations. The C++17 version of this function may look as follows:
+
+\begin{lstlisting}[style=styleCXX]
+template <unsigned int n>
+constexpr unsigned int factorial()
+{
+	if constexpr (n > 1)
+		return n * factorial<n - 1>();
+	else
+		return 1;
+}
+\end{lstlisting}
+
+The constexpr if statements can be useful in many situations. The last example presented in this section is a function template called are\_equal, which determines whether the two supplied arguments are equal or not. Typically, you’d think that using operator== should be enough to determine whether two values are equal or not. That is true in most cases, except for floating-point values. Because only some of the floatingpoint numbers can be stored without a precision loss (numbers like 1, 1.25, 1.5, and anything else where the fractional part is an exact sum of inverse powers of 2) we need to take special care when comparing floating-point numbers. Usually, this is solved by ensuring that the difference between two floating-point values is less than some threshold. Therefore, a possible implementation for such a function could be as follows:
+
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+bool are_equal(T const& a, T const& b)
+{
+	if constexpr (std::is_floating_point_v<T>)
+		return std::abs(a - b) < 0.001;
+	else
+		return a == b;
+}
+\end{lstlisting}
+
+When the T type is a floating-point type, we compare the absolute value of the difference of the two numbers with the selected threshold. Otherwise, we fall back to using operator==. This enables us to use this function not just with arithmetic types, but also any other type for which the equality operator is overloaded.
+
+\begin{lstlisting}[style=styleCXX]
+are_equal(1, 1); // OK
+are_equal(1.999998, 1.999997); // OK
+are_equal(std::string{ "1" }, std::string{ "1" }); // OK
+are_equal(widget{ 1, "one" }, widget{ 1, "two" }); // error
+\end{lstlisting}
+
+We are able to call the are\_equal function template with arguments of type int, double, and std::string. However, attempting to do the same with values of the widget type will trigger a compiler error, because the == operator is not overloaded for this type.
+
+So far in this chapter, we have seen what type traits are as well as different ways to perform conditional compilation. We have also seen some of the type traits available in the standard library. In the second part of this chapter, we will explore what the standard has to offer with regard to type traits.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
