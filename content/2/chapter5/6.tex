@@ -1,3 +1,221 @@
+
+In the previous section of the chapter, we have explored the various type traits that the standard library provides. It is difficult and unnecessary to find examples for each and every type trait. However, it is worth showcasing some examples where multiple type traits can be used for solving a problem. We will do this next.
+
 \subsubsubsection{5.6.1\hspace{0.2cm}Implementing a copy algorithm}
 
+The first example problem we will take a look at is a possible implementation for the std::copy standard algorithm (from the <algorithm> header). Keep in mind that what we will see next is not the actual implementation but a possible one that helps us learn more about the use of type traits. The signature of this algorithm is as follows:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename InputIt, typename OutputIt>
+constexpr OutputIt copy(InputIt first, InputIt last,
+						OutputIt d_first);
+\end{lstlisting}
+
+As a note, this function is constexpr only in C++20, but we can discuss it in this context. What it does is copy all the elements in the range [first, last) to another range that begins with d\_first. There is also an overload that takes an execution policy, and a version, std::copy\_if, that copies all the elements that match a predicate, but these are not important for our example. A straightforward implementation of this function is the following:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename InputIt, typename OutputIt>
+constexpr OutputIt copy(InputIt first, InputIt last,
+						OutputIt d_first)
+{
+	while (first != last)
+	{
+		*d_first++ = *first++;
+	}
+	return d_first;
+}
+\end{lstlisting}
+
+However, there are cases when this implementation can be optimized by simply copying memory. However, there are some conditions that must be met for this purpose:
+
+\begin{itemize}
+\item
+Both iterator types, InputIt and OutputIt, must be pointers.
+
+\item
+Both template parameters, InputIt and OutputIt, must point to the same type (ignoring cv-qualifiers).
+
+\item
+The type pointed by InputIt must have a trivial copy assignment operator.
+\end{itemize}
+
+We can check these conditions with the following standard type traits:
+
+\begin{itemize}
+\item
+std::is\_same (and the std::is\_same\_v variable) to check that two types are the same.
+
+\item
+std::is\_pointer (and the std::is\_pointer\_v variable) to check that a type is a pointer type.
+
+\item
+std::is\_trivially\_copy\_assignable (and the std::is\_trivially\_copy\_assignable\_v variable) to check whether a type has a trivial copy assignment operator.
+
+\item
+std::remove\_cv (and the std::remove\_cv\_t alias template) to remove cv-qualifiers from a type.
+\end{itemize}
+
+Let’s see how we can implement this. First, we need to have a primary template with the generic implementation, and then a specialization for pointer types with the optimized implementation. We can do this using class templates with member function templates as shown next:
+
+\begin{lstlisting}[style=styleCXX]
+namespace detail
+{
+	template <bool b>
+	struct copy_fn
+	{
+		template<typename InputIt, typename OutputIt>
+		constexpr static OutputIt copy(InputIt first,
+										InputIt last,
+										OutputIt d_first)
+		{
+			while (first != last)
+			{
+				*d_first++ = *first++;
+			}
+			return d_first;
+		}
+	};
+
+	template <>
+	struct copy_fn<true>
+	{
+		template<typename InputIt, typename OutputIt>
+		constexpr static OutputIt* copy(
+			InputIt* first, InputIt* last,
+			OutputIt* d_first)
+		{
+			std::memmove(d_first, first,
+						(last - first) * sizeof(InputIt));
+			return d_first + (last - first);
+		}
+	};
+}
+\end{lstlisting}
+
+To copy memory between a source and a destination we use std::memmove here, which copies data even if objects overlap. These implementations are provided in a namespace called detail, because they are implementation details that are used in turn by the copy function and not directly by the user. The implementation of this generic copy algorithm could be as follows:
+
+\begin{lstlisting}[style=styleCXX]
+template<typename InputIt, typename OutputIt>
+constexpr OutputIt copy(InputIt first, InputIt last,
+OutputIt d_first)
+{
+	using input_type = std::remove_cv_t<
+		typename std::iterator_traits<InputIt>::value_type>;
+	using output_type = std::remove_cv_t<
+		typename std::iterator_traits<OutputIt>::value_type>;
+		
+	constexpr bool opt =
+		std::is_same_v<input_type, output_type> &&
+		std::is_pointer_v<InputIt> &&
+		std::is_pointer_v<OutputIt> &&
+		std::is_trivially_copy_assignable_v<input_type>;
+		
+	return detail::copy_fn<opt>::copy(first, last, d_first);
+}
+\end{lstlisting}
+
+You can see here that the decision to select one specialization or the other is based on a constexpr Boolean value that is determined using the aforementioned type traits. Examples of using this copy function are shown in the next snippet:
+
+\begin{lstlisting}[style=styleCXX]
+std::vector<int> v1{ 1, 2, 3, 4, 5 };
+std::vector<int> v2(5);
+
+// calls the generic implementation
+copy(std::begin(v1), std::end(v1), std::begin(v2));
+
+int a1[5] = { 1,2,3,4,5 };
+int a2[5];
+
+// calls the optimized implementation
+copy(a1, a1 + 5, a2);
+\end{lstlisting}
+
+Keep in mind that this is not the real definition of the generic algorithm copy you will find in standard library implementations, which are further optimized. However, this was a good example to demonstrate how to use type traits for a real-world problem.
+
+For simplicity, I have defined the copy function in what appears to be the global namespace. This is a bad practice. In general, code, especially in libraries, is grouped in namespaces. In the source code on GitHub that accompanies the book, you will find this function defined in a namespace called n520 (this is just a unique name, nothing relevant to the topic). When calling the copy function that we have defined, we would actually need to use the fully qualified name (that includes the namespace name) such as the following:
+
+\begin{lstlisting}[style=styleCXX]
+n520::copy(std::begin(v1), std::end(v1), std::begin(v2));
+\end{lstlisting}
+
+Without this qualification, a process called Argument-Dependent Lookup (ADL) would kick in. This would result in resolving the call to copy to the std::copy function because the arguments we pass are found in the std namespace. You can read more about ADL at \url{https://en.cppreference.com/w/cpp/language/adl}.
+
+Now, let’s look at another example.
+
 \subsubsubsection{5.6.2\hspace{0.2cm}Building a homogenous variadic function template}
+
+For the second example, we want to build a variadic function template that can only take arguments of the same type or types that can be implicitly converted to a common one.
+Let’s start with the following skeleton definition:
+
+\begin{lstlisting}[style=styleCXX]
+template<typename... Ts>
+void process(Ts&&... ts) {}
+\end{lstlisting}
+
+The problem with this is that all of the following function calls work (keep in mind that the body of this function is empty so there will be no errors due to performing operations unavailable on some types):
+
+\begin{lstlisting}[style=styleCXX]
+process(1, 2, 3);
+process(1, 2.0, '3');
+process(1, 2.0, "3");
+\end{lstlisting}
+
+In the first example, we pass three int values. In the second example, we pass an int, a double, and a char; both int and char are implicitly convertible to double, so this should be all right. However, in the third example, we pass an int, a double, and a char const*, and this last type is not implicitly convertible to either int or double. Therefore, this last call is supposed to trigger a compiler error but does not.
+
+In order to do so, we need to ensure that when a common type for the function arguments is not available, the compiler will generate an error. To do so, we can use a static\_assert statement or std::enable\_if and SFINAE. However, we do need to figure out whether a common type exists or not. This is possible with the help of the std::common\_type type trait.
+
+The std::common\_type is a metafunction that defines the common type among all of its type arguments that all the types can be implicitly converted to. Therefore std::common\_type<int, double, char>::type will alias the double type. Using this type trait, we can build another type trait that tells us whether a common type exists. A possible implementation is as follows:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename, typename... Ts>
+struct has_common_type : std::false_type {};
+template <typename... Ts>
+struct has_common_type<
+		std::void_t<std::common_type_t<Ts...>>,
+		Ts...>
+	: std::true_type {};
+	
+template <typename... Ts>
+constexpr bool has_common_type_v =
+	sizeof...(Ts) < 2 ||
+	has_common_type<void, Ts...>::value;
+\end{lstlisting}
+
+You can see in this snippet that we base the implementation on several other type traits. First, there is the std::false\_type and std::true\_type pair. These are type aliases for std::bool\_constant<false> and std::bool\_constant<true> respectively. The std::bool\_constant class is available in C++17 and is, in turn, an alias template for a specialization of the std::integral\_constant class for the bool type. This last class template wraps a static constant of the specified type. Its conceptual implementation looks as follows (although some operations are also provided):
+
+\begin{lstlisting}[style=styleCXX]
+template<class T, T v>
+struct integral_constant
+{
+	static constexpr T value = v;
+	using value_type = T;
+};
+\end{lstlisting}
+
+This helps us simplify the definition of type traits that need to define a Boolean compiletime value, as we saw in several cases in this chapter.
+
+A third type trait used in the implementation of the has\_common\_type class is std::void\_t. This type trait defines a mapping between a variable number of types and the void type. We use this to build a mapping between the common type, if one exists, and the void type. This enables us to leverage SFINAE for the specialization of the has\_common\_type class template.
+
+Finally, a variable template called has\_common\_type\_v is defined to ease the use of the has\_common\_type trait.
+
+All these can be used to modify the definition of the process function template to ensure it only allows arguments of a common type. A possible implementation is shown next:
+
+\begin{lstlisting}[style=styleCXX]
+template<typename... Ts,
+		 typename = std::enable_if_t<
+						has_common_type_v<Ts...>>>
+void process(Ts&&... ts)
+{ }
+\end{lstlisting}
+
+As a result of this, calls such as process(1, 2.0, "3") will produce a compiler error because there is no overloaded process function for this set of arguments.
+
+As previously mentioned, there are different ways to use the has\_common\_type trait to achieve the defined goal. One of these, using std::enable\_if, was shown here, but we can also use static\_assert. However, a much better approach can be taken with the use of concepts, which we will see in the next chapter.
+
+
+
+
+
+
+
+

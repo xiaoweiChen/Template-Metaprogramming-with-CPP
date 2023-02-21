@@ -148,6 +148,7 @@ The next category of type traits we explore allows us to query properties of typ
 The type traits that enable us to query properties of types are the following:
 
 \begin{table}[H]
+\centering
 	\begin{tabular}{|l|l|l|}
 		\hline
 		\textbf{Name} & \textbf{C++ Version} & \textbf{Description}                                                                                                      \\ \hline
@@ -156,10 +157,433 @@ The type traits that enable us to query properties of types are the following:
 	\end{tabular}
 \end{table}
 
+\begin{table}[H]
+\centering
+	\begin{tabular}{|l|l|l|}
+		\hline
+		\textbf{Name} &
+		\textbf{C++ Version} &
+		\textbf{Description} \\ \hline
+		is\_trivial &
+		C++11 &
+		\begin{tabular}[c]{@{}l@{}}Checks whether a type is a trivial type or\\ a cv-qualified variant. The following are trivial types:\\ ·Scalar types or arrays of a scalar type\\ ·Trivially copyable classes with a trivaial default\\   constructor or arrarys of such a class.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}is\_trivially\_\\ copyable\end{tabular} &
+		C++11 &
+		\begin{tabular}[c]{@{}l@{}}Checks whether a type is trivially copyable. The \\ following are trivially copyable types:\\ ·Scalar types or arrays of a scalar type\\ ·Trivially copyable classes or arrays of such a class\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}is\_standard\_\\ layout\end{tabular} &
+		C++11 &
+		\begin{tabular}[c]{@{}l@{}}Checks whether a type is a standard layout type or a\\ cv-qualified variant. The following are such types:\\ ·Scalar types or arrays of a scalar type\\ ·Standard-layout classes or arrays of such a class\end{tabular} \\ \hline
+		is\_empty &
+		C++11 &
+		\begin{tabular}[c]{@{}l@{}}Checks whether a type is an empty type. An empty type is\\ a class type(that is not a union) and has no non-static\\ data members(except for bit fields of size 0), no virtual\\ functions, \\ no virtual base classes, and no non-empty base classes.\end{tabular} \\ \hline
+		is\_polymorphic &
+		C++11 &
+		\begin{tabular}[c]{@{}l@{}}Checks whether a type is a polymorphic type. A polymorphic\\ type is a class type(that is not a union) that inherits at\\ least one virtual function.\end{tabular} \\ \hline
+		is\_abstract &
+		C++11 &
+		\begin{tabular}[c]{@{}l@{}}Checks whether a type is an abstract type. An abstract type\\ is a class type(that is not a union) that inherits at least\\ one virtual pure function.\end{tabular} \\ \hline
+		is\_final &
+		C++14 &
+		\begin{tabular}[c]{@{}l@{}}Checks whether a type is a class type declared with the \\ final specifier.\end{tabular} \\ \hline
+		is\_aggregate &
+		C++17 &
+		Checks whether a type is an aggregate type. \\ \hline
+		is\_signed &
+		C++11 &
+		\begin{tabular}[c]{@{}l@{}}Checks whether a type is a floating-point type or a signed \\ integral type.\end{tabular} \\ \hline
+	\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+	\begin{tabular}{|l|l|l|}
+		\hline
+		\textbf{Name} &
+		\textbf{C++ Version} &
+		\textbf{Description} \\ \hline
+		is\_unsigned &
+		C++11 &
+		\begin{tabular}[c]{@{}l@{}}Checks whether a type is an unsigned integral type\\ or the bool type.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}is\_bounded\_\\ array\end{tabular} &
+		C++20 &
+		\begin{tabular}[c]{@{}l@{}}Checks whether a type is an array type of a known\\ bound(such as int{[}5{]})\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}is\_unbounded\_\\ array\end{tabular} &
+		C++20 &
+		\begin{tabular}[c]{@{}l@{}}Checks wheterh a type is an array type of an unknown\\ bound(such as int{[}{]}).\end{tabular} \\ \hline
+		is\_scoped\_enum &
+		C++23 &
+		Checks whether a type is a scoped enumeration type. \\ \hline
+		\begin{tabular}[c]{@{}l@{}}has\_unique\_\\ object\_\\ representation\end{tabular} &
+		C++17 &
+		\begin{tabular}[c]{@{}l@{}}Checks whether a type is trivially copyable, and any\\ two objects of this type having the same value also\\ have the same object representation.\end{tabular} \\ \hline
+	\end{tabular}
+\end{table}
+
+\begin{center}
+Table 5.2
+\end{center}
+
+Although most of these are probably straightforward to understand, there are two that seem the same at a first glance. These are is\_trivial and is\_trivially\_copyable. These both are true for scalar types or arrays of scalar types. They also are true for classes that are trivially copyable or arrays of such classes but is\_trivial is true only for copyable classes that have a trivial default constructor.
+
+According to the paragraph §11.4.4.1 in the C++ 20 standard, a default constructor is trivial if it is not user-provided, and the class has no virtual member functions, no virtual base classes, no non-static members with default initializers, every direct base of it has a trivial default constructor, and every non-static member of a class type also has a trivial default constructor. To understand this better, let’s look at the following example:
+
+\begin{lstlisting}[style=styleCXX]
+struct foo
+{
+	int a;
+};
+
+struct bar
+{
+	int a = 0;
+};
+
+struct tar
+{
+	int a = 0;
+	tar() : a(0) {}
+};
+
+std::cout << std::is_trivial_v<foo> << '\n'; // true
+std::cout << std::is_trivial_v<bar> << '\n'; // false
+std::cout << std::is_trivial_v<tar> << '\n'; // false
+
+std::cout << std::is_trivially_copyable_v<foo>
+          << '\n'; // true
+std::cout << std::is_trivially_copyable_v<bar>
+          << '\n'; // true
+std::cout << std::is_trivially_copyable_v<tar>
+          << '\n'; // true
+\end{lstlisting}
+
+In this example, there are three similar classes. All three of them, foo, bar, and tar, are trivially copyable. However, only the foo class is a trivial class, because it has a trivial default constructor. The bar class has a non-static member with a default initializer, and the tar class has a user-defined constructor, and this makes them non-trivial.
+
+Apart from trivial copy-ability, there are other operations that we can query for with the help of other type traits. We will see these in the following section.
+
 \subsubsubsection{5.5.3\hspace{0.2cm}Querying supported operations}
+
+The following set of type traits helps us to query supported operations:
+
+\begin{table}[H]
+\centering
+	\begin{tabular}{|l|l|}
+		\hline
+		\textbf{Name} & \textbf{Description} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}is\_constructible\\ is\_trivially\_constructible\\ is\_nothrow\_constructible\end{tabular} &
+		\begin{tabular}[c]{@{}l@{}}Checks whether a type has a \\ constructor that can take specific\\ arguments.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}is\_default\_constructible\\ is\_trivially\_default\_constructible\\ is\_nothrow\_default\_constructible\end{tabular} &
+		\begin{tabular}[c]{@{}l@{}}Check whether a type has a default\\ constructor.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}is\_copy\_constructible\\ is\_tribially\_copy\_constructible\\ is\_nothrow\_copy\_constructible\end{tabular} &
+		\begin{tabular}[c]{@{}l@{}}Check whether a type has a copy\\ constructor.\end{tabular} \\ \hline
+	\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+	\begin{tabular}{|l|l|}
+		\hline
+		\textbf{Name} &
+		\textbf{Description} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}is\_move\_constructible\\ is\_trivially\_move\_constructible\\ is\_nothrow\_move\_constructible\end{tabular} &
+		\begin{tabular}[c]{@{}l@{}}Check whether a type has a move\\ constructor.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}is\_assignable\\ is\_trivially\_assignable\\ is\_nothrow\_assignable\end{tabular} &
+		\begin{tabular}[c]{@{}l@{}}Check whether a type has an assignment\\ operator for a specific argumnet.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}is\_copy\_assignable\\ is\_trivially\_copy\_assignable\\ is\_nothrow\_copy\_assignable\end{tabular} &
+		\begin{tabular}[c]{@{}l@{}}Check whether a type a copy assignment\\ operator.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}is\_move\_assignable\\ is\_trivially\_move\_assigneable\\ is\_nothrow\_move\_assignable\end{tabular} &
+		\begin{tabular}[c]{@{}l@{}}Check whether a type has a move\\ assignment operator.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}is\_destructible\\ is\_trivially\_destructible\\ is\_nothrow\_destructible\end{tabular} &
+		\begin{tabular}[c]{@{}l@{}}Check whether a type has a non-deleted\\ destructor.\end{tabular} \\ \hline
+		has\_virtual\_destructor &
+		\begin{tabular}[c]{@{}l@{}}Checks whether a type has a virtual\\ destructor.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}is\_swappable\_with\\ is\_swappable\\ is\_nothrow\_swappable\_with\\ is\_nothrow\_swappable\end{tabular} &
+		\begin{tabular}[c]{@{}l@{}}Check whether objects of the same type\\ or objects of two different types can\\ be swapped.\end{tabular} \\ \hline
+	\end{tabular}
+\end{table}
+
+\begin{center}
+Table 5.3
+\end{center}
+
+Except for the last sub-set, which was introduced in C++17, the others are available in C++11. Each kind of these type traits has multiple variants, including ones for checking operations that are trivial or declared as non-throwing with the noexcept specifier.
+
+Now let’s look at type traits that allow us to query for relationships between types.
 
 \subsubsubsection{5.5.4\hspace{0.2cm}Querying type relationships}
 
+In this category, we can find several type traits that help to query relationships between types. These type traits are as follows:
+
+\begin{table}[H]
+\centering
+	\begin{tabular}{|l|l|l|}
+		\hline
+		\textbf{Name} &
+		\textbf{C++ Version} &
+		\textbf{Description} \\ \hline
+		is\_same &
+		C++11 &
+		\begin{tabular}[c]{@{}l@{}}Checks whether two types are the\\ same, including possible cv-qualifiers.\end{tabular} \\ \hline
+		is\_base\_of &
+		C++11 &
+		\begin{tabular}[c]{@{}l@{}}Checks whether one types is derived\\ from another type.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}is\_convertible\\ is\_nothrow\_convertible\end{tabular} &
+		\begin{tabular}[c]{@{}l@{}}C++11\\ C++14\end{tabular} &
+		\begin{tabular}[c]{@{}l@{}}Check whether a type can be converted \\ to another type.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}is\_invocable\\ is\_invocable\_r\\ is\_nothrow\_invocable\\ is\_nothrow\_invocable\_r\end{tabular} &
+		C++17 &
+		\begin{tabular}[c]{@{}l@{}}Check whether a type can be invoked\\ with the specified argument types.\end{tabular} \\ \hline
+		is\_layout\_compatible &
+		C++20 &
+		\begin{tabular}[c]{@{}l@{}}Checks whether two types have compatible\\ layouts. Two classes are layout-compatible \\ if they are the same type(ignoring cv-qualifiers),\\ or their common initial sequence contains all\\ the non-static data members and bit fields or are\\ enumerations with the same underlying type.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}is\_pointer\_\\ inconvertible\_base \_of\end{tabular} &
+		C++20 &
+		\begin{tabular}[c]{@{}l@{}}Checks whether a type is a pointer-inconvertible\\ base of another type.\end{tabular} \\ \hline
+	\end{tabular}
+\end{table}
+
+\begin{center}
+Table 5.4
+\end{center}
+
+Of these type traits, perhaps the most used one is std::is\_same. This type trait is very useful in determining whether two types are the same. Keep in mind that this type trait takes into account the const and volatile qualifiers; therefore, int and int const, for instance, are not the same type.
+
+We can use this type trait to extend the implementation of the as\_string function shown earlier. Remember that if you called it with the arguments true or false it prints 1 or 0, and not true/false. We can add an explicit check for the bool type and return a string containing one of these two values, shown as follows:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+std::string as_string(T value)
+{
+	if constexpr (std::is_null_pointer_v<T>)
+		return "null";
+	else if constexpr (std::is_same_v<T, bool>)
+		return value ? "true" : "false";
+	else if constexpr (std::is_arithmetic_v<T>)
+		return std::to_string(value);
+	else
+		static_assert(always_false<T>);
+}
+
+std::cout << as_string(true) << '\n'; // prints true
+std::cout << as_string(false) << '\n'; // prints false
+\end{lstlisting}
+
+All the type traits seen so far are used to query some kind of information about types. In the next sections, we will see type traits that perform modifications on types.
+
 \subsubsubsection{5.5.5\hspace{0.2cm}Modifying cv-specifiers, references, pointers, or a sign}
 
+The type traits that are performing transformations on types are also called metafunctions. These type traits provided a member type (typedef) called type that represents the transformed type. This category of type traits includes the following:
+
+\begin{table}[H]
+\centering
+	\begin{tabular}{|l|l|}
+		\hline
+		\textbf{Name} &
+		\textbf{Description} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}add\_cv\\ add\_const\\ add\_volatile\end{tabular} &
+		\begin{tabular}[c]{@{}l@{}}Add the const, volatile, or both specifiers\\ to a type.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}remove\_cv\\ remove\_const\\ remove\_volatile\end{tabular} &
+		\begin{tabular}[c]{@{}l@{}}Remove the const, volatile, or both specifiers\\ from a type.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}add\_lvalue\_reference\\ add\_rvalue\_reference\end{tabular} &
+		Add an lvalue or rvalue reference to a type. \\ \hline
+		remove\_reference &
+		\begin{tabular}[c]{@{}l@{}}Removes a reference(either lvalue or rvalue)\\ from a type.\end{tabular} \\ \hline
+	\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+	\begin{tabular}{|l|l|}
+		\hline
+		\textbf{Name}                                                                 & \textbf{Description}                          \\ \hline
+		remove\_cvref &
+		\begin{tabular}[c]{@{}l@{}}Removes the const and volatile specifiers as well\\ as lvalue or rvalue references from a type. It\\ combines the remove\_cv and remove\_reference traits.\end{tabular} \\ \hline
+		add\_pointer                                                                  & Adds a pointer to a type.                     \\ \hline
+		remove\_pointer                                                               & Removes a pointer from a type.                \\ \hline
+		\begin{tabular}[c]{@{}l@{}}make\_signed\\ make\_unsigned\end{tabular} &
+		\begin{tabular}[c]{@{}l@{}}Make an intrgral type(except for bool) or an\\ enumeration type either signed or unsigned. The\\ supported intrgral types are short, int, long,\\ long long, char, wchar\_t, char8\_t, char16\_t, and\\ char32\_t.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}remove\_extent\\ remove\_all\_extents\end{tabular} & Remove one or all extents from an array type. \\ \hline
+	\end{tabular}
+\end{table}
+
+\begin{center}
+Table 5.5
+\end{center}
+
+With the exception of remove\_cvref, which was added in C++20, all the other type traits listed in this table are available in C++11. These are not all the metafunctions from the standard library. More are listed in the next section.
+
 \subsubsubsection{5.5.6\hspace{0.2cm}Miscellaneous transformations}
+
+Apart from the metafunctions previously listed, there are other type traits performing type transformations. The most important of these are listed in the following table:
+
+\begin{table}[H]
+\centering
+	\begin{tabular}{|l|l|l|}
+		\hline
+		\textbf{Name} &
+		\textbf{C++ Version} &
+		\textbf{Description} \\ \hline
+		enable\_if &
+		C++11 &
+		\begin{tabular}[c]{@{}l@{}}Enables the removal of a function overload or\\ template specialization from overload resolution.\end{tabular} \\ \hline
+		conditional &
+		C++11 &
+		\begin{tabular}[c]{@{}l@{}}Defines the member type called type to be one\\ of two possible types by selecting them based on\\ a compile-time Boolean condition.\end{tabular} \\ \hline
+		decay &
+		C++11 &
+		\begin{tabular}[c]{@{}l@{}}Applies transformations on a type(array-to-pointer\\ for array types, lvalue-to-rvalue for reference\\ types, and function-to-pointer to function types),\\ removes const and volatile qualifiers, and uses the\\ resulting member typedef type as its own member\\ typedef type.\end{tabular} \\ \hline
+		common\_type &
+		C++11 &
+		Determines the common type from a group of types. \\ \hline
+		common\_reference &
+		C++20 &
+		\begin{tabular}[c]{@{}l@{}}Determines the common reference type from a group\\ of types.\end{tabular} \\ \hline
+		underlaying\_type &
+		C++11 &
+		\begin{tabular}[c]{@{}l@{}}Determines the underlying type of an enumeration\\ type.\end{tabular} \\ \hline
+		void\_t &
+		C++17 &
+		\begin{tabular}[c]{@{}l@{}}A type alias mapping a sequence of types to the void\\ type.\end{tabular} \\ \hline
+		type\_identity &
+		C++20 &
+		\begin{tabular}[c]{@{}l@{}}Provides the member typedef type as an alias for\\ the type argument T.\end{tabular} \\ \hline
+	\end{tabular}
+\end{table}
+
+From this list, we have already discussed enable\_if. There are some other type traits here that are worth exemplifying. Let’s first look at std::decay and for this purpose, let’s consider the following slightly changed implementation of the as\_string function:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+std::string as_string(T&& value)
+{
+	if constexpr (std::is_null_pointer_v<T>)
+		return "null";
+	else if constexpr (std::is_same_v<T, bool>)
+		return value ? "true" : "false";
+	else if constexpr (std::is_arithmetic_v<T>)
+		return std::to_string(value);
+	else
+		static_assert(always_false<T>);
+}
+\end{lstlisting}
+
+The only change is the way we pass arguments to the function. Instead of passing by value, we pass by rvalue reference. If you remember from Chapter 4, Advanced Template Concepts, this is a forwarding reference. We can still make calls passing rvalues (such as literals) but passing lvalues will trigger compiler errors:
+
+\begin{lstlisting}[style=styleCXX]
+std::cout << as_string(true) << '\n'; // OK
+std::cout << as_string(42) << '\n'; // OK
+
+bool f = true;
+std::cout << as_string(f) << '\n'; // error
+
+int n = 42;
+std::cout << as_string(n) << '\n'; // error
+\end{lstlisting}
+
+The last two calls are triggering the static\_assert statement to fail. The actual type template arguments are bool\& and int\&. Therefore std::is\_same<bool, bool\&> will initialize the value member with false. Similarly, std::is\_arithmetic<int\&> will do the same. In order to evaluate these types, we need to ignore references and the const and volatile qualifiers. The type trait that helps us do so is std::decay, which performs several transformations, as described in the previous table. Its conceptual implementation is the following:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+struct decay
+{
+private:
+	using U = typename std::remove_reference_t<T>;
+public:
+	using type = typename std::conditional_t<
+		std::is_array_v<U>,
+		typename std::remove_extent_t<U>*,
+		typename std::conditional_t<
+			std::is_function<U>::value,
+			typename std::add_pointer_t<U>,
+			typename std::remove_cv_t<U>
+		>
+	>;
+};
+\end{lstlisting}
+
+From this snippet, we can see that std::decay is implemented with the help of other metafunctions, including std::conditional, which is key for selecting between one type or another based on a compile-time expression. Actually, this type trait is used multiple times, which is something you can do if you need to make a selection based on multiple conditions.
+
+With the help of std::decay, we can modify the implementation of the as\_string function, stripping reference, and cv-qualifiers:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+std::string as_string(T&& value)
+{
+	using value_type = std::decay_t<T>;
+	
+	if constexpr (std::is_null_pointer_v<value_type>)
+		return "null";
+	else if constexpr (std::is_same_v<value_type, bool>)
+		return value ? "true" : "false";
+	else if constexpr (std::is_arithmetic_v<value_type>)
+		return std::to_string(value);
+	else
+		static_assert(always_false<T>);
+}
+\end{lstlisting}
+
+By changing the implementation as shown here, we made the previous calls to as\_string that failed to compile without any more errors.
+
+In the implementation of std::decay we saw the repetitive use of std::conditional. This is a metafunction that is fairly easy to use and can help to simplify many implementations. In Chapter 2, Template Fundamentals, in the section Defining alias templates, we saw an example where we built a list type called list\_t. This had a member alias template called type that was aliasing either the template type T, if the size of the list was 1, or std::vector<T>, if it was higher. Let’s look at the snippet again:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T, size_t S>
+struct list
+{
+	using type = std::vector<T>;
+};
+
+template <typename T>
+struct list<T, 1>
+{
+	using type = T;
+};
+
+template <typename T, size_t S>
+using list_t = typename list<T, S>::type;
+\end{lstlisting}
+
+This implementation can be greatly simplified with the help of std::conditional as follows:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T, size_t S>
+using list_t =
+	typename std::conditional<S ==
+					1, T, std::vector<T>>::type;
+\end{lstlisting}
+
+There is no need to rely on class template specialization to define such a list type. The entire solution can be reduced to defining an alias template. We can verify this works as expected with some static\_assert statements, as follows:
+
+\begin{lstlisting}[style=styleCXX]
+static_assert(std::is_same_v<list_t<int, 1>, int>);
+static_assert(std::is_same_v<list_t<int, 2>,
+							std::vector<int>>);
+\end{lstlisting}
+
+Exemplifying the use of each of the standard type traits is beyond the scope of this book. However, the next section of this chapter provides more complex examples that require the use of several standard type traits.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
