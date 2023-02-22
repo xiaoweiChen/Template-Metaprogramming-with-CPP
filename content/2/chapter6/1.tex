@@ -1,0 +1,281 @@
+As briefly mentioned in the introduction to this chapter, there are some important benefits that concepts provide. Arguably, the most important ones are code readability and better error messages. Before we look at how to use concepts, let’s revisit an example we saw previously and see how it stands in relation to these two programming aspects:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+T add(T const a, T const b)
+{
+	return a + b;
+}
+\end{lstlisting}
+
+This simple function template takes two arguments and returns their sum. In fact, it does not return the sum, but the result of applying the plus operator to the two arguments. A user-defined type can overload this operator and perform some particular operation. The term sum only makes sense when we discuss mathematical types, such as integral types, floating-point types, the std::complex type, matrix types, vector types, etc.
+
+For a string type, for instance, the plus operator can mean concatenation. And for most types, its overloading does not make sense at all. Therefore, just by looking at the declaration of the function, without inspecting its body, we cannot really say what this function may accept as input and what it does. We can call this function as follows:
+
+\begin{lstlisting}[style=styleCXX]
+add(42, 1); // [1]
+add(42.0, 1.0); // [2]
+add("42"s, "1"s); // [3]
+add("42", "1"); // [4] error: cannot add two pointers
+\end{lstlisting}
+
+The first three calls are all good; the first call adds two integers, the second adds two double values, and the third concatenates two std::string objects. However, the fourth call will produce a compiler error because const char * is substituted for the T type template parameter, and the plus operator is not overloaded for pointer types.
+
+The intention for this add function template is to allow passing only values of arithmetic types, that is, integer and floating-point types. Before C++20, we could do this in several ways. One way is to use std::enable\_if and SFINAE, as we saw in the previous chapter. Here is such an implementation:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T,
+	typename = typename std::enable_if_t
+		<std::is_arithmetic_v<T>>>
+T add(T const a, T const b)
+{
+	return a + b;
+}
+\end{lstlisting}
+
+The first thing to notice here is that the readability has decreased. The second type template parameter is difficult to read and requires good knowledge of templates to understand. However, this time, both the calls on the lines marked with [3] and [4] are producing a compiler error. Different compilers are issuing different error messages. Here are the ones for the three major compilers:
+
+\begin{itemize}
+\item
+In VC++ 17, the output is:
+
+\begin{tcblisting}{commandshell={}}
+error C2672: 'add': no matching overloaded function found
+error C2783: 'T add(const T,const T)': could not deduce
+template argument for '<unnamed-symbol>'
+\end{tcblisting}
+
+\item
+In GCC 12, the output is:
+\begin{tcblisting}{commandshell={}}
+prog.cc: In function 'int main()':
+prog.cc:15:8: error: no matching function for call
+to 'add(std::__cxx11::basic_string<char>, std::__
+cxx11::basic_string<char>)'
+15 |         add("42"s, "1"s);
+   |       ~~~^~~~~~~~~~~~~
+prog.cc:6:6: note: candidate: 'template<class T, class> T
+add(T, T)'
+6 | T add(T const a, T const b)
+  |     ^~~
+prog.cc:6:6: note: template argument deduction/
+substitution failed:
+In file included from /opt/wandbox/gcc-head/include/
+c++/12.0.0/bits/move.h:57,
+                 from /opt/wandbox/gcc-head/include/
+c++/12.0.0/bits/nested_exception.h:40,
+                 from /opt/wandbox/gcc-head/include/
+c++/12.0.0/exception:154,
+                 from /opt/wandbox/gcc-head/include/
+c++/12.0.0/ios:39,
+                 from /opt/wandbox/gcc-head/include/
+c++/12.0.0/ostream:38,
+                 from /opt/wandbox/gcc-head/include/
+c++/12.0.0/iostream:39,
+                 from prog.cc:1:
+/opt/wandbox/gcc-head/include/c++/12.0.0/type_traits: In
+substitution of 'template<bool _Cond, class _Tp> using
+enable_if_t = typename std::enable_if::type [with bool _
+Cond = false; _Tp = void]':
+prog.cc:5:14: required from here
+/opt/wandbox/gcc-head/include/c++/12.0.0/type_traits:2603:11:
+error: no type named 'type' in 'struct std::enable_if<false, 
+void>'
+2603 | using enable_if_t = typename enable_if<_Cond, _Tp>::type;
+     |            ^~~~~~~~~~~
+\end{tcblisting}
+
+\item
+In Clang 13, the output is:
+\begin{tcblisting}{commandshell={}}
+prog.cc:15:5: error: no matching function for call to
+'add'
+    add("42"s, "1"s);
+    ^~~
+prog.cc:6:6: note: candidate template ignored:
+requirement 'std::is_arithmetic_v<std::string>' was not
+satisfied [with T = std::string]
+   T add(T const a, T const b)
+      ^
+\end{tcblisting}
+\end{itemize}
+
+The error message in GCC is very verbose, and VC++ doesn’t say what the reason for failing to match the template argument is. Clang does, arguably, a better job at providing an understandable error message.
+
+Another way to define restrictions for this function, prior to C++20, is with the help of a static\_assert statement, as shown in the following snippet:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+T add(T const a, T const b)
+{
+	static_assert(std::is_arithmetic_v<T>,
+				  "Arithmetic type required");
+	return a + b;
+}
+\end{lstlisting}
+
+With this implementation, however, we returned to the original problem that just by looking at the declaration of the function, we wouldn’t know what kind of parameters it would accept, provided that any restriction exists. The error messages, on the other hand, are as follows:
+
+\begin{itemize}
+\item
+In VC++ 17:
+
+\begin{tcblisting}{commandshell={}}
+error C2338: Arithmetic type required
+main.cpp(157): message : see reference to function
+template instantiation 'T add<std::string>(const T,const
+T)' being compiled
+     with
+     [
+         T=std::string
+     ]
+\end{tcblisting}
+
+\item
+In GCC 12:
+
+\begin{tcblisting}{commandshell={}}
+prog.cc: In instantiation of 'T add(T, T) [with T =
+std::__cxx11::basic_string<char>]':
+prog.cc:15:8: required from here
+prog.cc:7:24: error: static assertion failed: Arithmetic
+type required
+    7 | static_assert(std::is_arithmetic_v<T>,
+"Arithmetic type required");
+      |                         ~~~~~^~~~~~~~~~~~~~~~~~
+prog.cc:7:24: note: 'std::is_arithmetic_v<std::__
+cxx11::basic_string<char> >' evaluates to false
+\end{tcblisting}
+
+\item
+In Clang 13:
+
+\begin{tcblisting}{commandshell={}}
+prog.cc:7:5: error: static_assert failed due to
+requirement 'std::is_arithmetic_v<std::string>'
+"Arithmetic type required"
+     static_assert(std::is_arithmetic_v<T>, "Arithmetic
+type required");
+     ^ ~~~~~~~~~~~~~~~~~~~~~~~
+prog.cc:15:5: note: in instantiation of function template
+specialization 'add<std::string>' requested here
+    add("42"s, "1"s);
+    ^
+\end{tcblisting}
+\end{itemize}
+
+The use of the static\_assert statement results in similar error messages received regardless of the compiler.
+
+We can improve these two discussed aspects (readability and error messages) in C++20 by using constraints. These are introduced with the new requires keyword as follows:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+requires std::is_arithmetic_v<T>
+T add(T const a, T const b)
+{
+	return a + b;
+}
+\end{lstlisting}
+
+The requires keyword introduces a clause, called the requires clause, that defines the constraints on the template parameters. There are, actually, two alternative syntaxes: one when the requires clause follows the template parameter list, as seen previously, and one when the requires clause follows the function declaration, as shown in the next snippet:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+T add(T const a, T const b)
+requires std::is_arithmetic_v<T>
+{
+	return a + b;
+}
+\end{lstlisting}
+
+Choosing between these two syntaxes is a matter of personal preference. However, in both cases, the readability is much better than in the pre-C++20 implementations. You know just by reading the declaration that the T type template parameter must be of an arithmetic type. Also, this implies that the function is simply adding two numbers. You don’t really need to see the definition to know that. Let’s see how the error message changes when we call the function with invalid arguments:
+
+\begin{itemize}
+\item
+In VC++ 17:
+
+\begin{tcblisting}{commandshell={}}
+error C2672: 'add': no matching overloaded function found
+error C7602: 'add': the associated constraints are not
+satisfied
+\end{tcblisting}
+
+\item
+In GCC 12:
+
+\begin{tcblisting}{commandshell={}}
+prog.cc: In function 'int main()':
+prog.cc:15:8: error: no matching function for call
+to 'add(std::__cxx11::basic_string<char>, std::__cxx11::
+basic_string<char>)'
+  15 |    add("42"s, "1"s);
+     |     ~~~^~~~~~~~~~~~~
+prog.cc:6:6: note: candidate: 'template<class T> 
+requires is_arithmetic_v<T> T add(T, T)'
+  6  |    T add(T const a, T const b)
+     |      ^~~
+prog.cc:6:6: note: template argument deduction/substitution
+ failed:
+prog.cc:6:6: note: constraints not satisfied
+prog.cc: In substitution of 'template<class
+T> requires is_arithmetic_v<T> T add(T, T) [with T =
+std::__cxx11::basic_string<char>]':
+prog.cc:15:8: required from here
+prog.cc:6:6: required by the constraints of
+'template<class T> requires is_arithmetic_v<T> T add(T,
+T)'
+prog.cc:5:15: note: the expression 'is_arithmetic_v<T>
+[with T = std::__cxx11::basic_string<char, std::char_
+traits<char>, std::allocator<char> >]' evaluated to 'false'
+    5 | requires std::is_arithmetic_v<T>
+      |               ~~~~~^~~~~~~~~~~~~~~~~~
+\end{tcblisting}
+
+\item
+In Clang 13:
+
+\begin{tcblisting}{commandshell={}}
+prog.cc:15:5: error: no matching function for call to
+'add'
+add("42"s, "1"s);
+^~~
+prog.cc:6:6: note: candidate template ignored:
+constraints not satisfied [with T = std::string]
+T add(T const a, T const b)
+^
+prog.cc:5:10: note: because 'std::is_arithmetic_
+v<std::string>' evaluated to false
+requires std::is_arithmetic_v<T>
+^
+\end{tcblisting}
+\end{itemize}
+
+The error messages follow the same patterns seen already: GCC is too verbose, VC++ is missing essential information (the constraint that is not met), while Clang is more concise and better pinpoints the cause of the error. Overall, there is an improvement in the diagnostic messages, although there is still room for improvement.
+
+A constraint is a predicate that evaluates to true or false at compile-time. The expression used in the previous example, std::is\_arithmetic\_v<T>, is simply using a standard type trait (which we saw in the previous chapter). However, these are different kinds of expressions that can be used in a constraint, and we will learn about them later in this chapter.
+
+In the next section, we look at how to define and use named constraints.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

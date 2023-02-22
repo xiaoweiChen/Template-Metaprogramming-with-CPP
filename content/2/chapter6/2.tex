@@ -1,0 +1,141 @@
+The constraints seen previously are nameless predicates defined in the places they are used. Many constraints are generic and can be used in multiple places. Let’s consider the following example of a function similar to the add function. This function performs the multiplication of arithmetic values and is shown next:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+requires std::is_arithmetic_v<T>
+T mul(T const a, T const b)
+{
+	return a * b;
+}
+\end{lstlisting}
+
+The same requires clause seen with the add function is present here. To avoid this repetitive code, we can define a name constraint that can be reused in multiple places. A named constraint is called a concept. A concept is defined with the new concept keyword and template syntax. Here is an example:
+
+\begin{lstlisting}[style=styleCXX]
+template<typename T>
+concept arithmetic = std::is_arithmetic_v<T>;
+\end{lstlisting}
+
+Even though they are assigned a Boolean value, concept names should not contain verbs. They represent requirements and are used as attributes or qualifiers on template parameters. Therefore, you should prefer names such as arithmetic, copyable, serializable, container, and more, and not is\_arithmetic, is\_copyable, is\_serializable, and is\_container. The previously defined arithmetic concept can be used as follows:
+
+\begin{lstlisting}[style=styleCXX]
+template <arithmetic T>
+T add(T const a, T const b) { return a + b; }
+
+template <arithmetic T>
+T mul(T const a, T const b) { return a * b; }
+\end{lstlisting}
+
+You can see from this snippet that the concept is used instead of the typename keyword. It qualifies the T type with the arithmetic quality, meaning that only the types that satisfy this requirement can be used as template arguments. The same arithmetic concept can be defined with a different syntax, shown in the following snippet:
+
+\begin{lstlisting}[style=styleCXX]
+template<typename T>
+concept arithmetic = requires { std::is_arithmetic_v<T>; };
+\end{lstlisting}
+
+This uses a requires expression. A requires expression uses curly branches, \{\}, whereas a requires clause does not. A requires expression can contain a sequence of requirements of different kinds: simple requirements, type requirements, compound requirements, and nested requirements. The one seen here is a simple requirement. For the purpose of defining this particular concept, this syntax is more complicated but has the same final effect. However, in some cases, complex requirements are needed. Let’s look at an example.
+
+Consider the case when we want to define a template that should only take container types for an argument. Before concepts were available, this could have been solved with the help of a type trait and SFINAE or a static\_assert statement, as we saw at the beginning of this chapter. However, a container type is not really easy to define formally. We can do it based on some properties of the standard containers:
+
+\begin{itemize}
+\item
+They have the member types value\_type, size\_type, allocator\_type, iterator, and const\_iterator.
+
+\item
+They have the member function size that returns the number of elements in the container.
+
+\item
+They have the member functions begin/end and cbegin/cend that return iterators and constant iterators to the first and one-past-the-last element in the container.
+\end{itemize}
+
+With the knowledge accumulated from Chapter 5, Type Traits and Conditional Compilation, we can define an is\_containter type trait as follows:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T, typename U = void>
+struct is_container : std::false_type {};
+
+template <typename T>
+struct is_container<T,
+	std::void_t<typename T::value_type,
+				typename T::size_type,
+				typename T::allocator_type,
+				typename T::iterator,
+				typename T::const_iterator,
+				decltype(std::declval<T>().size()),
+				decltype(std::declval<T>().begin()),
+				decltype(std::declval<T>().end()),
+				decltype(std::declval<T>().cbegin()),
+				decltype(std::declval<T>().cend())>>
+	: std::true_type{};
+
+template <typename T, typename U = void>
+constexpr bool is_container_v = is_container<T, U>::value;
+\end{lstlisting}
+
+We can verify with the help of static\_assert statements that the type trait correctly identifies container types. Here is an example:
+
+\begin{lstlisting}[style=styleCXX]
+struct foo {};
+
+static_assert(!is_container_v<foo>);
+static_assert(is_container_v<std::vector<foo>>);
+\end{lstlisting}
+
+Concepts make writing such a template constraint much easier. We can employ the concept syntax and requires expressions to define the following:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+concept container = requires(T t)
+{
+	typename T::value_type;
+	typename T::size_type;
+	typename T::allocator_type;
+	typename T::iterator;
+	typename T::const_iterator;
+	t.size();
+	t.begin();
+	t.end();
+	t.cbegin();
+	t.cend();
+};
+\end{lstlisting}
+
+This definition is both shorter and more readable. It uses both simple requirements, such as t.size(), and type requirements, such as typename T::value\_type. It can be used to constrain template parameters in the manner seen previously but can also be used with the static\_assert statements (since constraints evaluate to a compile-time Boolean value):
+
+\begin{lstlisting}[style=styleCXX]
+struct foo{};
+
+static_assert(!container<foo>);
+static_assert(container<std::vector<foo>>);
+
+template <container C>
+void process(C&& c) {}
+\end{lstlisting}
+
+In the following section, we will explore in depth the various kinds of requirements that can be used in requires expressions.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
