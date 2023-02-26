@@ -1,0 +1,164 @@
+
+We have seen multiple examples of constraining template arguments but in all the cases so far, we used a single constraint. It is possible though for constraints to be composed using the \&\& and || operators. A composition of two constraints using the \&\& operator is called a conjunction and the composition of two constraints using the || operator is called a disjunction.
+
+For a conjunction to be true, both constraints must be true. Like in the case of logical AND operations, the two constraints are evaluated from left to right, and if the left constraint is false, the right constraint is not evaluated. Let’s look at an example:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+requires std::is_integral_v<T> && std::is_signed_v<T>
+T decrement(T value)
+{
+	return value--;
+}
+\end{lstlisting}
+
+In this snippet, we have a function template that returns the decremented value of the received argument. However, it only accepts signed integral values. This is specified with the conjunction of two constraints, std::is\_integral\_v<T> \&\& std::is\_signed\_v<T>. The same result can be achieved using a different approach to defining the conjunction, as shown next:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+concept Integral = std::is_integral_v<T>;
+
+template <typename T>
+concept Signed = std::is_signed_v<T>;
+
+template <typename T>
+concept SignedIntegral = Integral<T> && Signed<T>;
+
+template <SignedIngeral T>
+T decrement(T value)
+{
+	return value--;
+}
+\end{lstlisting}
+
+You can see three concepts defined here: one that constrains integral types, one that constrains signed types, and one that constrains integral and signed types.
+
+Disjunctions work in a similar way. For a disjunction to be true, at least one of the constraints must be true. If the left constraint is true, then the right one is not evaluated. Again, let’s see an example. If you recall the add function template from the first section of the chapter, we constrained it with the std::is\_arithmetic type trait. However, we can get the same result using std::is\_integral and std::is\_floating\_point, used as follows:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+requires std::is_integral_v<T> || std::is_floating_point_v<T>
+T add(T a, T b)
+{
+	return a + b;
+}
+\end{lstlisting}
+
+The expression std::is\_integral\_v<T> || std::is\_floating\_point\_v<T> defines a disjunction of two atomic constraints. We will look at this kind of constraint in more detail later. For the time being, keep in mind that an atomic constraint is an expression of the bool type that cannot be decomposed into smaller parts. Similarly, to what we’ve done previously, we can also build a disjunction of concepts and use that. Here is how:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+concept Integral = std::is_integral_v<T>;
+
+template <typename T>
+concept FloatingPoint = std::is_floating_point_v<T>;
+
+template <typename T>
+concept Number = Integral<T> || FloatingPoint<T>;
+
+template <Number T>
+T add(T a, T b)
+{
+	return a + b;
+}
+\end{lstlisting}
+
+As already mentioned, conjunctions and disjunctions are short-circuited. This has an important implication in checking the correctness of a program. Considering a conjunction of the form A<T> \&\& B<T>, then A<T> is checked and evaluated first, and if it is false, the second constraint, B<T>, is not checked anymore.
+
+Similarly, for the A<T> || B<T> disjunction, after A<T> is checked, if it evaluates to true, the second constraint, B<T>, will not be checked. If you want both conjunctions to be checked for well-formedness and then their Boolean value determined, then you must use the \&\& and || operators differently. A conjunction or disjunction is formed only when the \&\& and || tokens, respectively, appear nested in parentheses or as an operand of the \&\& or || tokens. Otherwise, these operators are treated as logical operators. Let’s explain this with examples:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+requires A<T> || B<T>
+void f() {}
+
+template <typename T>
+requires (A<T> || B<T>)
+void f() {}
+
+template <typename T>
+requires A<T> && (!A<T> || B<T>)
+void f() {}
+\end{lstlisting}
+
+In all these examples, the || token defines a disjunction. However, when used inside a cast expression or a logical NOT, the \&\& and || tokens define a logical expression:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+requires (!(A<T> || B<T>))
+void f() {}
+
+template <typename T>
+requires (static_cast<bool>(A<T> || B<T>))
+void f() {}
+\end{lstlisting}
+
+In these cases, the entire expression is first checked for correctness, and then its Boolean value is determined. It is worth mentioning that in this latter example both expressions, !(A<T> || B<T>) and static\_cast<bool>(A<T> || B<T>), need to be wrapped inside another set of parentheses because the expression of a requires clause cannot start with the ! token or a cast.
+
+Conjunctions and disjunctions cannot be used to constrain template parameter packs. However, there is a workaround to make it happen. Let’s consider a variadic implementation of the add function template with the requirement that all arguments must be integral types. One would attempt to write such a constraint in the following form:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename ... T>
+requires std::is_integral_v<T> && ...
+auto add(T ... args)
+{
+	return (args + ...);
+}
+\end{lstlisting}
+
+This will generate a compiler error because the ellipsis is not allowed in this context. What we can do to avoid this error is to wrap the expression in a set of parentheses, as follows:
+
+\begin{lstlisting}[style=styleCXX]
+	template <typename ... T>
+	requires std::is_integral_v<T> && ...
+	auto add(T ... args)
+	{
+		return (args + ...);
+	}
+\end{lstlisting}
+
+The expression, (std::is\_integral\_v<T> \&\& ...), is now a fold expression. It is not a conjunction, as one would expect. Therefore, we get a single atomic constraint. The compiler will first check the correctness of the entire expression and then determine its Boolean value. To build a conjunction we first need to define a concept:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+concept Integral = std::is_integral_v<T>;
+\end{lstlisting}
+
+What we need to do next is change the requires clause so that it uses the newly defined concept and not the Boolean variable, std::is\_integral\_v<T>:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename ... T>
+requires (Integral<T> && ...)
+auto add(T ... args)
+{
+	return (args + ...);
+}
+\end{lstlisting}
+
+It does not look like much of a change but, in fact, because of the use of concepts, validating the correctness and determining the Boolean value occur individually for each template argument. If the constraint is not met for a type, the rest is short-circuited, and the validation stops.
+
+You must have noticed that earlier in this section I used the term atomic constraint twice. Therefore, one would ask, what is an atomic constraint? It is an expression of the bool type that cannot be decomposed further. Atomic constraints are formed during the process of constraint normalization when the compiler decomposes constraints into conjunction and disjunctions of atomic constraints. This works as follows:
+
+\begin{itemize}
+\item
+The expression, E1 \&\& E2, is decomposed into the conjunction of E1 and E2.
+
+\item
+The expression, E1 || E2, is decomposed into the disjunction of E1 and E2.
+
+\item
+The concept, C<A1, A2, … An>, is replaced with its definition after substituting all the template arguments into its atomic constraints.
+\end{itemize}
+
+Atomic constraints are used for determining the partial ordering of constraints that, in turn, determine the partial ordering of function templates and class template specializations, as well as the next candidate for non-template functions in overload resolution. We will discuss this topic next.
+
+
+
+
+
+
+
+
+
+
+

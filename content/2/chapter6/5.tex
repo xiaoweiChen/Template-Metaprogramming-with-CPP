@@ -1,0 +1,165 @@
+When a compiler encounters function calls or class template instantiations, it needs to figure out what overload (for a function) or specialization (for a class) is the best match. A function may be overloaded with different type constraints. Class templates can also be specialized with different type constraints. In order to decide which is the best match, the compiler needs to figure out which one is the most constrained and, at the same time, evaluates to true after substituting all the template parameters. In order to figure this out, it performs the constraints normalization. This is the process of transforming the constraint expression into conjunctions and disjunctions of atomic constraints, as described at the end of the previous section.
+
+An atomic constraint A is said to subsume another atomic constraint B if A implies B. A constraint declaration D1 whose constraints subsume the constraints of another declaration D2 is said to be at least as constrained as D2. Moreover, if D1 is at least as constrained as D2 but the reciprocal is not true, then it’s said that D1 is more constrained than D2. More constrained overloads are selected as the best match.
+
+We will discuss several examples in order to understand how constraints affect overload resolution. First, let’s start with the following two overloads:
+
+\begin{lstlisting}[style=styleCXX]
+int add(int a, int b)
+{
+	return a + b;
+}
+
+template <typename T>
+T add(T a, T b)
+{
+	return a + b;
+}
+\end{lstlisting}
+
+The first overload is a non-template function that takes two int arguments and returns their sum. The second is the template implementation we have seen already in the chapter.
+
+Having these two, let’s consider the following calls:
+
+\begin{lstlisting}[style=styleCXX]
+add(1.0, 2.0); // [1]
+add(1, 2); // [2]
+\end{lstlisting}
+
+The first call (at line [1]) takes two double values so only the template overload is a match. Therefore, its instantiation for the double type will be called. The second invocation of the add function (at line [2]) takes two integer arguments. Both overloads are a possible match. The compiler will select the most specific one, which is the non-template overload.
+
+What if both overloads are templates but one of them is constrained? Here is an example to discuss:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+T add(T a, T b)
+{
+	return a + b;
+}
+
+template <typename T>
+requires std::is_integral_v<T>
+T add(T a, T b)
+{
+	return a + b;
+}
+\end{lstlisting}
+
+The first overload is the function template seen previously. The second has an identical implementation except that it specifies a requirement for the template argument, which is restricted to integral types. If we consider the same two calls from the previous snippet, for the call at line [1] with two double values, only the first overload is a good match. For the call at line [2] with two integer values, both overloads are a good match. However, the second overload is more constrained (it has one constraint compared to the first one that has no constraint) so the compiler will select this one for the invocation.
+
+In the next example, both overloads are constrained. The first overload requires that the size of the template argument is four, and the second overload requires that the template argument must be an integral type:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+requires (sizeof(T) == 4)
+T add(T a, T b)
+{
+	return a + b;
+}
+
+template <typename T>
+requires std::is_integral_v<T>
+T add(T a, T b)
+{
+	return a + b;
+}
+\end{lstlisting}
+
+Let’s consider the following calls to this overloaded function template:
+
+\begin{lstlisting}[style=styleCXX]
+add((short)1, (short)2); // [1]
+add(1, 2); // [2]
+\end{lstlisting}
+
+The call at line [1] uses arguments of the short type. This is an integral type with the size 2; therefore, only the second overload is a match. However, the call at line [2] uses arguments of the int type. This is an integral type of size 4. Therefore, both overloads are a good match. However, this is an ambiguous situation, and the compiler is not able to select between the two and it will trigger an error.
+
+What happens, though, if we change the two overloads slightly, as shown in the next snippet?
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+requires std::is_integral_v<T>
+T add(T a, T b)
+{
+	return a + b;
+}
+
+template <typename T>
+requires std::is_integral_v<T> && (sizeof(T) == 4)
+T add(T a, T b)
+{
+	return a + b;
+}
+\end{lstlisting}
+
+Both overloads require that the template argument must be an integral type, but the second also requires that the size of the integral type must be 4 bytes. So, for the second overload, we use a conjunction of two atomic constraints. We will discuss the same two calls, with short arguments and with int arguments.
+
+For the call at line [1], passing two short values, only the first overload is a good match, so this one will be invoked. For the call at line [2] that takes two int arguments, both overloads are a match. The second, however, is more constrained. Yet, the compiler is not able to decide which is a better match and will issue an ambiguous call error. This may be surprising to you because, in the beginning, I said that the most constrained overload will be selected from the overload set. It does not work in our example because we used type traits to constrain the two functions. The behavior is different if we instead use concepts.
+Here is how:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+concept Integral = std::is_integral_v<T>;
+
+template <typename T>
+requires Integral<T>
+T add(T a, T b)
+{
+	return a + b;
+}
+
+template <typename T>
+requires Integral<T> && (sizeof(T) == 4)
+T add(T a, T b)
+{
+	return a + b;
+}
+\end{lstlisting}
+
+There is no ambiguity anymore; the compiler will select the second overload as the best match from the overload set. This demonstrates that concepts are handled preferentially by the compiler. Remember, there are different ways to use constraints using concepts, but the preceding definition simply replaced a type trait with a concept; therefore, they are arguably a better choice for demonstrating this behavior than the next implementation:
+
+\begin{lstlisting}[style=styleCXX]
+template <Integral T>
+T add(T a, T b)
+{
+	return a + b;
+}
+
+template <Integral T>
+requires (sizeof(T) == 4)
+T add(T a, T b)
+{
+	return a + b;
+}
+\end{lstlisting}
+
+All the examples discussed in this chapter involved constraining function templates. However, it’s possible to constrain non-template member functions as well as class templates and class template specializations. We will discuss these in the next sections, and we will start with the former.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

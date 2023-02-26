@@ -1,7 +1,663 @@
+
+This pattern has a rather curious name: the Curiously Recurring Template Pattern, or CRTP for short. It’s called curious because it is rather odd and unintuitive. The pattern was first described (and its name coined) by James Coplien in a column in the C++ Report in 1995. This pattern is as follows:
+
+\begin{itemize}
+\item
+There is a base class template that defines the (static) interface.
+
+\item
+Derived classes are themselves the template argument for the base class template.
+
+\item
+History of C++, The member functions of the base class call member functions of its type template parameter (which are the derived classes).
+\end{itemize}
+
+Let’s see how the pattern implementation looks in practice. We will transform the previous example with game units into a version using the CRTP. The pattern implementation goes as follows:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+struct game_unit
+{
+	void attack()
+	{
+		static_cast<T*>(this)->do_attack();
+	}
+};
+
+struct knight : game_unit<knight>
+{
+	void do_attack()
+	{ std::cout << "draw sword\n"; }
+};
+
+struct mage : game_unit<mage>
+{
+	void do_attack()
+	{ std::cout << "spell magic curse\n"; }
+};
+\end{lstlisting}
+
+The game\_unit class is now a template class but contains the same member function, attack. Internally, this performs an upcast of the this pointer to T* and then invokes a member function called do\_attack. The knight and mage classes derive from the game\_unit class and pass themselves as the argument for the type template parameter T. Both provide a member function called do\_attack.
+
+Notice that the member function in the base class template and the called member function in the derived classes have different names. Otherwise, if they had the same name, the derived class member functions would hide the member from the base since these are no longer virtual functions.
+
+The fight function that takes a collection of game units and calls the attack function needs to change too. It needs to be implemented as a function template, as follows:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+void fight(std::vector<game_unit<T>*> const & units)
+{
+	for (auto unit : units)
+	{
+		unit->attack();
+	}
+}
+\end{lstlisting}
+
+Using this function is a little different than before. It goes as follows:
+
+\begin{lstlisting}[style=styleCXX]
+knight k;
+mage m;
+fight<knight>({ &k });
+fight<mage>({ &m });
+\end{lstlisting}
+
+We have moved the runtime polymorphism to compile-time. Therefore, the fight function cannot treat knight and mage objects polymorphically. Instead, we get two different overloads, one that can handle knight objects and one that can handle mage objects. This is static polymorphism.
+
+Although the pattern might not look complicated after all, the question you’re probably asking yourself at this point is: how is this pattern actually useful? There are different problems you can solve using CRT, including the following:
+
+\begin{itemize}
+\item
+Limiting the number of times a type can be instantiated
+
+\item
+Adding common functionality and avoiding code duplication
+
+\item
+Implementing the composite design pattern
+\end{itemize}
+
+In the following subsections, we will look at each of these problems and see how to solve them with CRTP.
+
 \subsubsubsection{7.2.1\hspace{0.2cm}Limiting the object count with CRTP}
+
+Let’s assume that for the game in which we created knights and mages we need some items to be available in a limited number of instances. For instance, there is a special sword type called Excalibur and there should be only one instance of it. On the other hand, there is a book of magic spells but there cannot be more than three instances of it at a time in the game. How do we solve this? Obviously, the sword problem could be solved with the singleton pattern. But what do we do when we need to limit the number to some higher value but still finite? The singleton pattern wouldn’t be of much help (unless we transform it into a “multiton”) but the CRTP would.
+
+First, we start with a base class template. The only thing this class template does is keep a count of how many times it has been instantiated. The counter, which is a static data member, is incremented in the constructor and decremented in the destructor. When that count exceeds a defined limit, an exception is thrown. Here is the implementation:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T, size_t N>
+struct limited_instances
+{
+	static std::atomic<size_t> count;
+	limited_instances()
+	{
+		if (count >= N)
+			throw std::logic_error{ "Too many instances" };
+		++count;
+	}
+	~limited_instances() { --count; }
+};
+
+template <typename T, size_t N>
+std::atomic<size_t> limited_instances<T, N>::count = 0;
+\end{lstlisting}
+
+The second part of the template consists of defining the derived classes. For the mentioned problem, they are as follows:
+
+\begin{lstlisting}[style=styleCXX]
+struct excalibur : limited_instances<excalibur, 1>
+{};
+
+struct book_of_magic : limited_instances<book_of_magic, 3>
+{};
+\end{lstlisting}
+
+We can instantiate excalibur once. The second time we try to do the same (while the first instance is still alive) an exception will be thrown:
+
+\begin{lstlisting}[style=styleCXX]
+excalibur e1;
+try
+{
+	excalibur e2;
+}
+catch (std::exception& e)
+{
+	std::cout << e.what() << '\n';
+}
+\end{lstlisting}
+
+Similarly, we can instantiate book\_of\_magic three times and an exception will be thrown the fourth time we attempt to do that:
+
+\begin{lstlisting}[style=styleCXX]
+book_of_magic b1;
+book_of_magic b2;
+book_of_magic b3;
+try
+{
+	book_of_magic b4;
+}
+catch (std::exception& e)
+{
+	std::cout << e.what() << '\n';
+}
+\end{lstlisting}
+
+Next, we look at a more common scenario, adding common functionality to types.
 
 \subsubsubsection{7.2.2\hspace{0.2cm}Adding functionality with CRTP}
 
+Another case when the curiously recurring template pattern can help us is providing common functionalities to derived classes through generic functions in a base class that relies solely on derived class members. Let’s take an example to understand this use case.
+
+Let’s suppose that some of our game units have member functions such as step\_forth and step\_back that move them one position, forward or backward. These classes would look as follows (at a bare minimum):
+
+\begin{lstlisting}[style=styleCXX]
+struct knight
+{
+	void step_forth();
+	void step_back();
+};
+
+struct mage
+{
+	void step_forth();
+	void step_back();
+};
+\end{lstlisting}
+
+However, it could be a requirement that everything that can move back and forth one step should also be able to advance or retreat an arbitrary number of steps. However, this functionality could be implemented based on the step\_forth and step\_back functions, which would help avoid having duplicate code in each of these game unit classes. The CRTP implementation for this problem would, therefore, look as follows:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+struct movable_unit
+{
+	void advance(size_t steps)
+	{
+		while (steps--)
+			static_cast<T*>(this)->step_forth();
+	}
+
+	void retreat(size_t steps)
+	{
+		while (steps--)
+			static_cast<T*>(this)->step_back();
+	}
+};
+
+struct knight : movable_unit<knight>
+{
+	void step_forth()
+	{ std::cout << "knight moves forward\n"; }
+	
+	void step_back()
+	{ std::cout << "knight moves back\n"; }
+};
+
+struct mage : movable_unit<mage>
+{
+	void step_forth()
+	{ std::cout << "mage moves forward\n"; }
+	
+	void step_back()
+	{ std::cout << "mage moves back\n"; }
+};
+\end{lstlisting}
+
+We can advance and retreat the units by calling the base class advance and retreat member functions as follows:
+
+\begin{lstlisting}[style=styleCXX]
+knight k;
+k.advance(3);
+k.retreat(2);
+
+mage m;
+m.advance(5);
+m.retreat(3);
+\end{lstlisting}
+
+You could argue that the same result could be achieved using non-member function templates. For the sake of discussion, such a solution is presented as follows:
+
+\begin{lstlisting}[style=styleCXX]
+struct knight
+{
+	void step_forth()
+	{ std::cout << "knight moves forward\n"; }
+	
+	void step_back()
+	{ std::cout << "knight moves back\n"; }
+};
+
+struct mage
+{
+	void step_forth()
+	{ std::cout << "mage moves forward\n"; }
+	
+	void step_back()
+	{ std::cout << "mage moves back\n"; }
+};
+
+template <typename T>
+void advance(T& t, size_t steps)
+{
+	while (steps--) t.step_forth();
+}
+
+template <typename T>
+void retreat(T& t, size_t steps)
+{
+	while (steps--) t.step_back();
+}
+\end{lstlisting}
+
+The client code would need to change but the changes are actually small:
+
+\begin{lstlisting}[style=styleCXX]
+knight k;
+advance(k, 3);
+retreat(k, 2);
+
+mage m;
+advance(m, 5);
+retreat(m, 3);
+\end{lstlisting}
+
+The choice between these two may depend on the nature of the problem and your preferences. However, the CRTP has the advantage that it is describing well the interface of the derived classes (such as knight and mage in our example). With the non-member functions, you wouldn’t necessarily know about this functionality, which would probably come from a header that you need to include. However, with CRTP, the class interface is well visible to those using it.
+
+For the last scenario we discuss here, let’s see how CRTP helps to implement the composite design pattern.
+
 \subsubsubsection{7.2.3\hspace{0.2cm}Implementing the composite design pattern}
 
+In their famous book, Design Patterns: Elements of Reusable Object-Oriented Software, the Gang of Four (Erich Gamma, Richard Helm, Ralph Johnson, and John Vlissides) describe a structural pattern called composite that enables us to compose objects into larger structures and treat both individual objects and compositions uniformly. This pattern can be used when you want to represent part-whole hierarchies of objects and you want to ignore the differences between individual objects and compositions of individual objects.
+
+To put this pattern into practice, let’s consider the game scenario again. We have heroes that have special abilities and can do different actions, one of which is allying with another hero. That can be easily modeled as follows:
+
+\begin{lstlisting}[style=styleCXX]
+struct hero
+{
+	hero(std::string_view n) : name(n) {}
+	void ally_with(hero& u)
+	{
+		connections.insert(&u);
+		u.connections.insert(this);
+	}
+private:
+	std::string name;
+	std::set<hero*> connections;
+	friend std::ostream& operator<<(std::ostream& os,
+									hero const& obj);
+};
+
+std::ostream& operator<<(std::ostream& os,
+hero const& obj)
+{
+	for (hero* u : obj.connections)
+		os << obj.name << " --> [" << u->name << "]" << '\n';
+		
+	return os;
+}
+\end{lstlisting}
+
+These heroes are represented by the hero class that contains a name, a list of connections to other hero objects, as well as a member function, ally\_with, that defines an alliance between two heroes. We can use it as follows:
+
+\begin{lstlisting}[style=styleCXX]
+hero k1("Arthur");
+hero k2("Sir Lancelot");
+hero k3("Sir Gawain");
+
+k1.ally_with(k2);
+k2.ally_with(k3);
+
+std::cout << k1 << '\n';
+std::cout << k2 << '\n';
+std::cout << k3 << '\n';
+\end{lstlisting}
+
+The output of running this snippet is the following:
+
+\begin{tcblisting}{commandshell={}}
+Arthur --> [Sir Lancelot]
+
+Sir Lancelot --> [Arthur]
+Sir Lancelot --> [Sir Gawain]
+
+Sir Gawain --> [Sir Lancelot]
+\end{tcblisting}
+
+Everything was simple so far. But the requirement is that heroes could be grouped together to form parties. It should be possible for a hero to ally with a group, and for a group to ally with either a hero or an entire group. Suddenly, there is an explosion of functions that we need to provide:
+
+\begin{lstlisting}[style=styleCXX]
+struct hero_party;
+
+struct hero
+{
+	void ally_with(hero& u);
+	void ally_with(hero_party& p);
+};
+
+struct hero_party : std::vector<hero>
+{
+	void ally_with(hero& u);
+	void ally_with(hero_party& p);
+};
+\end{lstlisting}
+
+This is where the composite design pattern helps us treat heroes and parties uniformly and avoid unnecessary duplications of the code. As usual, there are different ways to implement it, but one way is using the curiously recurring template pattern. The implementation requires a base class that defines the common interface. In our case, this will be a class template with a single member function called ally\_with:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+struct base_unit
+{
+	template <typename U>
+	void ally_with(U& other);
+};
+\end{lstlisting}
+
+We will define the hero class as a derived class from base\_unit<hero>. This time, the hero class no longer implements ally\_with itself. However, it features begin and end methods that are intended to simulate the behavior of a container:
+
+\begin{lstlisting}[style=styleCXX]
+struct hero : base_unit<hero>
+{
+	hero(std::string_view n) : name(n) {}
+	
+	hero* begin() { return this; }
+	hero* end() { return this + 1; }
+	
+private:
+	std::string name;
+	std::set<hero*> connections;
+	
+	template <typename U>
+	friend struct base_unit;
+	
+	template <typename U>
+	friend std::ostream& operator<<(std::ostream& os,
+									base_unit<U>& object);
+};
+\end{lstlisting}
+
+The class that models a group of heroes is called hero\_party and derives from both std::vector<hero> (to define a container of hero objects) and from base\_unit<hero\_party>. This is why the hero class has begin and end functions to help us perform iterating operations on hero objects, just as we would do with hero\_party objects:
+
+\begin{lstlisting}[style=styleCXX]
+struct hero_party : std::vector<hero>,
+					base_unit<hero_party>
+{};
+\end{lstlisting}
+
+We need to implement the ally\_with member function of the base class. The code is shown as follows. What it does is iterate through all the sub-objects of the current object and connect them with all the sub-objects of the supplied argument:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+template <typename U>
+void base_unit<T>::ally_with(U& other)
+{
+	for (hero& from : *static_cast<T*>(this))
+	{
+		for (hero& to : other)
+		{
+			from.connections.insert(&to);
+			to.connections.insert(&from);
+		}
+	}
+}
+\end{lstlisting}
+
+The hero class declared the base\_unit class template a friend so that it could access the connections member. It also declared the operator<{}< as a friend so that this function could access both the connections and name private members. For more information about templates and friends, see Chapter 4, Advanced Template Concepts. The output stream operator implementation is shown here:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+std::ostream& operator<<(std::ostream& os,
+base_unit<T>& object)
+{
+	for (hero& obj : *static_cast<T*>(&object))
+	{
+		for (hero* n : obj.connections)
+			os << obj.name << " --> [" << n->name << "]"
+				<< '\n';
+	}
+	return os;
+}
+\end{lstlisting}
+
+Having all this defined, we can write code as follows:
+
+\begin{lstlisting}[style=styleCXX]
+hero k1("Arthur");
+hero k2("Sir Lancelot");
+
+hero_party p1;
+p1.emplace_back("Bors");
+
+hero_party p2;
+p2.emplace_back("Cador");
+p2.emplace_back("Constantine");
+
+k1.ally_with(k2);
+k1.ally_with(p1);
+
+p1.ally_with(k2);
+p1.ally_with(p2);
+
+std::cout << k1 << '\n';
+std::cout << k2 << '\n';
+std::cout << p1 << '\n';
+std::cout << p2 << '\n';
+\end{lstlisting}
+
+We can see from this that we are able to ally a hero with both another hero and a hero\_party, as well as a hero\_party with either a hero or another hero\_party. That was the proposed goal, and we were able to do it without duplicating the code between hero and hero\_party. The output of executing the previous snippet is the following:
+
+\begin{tcblisting}{commandshell={}}
+Arthur --> [Sir Lancelot]
+Arthur --> [Bors]
+
+Sir Lancelot --> [Arthur]
+Sir Lancelot --> [Bors]
+
+Bors --> [Arthur]
+Bors --> [Sir Lancelot]
+Bors --> [Cador]
+Bors --> [Constantine]
+
+Cador --> [Bors]
+Constantine --> [Bors]
+\end{tcblisting}
+
+After seeing how the CRTP helps achieve different goals, let’s look at the use of the CRTP in the C++ standard library.
+
 \subsubsubsection{7.2.4\hspace{0.2cm}The CRTP in the standard library}
+
+The standard library contains a helper type called std::enabled\_shared\_from\_this (in the <memory> header) that enables objects managed by a std::shared\_ptr to generate more std::shared\_ptr instances in a safe manner. The std::enabled\_shared\_from\_this class is the base class in the CRTP pattern. However, the previous description may sound abstract, so let’s try to understand it with examples.
+
+Let’s suppose we have a class called building and we are creating std::shared\_ptr objects in the following manner:
+
+\begin{lstlisting}[style=styleCXX]
+struct building {};
+
+building* b = new building();
+std::shared_ptr<building> p1{ b }; // [1]
+std::shared_ptr<building> p2{ b }; // [2] bad
+\end{lstlisting}
+
+We have a raw pointer and, on line [1], we instantiate a std::shared\_ptr object to manage its lifetime. However, on line [2], we instantiate a second std::shared\_ptr object for the same pointer. Unfortunately, the two smart pointers know nothing of each other, so upon getting out of scope, they will both delete the building object allocated on the heap. Deleting an object that was already deleted is undefined behavior and will likely result in a crash of the program.
+
+The std::enable\_shared\_from\_this class helps us create more shared\_ptr objects from an existing one in a safe manner. First, we need to implement the CRTP pattern as follows:
+
+\begin{lstlisting}[style=styleCXX]
+struct building : std::enable_shared_from_this<building>
+{
+};
+\end{lstlisting}
+
+Having this new implementation, we can call the member function shared\_from\_this to create more std::shared\_ptr instances from an object, which all refer to the same instance of the object:
+
+\begin{lstlisting}[style=styleCXX]
+building* b = new building();
+std::shared_ptr<building> p1{ b }; // [1]
+std::shared_ptr<building> p2{
+	b->shared_from_this()}; // [2] OK
+\end{lstlisting}
+
+The interface of the std::enable\_shared\_from\_this is as follows:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+class enable_shared_from_this
+{
+	public:
+	std::shared_ptr<T> shared_from_this();
+	std::shared_ptr<T const> shared_from_this() const;
+	std::weak_ptr<T> weak_from_this() noexcept;
+	std::weak_ptr<T const> weak_from_this() const noexcept;
+	enable_shared_from_this<T>& operator=(
+		const enable_shared_from_this<T> &obj ) noexcept;
+};
+\end{lstlisting}
+
+The previous example shows how enable\_shared\_from\_this works but does not help understand when it is appropriate to use it. Therefore, let’s modify the example to show a realistic example.
+
+Let’s consider that the buildings we have can be upgraded. This is a process that takes some time and involves several steps. This task, as well as other tasks in the game, are executed by a designated entity, which we will call executor. In its simplest form, this executor class has a public member function called execute that takes a function object and executes it on a different thread. The following listing is a simple implementation:
+
+\begin{lstlisting}[style=styleCXX]
+struct executor
+{
+	void execute(std::function<void(void)> const& task)
+	{
+		threads.push_back(std::thread([task]() {
+			using namespace std::chrono_literals;
+			std::this_thread::sleep_for(250ms);
+			task();
+		}));
+	}
+
+	~executor()
+	{
+		for (auto& t : threads)
+		t.join();
+	}
+private:
+	std::vector<std::thread> threads;
+};
+\end{lstlisting}
+
+The building class has a pointer to an executor, which is passed from the client. It also has a member function called upgrade that kicks off the execution process. However, the actual upgrade occurs in a different, private, function called do\_upgrade. This is called from a lambda expression that is passed to the execute member function of the executor. All these are shown in the following listing:
+
+\begin{lstlisting}[style=styleCXX]
+struct building
+{
+	building() { std::cout << "building created\n"; }
+	~building() { std::cout << "building destroyed\n"; }
+	
+	void upgrade()
+	{
+		if (exec)
+		{
+			exec->execute([self = this]() {
+				self->do_upgrade();
+			});
+		}
+	}
+	void set_executor(executor* e) { exec = e; }
+private:
+	void do_upgrade()
+	{
+		std::cout << "upgrading\n";
+		operational = false;
+		
+		using namespace std::chrono_literals;
+		std::this_thread::sleep_for(1000ms);
+		
+		operational = true;
+		std::cout << "building is functional\n";
+	}
+
+	bool operational = false;
+	executor* exec = nullptr;
+};
+\end{lstlisting}
+
+The client code is relatively simple: create an executor, create a building managed by a shared\_ptr, set the executor reference, and run the upgrade process:
+
+\begin{lstlisting}[style=styleCXX]
+int main()
+{
+	executor e;
+	std::shared_ptr<building> b =
+		std::make_shared<building>();
+	b->set_executor(&e);
+	b->upgrade();
+	
+	std::cout << "main finished\n";
+}
+\end{lstlisting}
+
+If you run this program, you get the following output:
+
+\begin{tcblisting}{commandshell={}}
+building created
+main finished
+building destroyed
+upgrading
+building is functional
+\end{tcblisting}
+
+What we can see here is that the building is destroyed before the upgrade process begins. This incurs undefined behavior and, although this program didn’t crash, a real-world program would certainly crash.
+
+The culprit for this behavior is this particular line in the upgrading code:
+
+\begin{lstlisting}[style=styleCXX]
+exec->execute([self = this]() {
+	self->do_upgrade();
+});
+\end{lstlisting}
+
+We are creating a lambda expression that captures the this pointer. The pointer is later used after the object it points to has been destroyed. To avoid this, we would need to create and capture a shared\_ptr object. The safe way to do that is with the help of the std::enable\_shared\_from\_this class. There are two changes that need to be done. The first is to actually derive the building class from the std::enable\_shared\_from\_this class:
+
+\begin{lstlisting}[style=styleCXX]
+struct building : std::enable_shared_from_this<building>
+{
+	/* … */
+};
+\end{lstlisting}
+
+The second change requires us to call shared\_from\_this in the lambda capture:
+
+\begin{lstlisting}[style=styleCXX]
+exec->execute([self = shared_from_this()]() {
+	self->do_upgrade();
+});
+\end{lstlisting}
+
+These are two slight changes to our code but the effect is significant. The building object is no longer destroyed before the lambda expression gets executed on a separate thread (because there is now an extra shared pointer that refers to the same object as the shared pointer created in the main function). As a result, we get the output we expected (without any changes to the client code):
+
+\begin{tcblisting}{commandshell={}}
+building created
+main finished
+upgrading
+building is functional
+building destroyed
+\end{tcblisting}
+
+You could argue that after the main function finishes, we shouldn’t care what happens. Mind that this is just a demo program, and in practice, this happens in some other function and the program continues to run long after that function returns.
+
+With this, we conclude the discussion around the curiously recurring template pattern. Next, we will look at a technique called mixins that is often mixed with the CRTP pattern.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

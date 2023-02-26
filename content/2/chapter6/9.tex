@@ -1,0 +1,108 @@
+We have discussed in this chapter about requires clauses and requires expressions. Although both are introduced with the new requires keyword, they are different things and should be fully understood:
+
+\begin{itemize}
+\item
+A requires clause determines whether a function participates in overload resolution or not. This happens based on the value of a compile-time Boolean expression.
+
+\item
+A requires expression determines whether a set of one or more expressions is well-formed, without having any side effects on the behavior of the program. A requires expression is a Boolean expression that can be used with a requires clause.
+\end{itemize}
+
+Let’s see an example again:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+concept addable = requires(T a, T b) { a + b; };
+                       // [1] requires expression
+template <typename T>
+requires addable<T> // [2] requires clause
+auto add(T a, T b)
+{
+	return a + b;
+}
+\end{lstlisting}
+
+The construct at line [1] that starts with the requires keyword is a requires expression. It verifies that the expression, a + b, is well-formed for any T. On the other hand, the construct at line [2] is a requires clause. If the Boolean expression addable<T> evaluates to true, the function takes part in overload resolution; otherwise, it does not.
+
+Although requires clauses are supposed to use concepts, a requires expression can also be used. Basically, anything that can be placed on the right-hand side of the = token in a concept definition can be used with a requires clause. That means we can do the following:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+	requires requires(T a, T b) { a + b; }
+auto add(T a, T b)
+{
+	return a + b;
+}
+\end{lstlisting}
+
+Although this is perfectly legal code it is arguable whether it’s a good way of using constraints. I would recommend avoiding creating constructs that start with requires requires. They are less readable and may create confusion. Moreover, named concepts can be used anywhere, while a requires clause with a requires expression will have to be duplicated if it needs to be used for multiple functions.
+
+Now that we’ve seen how to constrain template arguments in several ways using constraints and concepts, let’s see how we can simplify function template syntax and constrain the template arguments.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

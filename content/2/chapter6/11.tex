@@ -1,0 +1,243 @@
+The standard library provides a set of fundamental concepts that can be used to define requirements on the template arguments of function templates, class templates, variable templates, and alias templates, as we have seen throughout this chapter. The standard concepts in C++20 are spread across several headers and namespaces. We will present some of them in this section although not all of them. You can find all of them online at \url{https://en.cppreference.com/}.
+
+The main set of concepts is available in the <concepts> header and the std namespace. Most of these concepts are equivalent to one or more existing type traits. For some of them, their implementation is well-defined; for some, it is unspecified. They are grouped into four categories: core language concepts, comparison concepts, object concepts, and callable concepts. This set of concepts contains the following (but not only):
+
+\begin{table}[H]
+\centering
+	\begin{tabular}{|l|l|}
+		\hline
+		\textbf{Concept}   & \textbf{Description}                                                                                            \\ \hline
+		same\_as           & \begin{tabular}[c]{@{}l@{}}Defines the requirement that a type T is the same as\\ another type U.\end{tabular}  \\ \hline
+		derived\_from      & \begin{tabular}[c]{@{}l@{}}Defines the requirement that a type D is derived from\\ another type B.\end{tabular} \\ \hline
+		convertible\_to &
+		\begin{tabular}[c]{@{}l@{}}Defines the requirement that a type T is implicity\\ convertible to another type U.\end{tabular} \\ \hline
+		common\_reference\_with &
+		\begin{tabular}[c]{@{}l@{}}Defines the requirements that two types, T and U, have\\ a common reference type.\end{tabular} \\ \hline
+		common\_with &
+		\begin{tabular}[c]{@{}l@{}}Defines the requirement that two types, T and U, have\\ a common type to which both can be convertible.\end{tabular} \\ \hline
+		integral           & \begin{tabular}[c]{@{}l@{}}Defines the requirement that a type T is an integral\\ type.\end{tabular}            \\ \hline
+		signed\_integral   & \begin{tabular}[c]{@{}l@{}}Defines the requirement that a type T is a signed\\ integral type.\end{tabular}      \\ \hline
+		unsigned\_integral & \begin{tabular}[c]{@{}l@{}}Defines that requirement that a type T is an unsigned\\ integral type.\end{tabular}  \\ \hline
+		floating\_point    & \begin{tabular}[c]{@{}l@{}}Defines the requirement that a type T is a floating-\\ point type.\end{tabular}      \\ \hline
+		assignable\_from &
+		\begin{tabular}[c]{@{}l@{}}Defines the requirement that an expression of a type U\\ can be assigned to ab lvalue expression of a type T.\end{tabular} \\ \hline
+	\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+	\begin{tabular}{|l|l|}
+		\hline
+		\textbf{Concept} &
+		\textbf{Description} \\ \hline
+		swappable &
+		\begin{tabular}[c]{@{}l@{}}Defines the requirement that two values of the same\\ type T can be swapped.\end{tabular} \\ \hline
+		swappable\_with &
+		\begin{tabular}[c]{@{}l@{}}Defines the requirement that a value of a type T can\\ be seapped with a value of a type U.\end{tabular} \\ \hline
+		destructible &
+		\begin{tabular}[c]{@{}l@{}}Defines the requirement that a value of a type T can\\ safely be destroyed(without any exception thrown\\ from the destructor).\end{tabular} \\ \hline
+		constructible\_from &
+		\begin{tabular}[c]{@{}l@{}}Defines the requirement that an object of a type T\\ can be constructed with the given set of argumnet types.\end{tabular} \\ \hline
+		default\_initializable &
+		\begin{tabular}[c]{@{}l@{}}Defines the requirement that an object of a type T can\\ be default-constructible(either value initialized T(), \\ direct-list-initialized from an empty initializer list\\ T\{\}, or default-initialized, as in T t).\end{tabular} \\ \hline
+		move\_constructible &
+		\begin{tabular}[c]{@{}l@{}}Defines the requirement that an object of a type T can\\ be constructed with move semantics.\end{tabular} \\ \hline
+		copy\_constructible &
+		\begin{tabular}[c]{@{}l@{}}Defines the requirement that an object of a type T can\\ be copy constructed and move constructed.\end{tabular} \\ \hline
+		moveable &
+		\begin{tabular}[c]{@{}l@{}}Defines the requirement that an object of a type T can\\ be moved and swapped.\end{tabular} \\ \hline
+		copyable &
+		\begin{tabular}[c]{@{}l@{}}Defines the requirement that an object of a type T can\\ be copied, moved, and swapped.\end{tabular} \\ \hline
+		regular &
+		\begin{tabular}[c]{@{}l@{}}Defines the requirement that a type T satisfies both\\ the semiregular and equality\_compareable concepts.\end{tabular} \\ \hline
+		semiregular &
+		\begin{tabular}[c]{@{}l@{}}Defines the requirement that an object of a type T can\\ be copied, moved, swapped, and default constructed.\end{tabular} \\ \hline
+		equality\_comparable &
+		\begin{tabular}[c]{@{}l@{}}Defines the requirement that the comparison operator\\ == for a type T reflects equality, meaning that it yields\\ true if and only if two values are equal, Similarly, the\\ =! comparison reflects inequality.\end{tabular} \\ \hline
+		predicate &
+		\begin{tabular}[c]{@{}l@{}}Defines the requirement that a callable type T is\\ a Boolean preficate.\end{tabular} \\ \hline
+	\end{tabular}
+\end{table}
+
+\begin{center}
+Table 6.1
+\end{center}
+
+Some of these concepts are defined using type traits, some are a combination of other concepts or concepts and type traits, and some have, at least partially, an unspecified implementation. Here are some examples:
+
+\begin{lstlisting}[style=styleCXX]
+template < class T >
+concept integral = std::is_integral_v<T>;
+
+template < class T >
+concept signed_integral = std::integral<T> &&
+                          std::is_signed_v<T>;
+
+template <class T>
+concept regular = std::semiregular<T> &&
+                  std::equality_comparable<T>;
+\end{lstlisting}
+
+C++20 also introduces a new system of iterators, based on concepts, and defines a set of concepts in the <iterator> header. Some of these concepts are listed in the following table:
+
+\begin{table}[H]
+\centering
+	\begin{tabular}{|l|l|}
+		\hline
+		\textbf{Concept} &
+		\textbf{Description} \\ \hline
+		indirectly\_readable &
+		\begin{tabular}[c]{@{}l@{}}Defines the requirement that values of a type can be\\ read by applying the * operator.\end{tabular} \\ \hline
+		indirectly\_writable &
+		\begin{tabular}[c]{@{}l@{}}Defines the requirement that objects referenced by\\ an iterator type can be written to.\end{tabular} \\ \hline
+		input\_iterator &
+		\begin{tabular}[c]{@{}l@{}}Defines the requirement that a type is an input\\ iterator(supports reading, pre-, and post-increment).\end{tabular} \\ \hline
+		output\_iterator &
+		\begin{tabular}[c]{@{}l@{}}Defines the requirement that a type is an output\\ iterator(supports writing, pre-, and post-incremnet).\end{tabular} \\ \hline
+		forward\_iterator &
+		\begin{tabular}[c]{@{}l@{}}Defines the requirement that a type that is an\\ input\_iterator is also a forward iterator (supports\\ equality comparison and multi-pass)\end{tabular} \\ \hline
+		bidirectional\_iterator &
+		\begin{tabular}[c]{@{}l@{}}Defines the requirement that a type that is a \\ forward\_iterator is also a bidirectional iterator(\\ supportes moving backward).\end{tabular} \\ \hline
+		randon\_access\_iterator &
+		\begin{tabular}[c]{@{}l@{}}Defines the requirement that a type that is a \\ bidirectional\_iterator is also a random-access iterator\\ (supports subscripting and advancement in constant time).\end{tabular} \\ \hline
+		contiguous\_iterator &
+		\begin{tabular}[c]{@{}l@{}}Defines the requirement that a type that is a \\ random\_access\_iterator is also a contiguous iterator\\ (elements are stored in contiguous memory locations).\end{tabular} \\ \hline
+	\end{tabular}
+\end{table}
+
+\begin{center}
+Table 6.2
+\end{center}
+
+Here is how the random\_access\_iterator concept is defined in the C++ standard:
+
+\begin{lstlisting}[style=styleCXX]
+template<typename I>
+concept random_access_iterator =
+	std::bidirectional_iterator<I> &&
+	std::derived_from</*ITER_CONCEPT*/<I>,
+					  std::random_access_iterator_tag> &&
+	std::totally_ordered<I> &&
+	std::sized_sentinel_for<I, I> &&
+	requires(I i,
+			 const I j,
+			 const std::iter_difference_t<I> n)
+	{
+		{ i += n } -> std::same_as<I&>;
+		{ j + n } -> std::same_as<I>;
+		{ n + j } -> std::same_as<I>;
+		{ i -= n } -> std::same_as<I&>;
+		{ j - n } -> std::same_as<I>;
+		{ j[n] } -> std::same_as<std::iter_reference_t<I>>;
+	};
+\end{lstlisting}
+
+As you can see, it uses several concepts (some of them not listed here) as well as a requires expression to ensure that some expressions are well-formed.
+
+Also, in the <iterator> header, there is a set of concepts designed to simplify the constraining of general-purpose algorithms. Some of these concepts are listed in the next table:
+
+\begin{table}[H]
+\centering
+	\begin{tabular}{|l|l|}
+		\hline
+		\textbf{Concept} & \textbf{Description}                                                                                                            \\ \hline
+		indriectly\_movable &
+		\begin{tabular}[c]{@{}l@{}}Defines the requirement that values can be moved from\\ an indirectly\_readable type to an indrectly\_readable\\ type.\end{tabular} \\ \hline
+		indirectly\_copyable &
+		\begin{tabular}[c]{@{}l@{}}Defines the requirement that values can be copied from\\ an indirectly\_readable type to an indrectly\_copyable\\ type.\end{tabular} \\ \hline
+		mergeable &
+		\begin{tabular}[c]{@{}l@{}}Defines the requirements for algorithms that merge sorted\\ sequences into an output sequence by copying elements.\end{tabular} \\ \hline
+		sortable         & \begin{tabular}[c]{@{}l@{}}Defines the requirements for algorithms that modify\\ sequences into ordered sequences.\end{tabular} \\ \hline
+		permutable       & \begin{tabular}[c]{@{}l@{}}Defines the requirements for algorithms that reorder\\ elements in place.\end{tabular}               \\ \hline
+	\end{tabular}
+\end{table}
+
+\begin{center}
+Table 6.3
+\end{center}
+
+One of the several major features included in C++20 (along with concepts, modules, and coroutines) are ranges. The ranges library defines a series of classes and functions for simplifying operations with ranges. Among these is a set of concepts. These are defined in the <ranges> header and the std::ranges namespace. Some of these concepts are listed as follows:
+
+\begin{table}[H]
+\centering
+	\begin{tabular}{|l|l|}
+		\hline
+		\textbf{Concept} &
+		\textbf{Description} \\ \hline
+		range &
+		\begin{tabular}[c]{@{}l@{}}Defines the requirement that a type R is range, meaning\\ that it provides a begin iterator and an end sentinel.\end{tabular} \\ \hline
+		sized\_range &
+		\begin{tabular}[c]{@{}l@{}}Defines the requirement that a type R is range with the\\ size known in constant time.\end{tabular} \\ \hline
+		view &
+		\begin{tabular}[c]{@{}l@{}}Defines the requirement that a type T is a view, meaning\\ that it provides constant-time copy, move, and assignment\\ operations.\end{tabular} \\ \hline
+		input\_range &
+		\begin{tabular}[c]{@{}l@{}}Defines the requirement that a type R is a range whose\\ iterator type satisfies the input\_iterator concept.\end{tabular} \\ \hline
+		output\_range &
+		\begin{tabular}[c]{@{}l@{}}Defiens the requirement that a typt R is a range whose\\ iterator type satisfies the output\_iterator concept.\end{tabular} \\ \hline
+		forward\_range &
+		\begin{tabular}[c]{@{}l@{}}Defines the requirement that a type R is a range whose\\ iterator type satisfies the forward\_iterator concept.\end{tabular} \\ \hline
+		bidirectional\_range &
+		\begin{tabular}[c]{@{}l@{}}Defines the requirement that a type R is a range whose\\ iterator type satisfies the bidirectional\_iterator\\ concept.\end{tabular} \\ \hline
+		random\_access\_range &
+		\begin{tabular}[c]{@{}l@{}}Defines the requirement that a type R is a range whose\\ iterator type satisfies the random\_access\_iterator concept.\end{tabular} \\ \hline
+		contiguous\_range &
+		\begin{tabular}[c]{@{}l@{}}Defines the requirement that a type R is a range whose\\ iterator type satisfies the contiguous\_iterator concept.\end{tabular} \\ \hline
+	\end{tabular}
+\end{table}
+
+\begin{center}
+Table 6.4
+\end{center}
+
+Here is how some of these concepts are defined:
+
+\begin{lstlisting}[style=styleCXX]
+template< class T >
+concept range = requires( T& t ) {
+	ranges::begin(t);
+	ranges::end (t);
+};
+
+template< class T >
+concept sized_range = ranges::range<T> &&
+	requires(T& t) {
+		ranges::size(t);
+	};
+
+template< class T >
+concept input_range = ranges::range<T> &&
+	std::input_iterator<ranges::iterator_t<T>>;
+\end{lstlisting}
+
+As mentioned already, there are more concepts than those listed here. Others will probably be added in the future. This section is not intended as a complete reference to the standard concepts but rather as an introduction to them. You can learn more about each of these concepts from the official C++ reference documentation available at \url{https:// en.cppreference.com/}. As for ranges, we will learn more about them and explore what the standard library provides in Chapter 8, Ranges and Algorithms.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

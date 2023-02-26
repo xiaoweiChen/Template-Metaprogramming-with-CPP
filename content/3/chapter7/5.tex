@@ -1,1 +1,249 @@
+
+Tag dispatching is a technique that enables us to select one or another function overload at compile time. It is an alternative to std::enable\_if and SFINAE and is simple to understand and use. The term tag describes an empty class that has no members (data), or functions (behavior). Such a class is only used to define a parameter (usually the last) of a function to decide whether to select it at compiletime, depending on the supplied arguments. To better understand this, let’s consider an example.
+
+The standard library contains a utility function called std::advance that looks as follows:
+
+\begin{lstlisting}[style=styleCXX]
+template<typename InputIt, typename Distance>
+void advance(InputIt& it, Distance n);
+\end{lstlisting}
+
+Notice that in C++17, this is also constexpr (more about this, shortly). This function increments the given iterator by n elements. However, there are several categories of iterators (input, output, forward, bidirectional, and random access). That means such an operation can be computed differently:
+
+\begin{itemize}
+\item
+For input iterators, it could call operator++ a number of n times.
+
+\item
+For bidirectional iterators, it could call either operator++ a number of n times (if n is a positive number) or operator-- a number of n times (if n is a negative number).
+
+\item
+For random-access iterators, it can use the operator+= to increment it directly with n elements.
+\end{itemize}
+
+This implies there can be three different implementations, but it should be possible to select at compile-time which one is the best match for the category of the iterator it is called for. A solution for this is tag dispatching. And the first thing to do is define the tags. As mentioned earlier, tags are empty classes. Therefore, tags that correspond to the five iterator types can be defined as follows:
+
+\begin{lstlisting}[style=styleCXX]
+struct input_iterator_tag {};
+struct output_iterator_tag {};
+struct forward_iterator_tag : input_iterator_tag {};
+struct bidirectional_iterator_tag :
+	forward_iterator_tag {};
+struct random_access_iterator_tag :
+	bidirectional_iterator_tag {};
+\end{lstlisting}
+
+This is exactly how they are defined in the C++ standard library, in the std namespace. These tags will be used to define an additional parameter for each overload of std::advance, as shown next:
+
+\begin{lstlisting}[style=styleCXX]
+namespace std
+{
+	namespace details
+	{
+		template <typename Iter, typename Distance>
+		void advance(Iter& it, Distance n,
+		std::random_access_iterator_tag)
+		{
+			it += n;
+		}
+	
+		template <typename Iter, typename Distance>
+		void advance(Iter& it, Distance n,
+					 std::bidirectional_iterator_tag)
+		{
+			if (n > 0)
+			{
+				while (n--) ++it;
+			}
+			else
+			{
+				while (n++) --it;
+			}
+		}
+
+		template <typename Iter, typename Distance>
+		void advance(Iter& it, Distance n,
+				     std::input_iterator_tag)
+		{
+			while (n--)
+			{
+				++it;
+			}
+		}
+	}
+}
+\end{lstlisting}
+
+These overloads are defined in a separate (inner) namespace of the std namespace so that the standard namespace is not polluted with unnecessary definitions. You can see here that each of these overloads has three parameters: a reference to an iterator, a number of elements to increment (or decrement), and a tag.
+
+The last thing to do is provide a definition of an advance function that is intended for direct use. This function does not have a third parameter but calls one of these overloads by determining the category of the iterator it is called with. Its implementation may look as follows:
+
+\begin{lstlisting}[style=styleCXX]
+namespace std
+{
+	template <typename Iter, typename Distance>
+	void advance(Iter& it, Distance n)
+	{
+		details::advance(it, n,
+			typename std::iterator_traits<Iter>::
+								iterator_category{});
+	}
+}
+\end{lstlisting}
+
+The std::iterator\_traits class seen here defines a sort of interface for iterator types. For this purpose, it contains several member types, one of them being iterator\_category. This resolves to one of the iterator tags defined earlier, such as std::input\_iterator\_tag for input iterators or std::random\_access\_iterator\_tag for random access iterators. Therefore, based on the category of the supplied iterator, it instantiates one of these tag classes, determining the selection at compile-time of the appropriate overloaded implementation from the details namespace. We can invoke the std::advance function as follows:
+
+\begin{lstlisting}[style=styleCXX]
+std::vector<int> v{ 1,2,3,4,5 };
+auto sv = std::begin(v);
+std::advance(sv, 2);
+
+std::list<int> l{ 1,2,3,4,5 };
+auto sl = std::begin(l);
+std::advance(sl, 2);
+\end{lstlisting}
+
+The category type of the std::vector’s iterators is random access. On the other hand, the iterator category type for std::list is bidirectional. However, we can use a single function that relies on different optimized implementations by leveraging the technique of tag dispatching.
+
 \subsubsubsection{7.5.1\hspace{0.2cm}Alternatives to tag dispatching}
+
+Prior to C++17, the only alternative to tag dispatching was SFINAE with enable\_if. We have discussed this topic in Chapter 5, Type Traits and Conditional Compilation. This is a rather legacy technique that has better alternatives in modern C++. These alternatives are constexpr if and concepts. Let’s discuss them one at a time.
+
+\noindent
+\hspace*{\fill} \\ %插入空行
+\textbf{Using constexpr if}
+
+C++11 introduced the concept of constexpr values, which are values known at compile-time but also constexpr functions that are functions that could be evaluated at compile-time (if all inputs are compile-time values). In C++14, C++17, and C++20, many standard library functions or member functions of standard library classes have been changed to be constexpr. One of these is std::advance, whose implementation in C++17 is based on the constexpr if feature, also added in C++17 (which was discussed in Chapter 5, Type Traits and Conditional Compilation).
+
+The following is a possible implementation in C++17:
+
+\begin{lstlisting}[style=styleCXX]
+template<typename It, typename Distance>
+constexpr void advance(It& it, Distance n)
+{
+	using category =
+	typename std::iterator_traits<It>::iterator_category;
+	static_assert(std::is_base_of_v<std::input_iterator_tag,
+	category>);
+	auto dist =
+	typename std::iterator_traits<It>::difference_type(n);
+	if constexpr (std::is_base_of_v<
+	std::random_access_iterator_tag,
+	category>)
+	{
+		it += dist;
+	}
+	else
+	{
+		while (dist > 0)
+		{
+			--dist;
+			++it;
+		}
+		if constexpr (std::is_base_of_v<
+						std::bidirectional_iterator_tag,
+						category>)
+		{
+			while (dist < 0)
+			{
+				++dist;
+				--it;
+			}
+		}
+	}
+}
+\end{lstlisting}
+
+Although this implementation still uses the iterator tags that we saw earlier, they are no longer used to invoke different overloaded functions but to determine the value of some compile-time expressions. The std::is\_base\_of type trait (through the std::is\_base\_of\_v variable template) is used to determine the type of the iterator category at compile-time.
+
+This implementation has several advantages:
+
+\begin{itemize}
+\item
+Has a single implementation of the algorithm (in the std namespace)
+
+\item
+Does not require multiple overloads with implementation details defined in a separate namespace
+\end{itemize}
+
+The client code is unaffected. Therefore, library implementors were able to replace the previous version based on tag dispatching with the new version based on constexpr if, without affecting any line of code calling std::advance.
+
+However, in C++20 there is an even better alternative. Let’s explore it next.
+
+\noindent
+\hspace*{\fill} \\ %插入空行
+\textbf{Using concepts}
+
+The previous chapter was dedicated to constraints and concepts, introduced in C++20. We have seen not only how these features work but also some of the concepts that the standard library defines in several headers such as <concepts> and <iterator>. Some of these concepts specify that a type is some iterator category. For instance, std::input\_iterator specifies that a type is an input iterator. Similarly, the following concepts are also defined: std::output\_iterator, std::forward\_iterator, std::bidirectional\_iterator, std::random\_access\_iterator, and std::contiguous\_iterator (the last one indicating that an iterator is a randomaccess iterator, referring to elements that are stored contiguously in memory).
+
+The std::input\_iterator concept is defined as follows:
+
+\begin{lstlisting}[style=styleCXX]
+template<class I>
+	concept input_iterator =
+		std::input_or_output_iterator<I> &&
+		std::indirectly_readable<I> &&
+		requires { typename /*ITER_CONCEPT*/<I>; } &&
+		std::derived_from</*ITER_CONCEPT*/<I>,
+						  std::input_iterator_tag>;
+\end{lstlisting}
+
+Without getting into too many details, it is worth noting that this concept is a set of constraints that verify the following:
+
+\begin{itemize}
+\item
+The iterator is dereferenceable (supports *i) and is incrementable (supports ++i and i++)
+
+\item
+The iterator category is derived from std::input\_iterator\_tag.
+\end{itemize}
+
+This means that the category check is performed within the constraint. Therefore, these concepts are still based on the iterator tags, but the technique is significantly different than tag dispatching. As a result, in C++20, we could have yet another implementation for the std::advance algorithm, as follows:
+
+\begin{lstlisting}[style=styleCXX]
+template <std::random_access_iterator Iter, class Distance>
+void advance(Iter& it, Distance n)
+{
+	it += n;
+}
+
+template <std::bidirectional_iterator Iter, class Distance>
+void advance(Iter& it, Distance n)
+{
+	if (n > 0)
+	{
+		while (n--) ++it;
+	}
+	else
+	{
+		while (n++) --it;
+	}
+}
+
+template <std::input_iterator Iter, class Distance>
+void advance(Iter& it, Distance n)
+{
+	while (n--)
+	{
+		++it;
+	}
+}
+\end{lstlisting}
+
+There are a couple of things to notice here:
+
+\begin{itemize}
+\item
+There are yet again three different overloads of the advanced function.
+
+\item
+These overloads are defined in the std namespace and do not require a separate namespace to hide implementation details.
+\end{itemize}
+
+Although we explicitly wrote several overloads again, this solution is arguably easier to read and understand than the one based on constexpr if because the code is nicely separated into different units (functions), making it easier to follow.
+
+Tag dispatching is an important technique for selecting between overloads at compiletime. It has its trade-offs but also better alternatives if you are using C++17 or C++20. If your compiler supports concepts, you should prefer this alternative for the reasons mentioned earlier.
+
+The next pattern we will look at in this chapter is expression templates.
+
+

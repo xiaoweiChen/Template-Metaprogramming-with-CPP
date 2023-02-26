@@ -1,0 +1,109 @@
+As you well know, apart from function templates and class templates we also have variable templates and alias templates in C++. These make no exception of the need to define constraints. The same rules for constraining the template arguments discussed so far apply to these two. In this section, we will demonstrate them shortly. Let’s start with variable templates.
+
+It is a typical example to define the PI constant for showing how variable templates work. Indeed, it is a simple definition that looks as follows:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+constexpr T PI = T(3.1415926535897932385L);
+\end{lstlisting}
+
+However, this only makes sense for floating-point types (and maybe other types such as decimal, which does not exist in C++ yet). Therefore, this definition should be restricted to floating-point types, as follows:
+
+\begin{lstlisting}[style=styleCXX]
+template <std::floating_point T>
+constexpr T PI = T(3.1415926535897932385L);
+
+std::cout << PI<double> << '\n'; // OK
+std::cout << PI<int> << '\n'; // error
+\end{lstlisting}
+
+The use of PI<double> is correct but PI<int> produces a compiler error. This is what constraints can provide in a simple and readable manner.
+
+Finally, the last category of templates that we have in the language, alias templates, can also be constrained. In the following snippet, we can see such an example:
+
+\begin{lstlisting}[style=styleCXX]
+template <std::integral T>
+using integral_vector = std::vector<T>;
+\end{lstlisting}
+
+The integral\_vector template is an alias for std::vector<T> when T is an integral type. The very same can be achieved with the following alternative, although longer, declaration:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+requires std::integral<T>
+using integral_vector = std::vector<T>;
+\end{lstlisting}
+
+We can use this integral\_vector alias template as follows:
+
+\begin{lstlisting}[style=styleCXX]
+integral_vector<int> v1 { 1,2,3 }; // OK
+integral_vector<double> v2 {1.0, 2.0, 3.0}; // error
+\end{lstlisting}
+
+Defining the v1 object works fine since int is an integral type. However, defining the v2 vector generates a compiler error because double is not an integral type.
+
+If you paid attention to the examples in this section, you will have noticed that they don’t use the type traits (and the associated variable templates) we used previously in the chapter, but a couple of concepts: std::integral and std::floating\_point. These are defined in the <concepts> header and help us avoid repeatedly defining the same concepts based on available C++11 (or newer) type traits. We will look at the content of the standard concepts library shortly. Before we do that, let’s see what other ways we can employ to define constraints in C++20.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

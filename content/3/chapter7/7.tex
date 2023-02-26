@@ -1,3 +1,526 @@
+
+A type list (also spelled typelist) is a compile-time construct that enables us to manage a sequence of types. A typelist is somehow similar to a tuple but does not store any data. A typelist only carries type information and is used exclusively at compile-time for implementing different metaprogramming algorithms, type switches, or design patterns such as Abstract Factory or Visitor.
+
+\begin{tcolorbox}[breakable,enhanced jigsaw,colback=blue!5!white,colframe=blue!75!black,title={Important Note}]
+Although both the type list and typelist spellings are in use, most of the time you will find the term typelist in C++ books and articles. Therefore, this will be the form we will use in this book.
+\end{tcolorbox}
+
+Typelists were popularized by Andrei Alexandrescu in his book, Modern C++ Design, published a decade before the release of C++11 (and variadic templates). Alexandrescu defined a typelist as follows:
+
+\begin{lstlisting}[style=styleCXX]
+template <class T, class U>
+struct Typelist
+{
+	typedef T Head;
+	typedef U Tail;
+};
+\end{lstlisting}
+
+In his implementation, a typelist is composed of a head—which is a type, and a tail— which is another typelist. In order to perform various operations on the typelist (which will be discussed shortly) we also need a type to represent the end of the typelist. This can be a simple, empty type that Alexandrescu defined as follows:
+
+\begin{lstlisting}[style=styleCXX]
+class null_typelist {};
+\end{lstlisting}
+
+Having these two constructs, we can define typelists in the following way:
+
+\begin{lstlisting}[style=styleCXX]
+typedef Typelist<int,
+				 Typelist<double, null_typelist>> MyList;
+\end{lstlisting}
+
+Variadic templates make the implementation of typelists simpler, as shown in the next snippet:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename ... Ts>
+struct typelist {};
+
+using MyList = typelist<int, double>;
+\end{lstlisting}
+
+The implementation of operations of typelists (such as accessing a type at a given index, adding or removing types from the list, and so on) differs significantly depending on the selected approach. In this book, we will only consider the variadic template version. The advantage of this approach is simplicity at different levels: the definition of the typelist is shorter, there is no need for a type to represent the end of the list, and defining typelist aliases is also shorter and easier to read.
+
+Today, perhaps many of the problems for which typelists represented the solution can be also solved using variadic templates. However, there are still scenarios where typelists are required. Here is an example: let’s consider a variadic metafunction (a type trait that performs a transformation of types) that does some transformation (such as adding the const qualifier) to the type template arguments. This metafunction defines a member type that represents the input types and one that represents the transformed types. If you try to define it as follows, it will not work:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename ... Ts>
+struct transformer
+{
+	using input_types = Ts...;
+	using output_types = std::add_const_t<Ts>...;
+};
+\end{lstlisting}
+
+This code produces compiler errors, because the expansion of the parameter pack is not possible in this context. This is a topic we discussed in Chapter 3, Variadic Templates. The solution to this is to use a typelist, as follows:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename ... Ts>
+struct transformer
+{
+	using input_types = typelist<Ts...>;
+	using output_types = typelist<std::add_const_t<Ts>...>;
+};
+
+static_assert(
+	std::is_same_v<
+		transformer<int, double>::output_types,
+		typelist<int const, double const>>);
+\end{lstlisting}
+
+The change is minimal but produces the expected result. Although this is a good example of where typelists are needed, it’s not a typical example of where typelists are used. We will look at such an example next.
+
 \subsubsubsection{7.7.1\hspace{0.2cm}Using typelists}
 
+It’s worth exploring a more complex example before we look at how to implement operations on typelists. This should give you an understanding of the possible usage of typelists, although you can always search for more online.
+
+Let’s return to the example of the game units. For simplicity, we’ll only consider the following class:
+
+\begin{lstlisting}[style=styleCXX]
+struct game_unit
+{
+	int attack;
+	int defense;
+};
+\end{lstlisting}
+
+A game unit has two data members representing indices (or levels) for attacking and defending. We want to operate changes on these members with the help of some functors. Two such functions are shown in the following listing:
+
+\begin{lstlisting}[style=styleCXX]
+struct upgrade_defense
+{
+	void operator()(game_unit& u)
+	{
+		u.defense = static_cast<int>(u.defense * 1.2);
+	}
+};
+struct upgrade_attack
+{
+	void operator()(game_unit& u)
+	{
+		u.attack += 2;
+	}
+};
+\end{lstlisting}
+
+The first increases the defense index by 20\%, while the second increases the attack index by two units. Although this is a small example meant to demonstrate the use case, you can imagine a larger variety of functors like this that could be applied in some well-defined combinations. In our example, however, we want to apply these two functors on a game\_unit object. We’d like to have a function as follows:
+
+\begin{lstlisting}[style=styleCXX]
+void upgrade_unit(game_unit& unit)
+{
+	using upgrade_types =
+		typelist<upgrade_defense, upgrade_attack>;
+	apply_functors<upgrade_types>{}(unit);
+}
+\end{lstlisting}
+
+This upgrade\_unit function takes a game\_unit object and applies the upgrade\_defense and upgrade\_attack functors to it. For this, it uses another helper functor called apply\_functors. This is a class template that has a single template argument. This template argument is a typelist. A possible implementation for the apply\_functors functor is shown next:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename TL>
+struct apply_functors
+{
+	private:
+	template <size_t I>
+	static void apply(game_unit& unit)
+	{
+		using F = at_t<I, TL>;
+		std::invoke(F{}, unit);
+	}
+
+	template <size_t... I>
+	static void apply_all(game_unit& unit,
+	{
+		(apply<I>(unit), ...);
+	}
+
+public:
+	void operator()(game_unit& unit) const
+	{
+		apply_all(unit,
+		std::make_index_sequence<length_v<TL>>{});
+	}
+};
+\end{lstlisting}
+
+This class template has an overloaded call operator and two private helper functions:
+
+\begin{itemize}
+\item
+apply, which applies the functor from the I index of the typelist to a game\_unit object.
+
+\item
+apply\_all, which applies all the functors in the typelist to a game\_unit object by using the apply function in a pack expansion.
+\end{itemize}
+
+We can use the upgrade\_unit function as follows:
+
+\begin{lstlisting}[style=styleCXX]
+game_unit u{ 100, 50 };
+std::cout << std::format("{},{}\n", u.attack, u.defense);
+// prints 100,50
+
+upgrade_unit(u);
+std::cout << std::format("{},{}\n", u.attack, u.defense);
+// prints 102,60
+\end{lstlisting}
+
+If you paid attention to the implementation of the apply\_functors class template, you will have noticed the use of the at\_t alias template and the length\_v variable template, which we have not defined yet. We will look at these two and more in the next section.
+
 \subsubsubsection{7.7.2\hspace{0.2cm}Implementing operations on typelists}
+
+A typelist is a type that only carries valuable information at compile-time. A typelist acts as a container for other types. When you work with typelists, you need to perform various operations, such as counting the types in the list, accessing a type at a given index, adding a type at the beginning or the end of the list, or the reverse operation, removing a type from the beginning or the end of the list, and so on. If you think about it, these are typical operations you’d use with a container such as a vector. Therefore, in this section, we’ll discuss how to implement the following operations:
+
+\begin{itemize}
+\item
+size: Determines the size of the list
+
+\item
+front: Retrieves the first type in the list
+
+\item
+back: Retrieves the last type in the list
+
+\item
+at: Retrieves the type at the specified index in the list
+
+\item
+push\_back: Adds a new type to the end of the list
+
+\item
+push\_front: Adds a new type to the beginning of the list
+
+\item
+pop\_back: Removes the type at the end of the list
+
+\item
+pop\_front: Removes the type at the beginning of the list
+\end{itemize}
+
+A typelist is a compile-time construct. It is an immutable entity. Therefore, the operations that add or remove a type do not modify a typelist but create a new one. We’ll see that shortly. But first, let’s start with the simplest operation, which is retrieving the size of a typelist.
+
+To avoid naming confusion with the size\_t type, we’ll call this operation lenght\_t, and not size\_t. We can define this as follows:
+
+\begin{lstlisting}[style=styleCXX]
+namespace detail
+{
+	template <typename TL>
+	struct length;
+	
+	template <template <typename...> typename TL,
+			  typename... Ts>
+	struct length<TL<Ts...>>
+	{
+		using type =
+		std::integral_constant<std::size_t, sizeof...(Ts)>;
+	};
+}
+
+template <typename TL>
+using length_t = typename detail::length<TL>::type;
+
+template <typename TL>
+constexpr std::size_t length_v = length_t<TL>::value;
+\end{lstlisting}
+
+In the detail namespace, we have a class template called length. There is a primary template (without a definition) and a specialization for a typelist. This specialization defines a member type called type that is a std::integral\_constant, with a value of the type std::size\_t representing the number of arguments in the parameter pack Ts. Furthermore, we have an alias template, length\_h, that is an alias for the member called type of the length class template. Finally, we have a variable template called length\_v that is initialized from the value of the std::integral\_constant member, which is also called value.
+
+We can verify the correctness of this implementation with the help of some static\_assert statements, as follows:
+
+\begin{lstlisting}[style=styleCXX]
+static_assert(
+	length_t<typelist<int, double, char>>::value == 3);
+static_assert(length_v<typelist<int, double, char>> == 3);
+static_assert(length_v<typelist<int, double>> == 2);
+static_assert(length_v<typelist<int>> == 1);
+\end{lstlisting}
+
+The approach used here will be used for defining all the other operations. Let’s look next at accessing the front type in the list. This is shown in the next listing:
+
+\begin{lstlisting}[style=styleCXX]
+struct empty_type {};
+namespace detail
+{
+	template <typename TL>
+	struct front_type;
+	
+	template <template <typename...> typename TL,
+			  typename T, typename... Ts>
+	struct front_type<TL<T, Ts...>>
+	{
+		using type = T;
+	};
+
+	template <template <typename...> typename TL>
+	struct front_type<TL<>>
+	{
+		using type = empty_type;
+	};
+}
+
+template <typename TL>
+using front_t = typename detail::front_type<TL>::type;
+\end{lstlisting}
+
+In the detail namespace, we have a class template called front\_type. Again, we declared a primary template but without a definition. However, we have two specializations: one for a typelist that contains at least one type and one for an empty typelist. In the former case, the type member is aliasing the first type in the typelist. In the latter case, there is no type so the type member is aliasing a type called empty\_type. This is an empty class whose only role is to act as the return type for operations where no type is to be returned. We can verify the implementation as follows:
+
+\begin{lstlisting}[style=styleCXX]
+static_assert(
+	std::is_same_v<front_t<typelist<>>, empty_type>);
+static_assert(
+	std::is_same_v<front_t<typelist<int>>, int>);
+static_assert(
+	std::is_same_v<front_t<typelist<int, double, char>>,
+				   int>);
+\end{lstlisting}
+
+If you expect the implementation of the operation for accessing the back type to be similar, you will not be disappointed. Here is how it looks:
+
+\begin{lstlisting}[style=styleCXX]
+namespace detail
+{
+	template <typename TL>
+	struct back_type;
+	
+	template <template <typename...> typename TL,
+			  typename T, typename... Ts>
+	struct back_type<TL<T, Ts...>>
+	{
+		using type = back_type<TL<Ts...>>::type;
+	};
+
+	template <template <typename...> typename TL,
+	          typename T>
+	struct back_type<TL<T>>
+	{
+		using type = T;
+	};
+
+	template <template <typename...> typename TL>
+	struct back_type<TL<>>
+	{
+		using type = empty_type;
+	};
+}
+
+template <typename TL>
+using back_t = typename detail::back_type<TL>::type;
+\end{lstlisting}
+
+The only significant difference with this implementation is that there are three specializations of the back\_type class template and there is recursion involved. The three specializations are for an empty typelist, a typelist with a single type, and a typelist with two or more types. The last one (which is actually the first in the previous listing) is using template recursion in the definition of its type member. We have seen how this works in Chapter 4, Advanced Template Concepts. To ensure we implemented the operation the right way we can do some validation as follows:
+
+\begin{lstlisting}[style=styleCXX]
+static_assert(
+	std::is_same_v<back_t<typelist<>>, empty_type>);
+static_assert(
+	std::is_same_v<back_t<typelist<int>>, int>);
+static_assert(
+	std::is_same_v<back_t<typelist<int, double, char>>,
+				   char>);
+\end{lstlisting}
+
+Apart from accessing the first and last type in a typelist, we are also interested in accessing a type at any given index. However, the implementation of this operation is less trivial. Let’s see it first:
+
+\begin{lstlisting}[style=styleCXX]
+namespace detail
+{
+	template <std::size_t I, std::size_t N, typename TL>
+	struct at_type;
+	
+	template <std::size_t I, std::size_t N,
+			  template <typename...> typename TL,
+			  typename T, typename... Ts>
+	struct at_type<I, N, TL<T, Ts...>>
+	{
+		using type =
+		std::conditional_t<
+		I == N,
+		T,
+		typename at_type<I, N + 1, TL<Ts...>>::type>;
+	};
+
+	template <std::size_t I, std::size_t N>
+	struct at_type<I, N, typelist<>>
+	{
+		using type = empty_type;
+	};
+}
+
+template <std::size_t I, typename TL>
+using at_t = typename detail::at_type<I, 0, TL>::type;
+\end{lstlisting}
+
+The at\_t alias template has two template arguments: an index and a typelist. The at\_t template is an alias for the member type of the at\_type class template from the detail namespace. The primary template has three template parameters: an index representing the position of the type to retrieve (I), another index representing the current position in the iteration of the types in the list (N), and a typelist (TL).
+
+There are two specializations of this primary template: one for a typelist that contains at least one type and one for an empty typelist. In the latter case, the member type is aliasing the empty\_type type. In the former case, the member type is defined with the help of the std::conditional\_t metafunction. This defines its member type as the first type (T) when I == N, or as the second type (typename at\_type<I, N + 1, TL<Ts...>{}>::type) when this condition is false. Here, again, we employ template recursion, incrementing the value of the second index with each iteration. The following static\_assert statements validate the implementation:
+
+\begin{lstlisting}[style=styleCXX]
+static_assert(
+	std::is_same_v<at_t<0, typelist<>>, empty_type>);
+static_assert(
+	std::is_same_v<at_t<0, typelist<int>>, int>);
+static_assert(
+	std::is_same_v<at_t<0, typelist<int, char>>, int>);
+	
+static_assert(
+	std::is_same_v<at_t<1, typelist<>>, empty_type>);
+static_assert(
+	std::is_same_v<at_t<1, typelist<int>>, empty_type>);
+static_assert(
+	std::is_same_v<at_t<1, typelist<int, char>>, char>);
+	
+static_assert(
+	std::is_same_v<at_t<2, typelist<>>, empty_type>);
+static_assert(
+	std::is_same_v<at_t<2, typelist<int>>, empty_type>);
+static_assert(
+	std::is_same_v<at_t<2, typelist<int, char>>,
+				   empty_type>);
+\end{lstlisting}
+
+The next category of operations to implement is adding a type to the beginning and the end of a typelist. We call these push\_back\_t and push\_front\_t and their definitions are as follows:
+
+\begin{lstlisting}[style=styleCXX]
+namespace detail
+{
+	template <typename TL, typename T>
+	struct push_back_type;
+	
+	template <template <typename...> typename TL,
+			  typename T, typename... Ts>
+	struct push_back_type<TL<Ts...>, T>
+	{
+		using type = TL<Ts..., T>;
+	};
+
+	template <typename TL, typename T>
+	struct push_front_type;
+	
+	template <template <typename...> typename TL,
+			  typename T, typename... Ts>
+	struct push_front_type<TL<Ts...>, T>
+	{
+		using type = TL<T, Ts...>;
+	};
+}
+
+template <typename TL, typename T>
+using push_back_t =
+	typename detail::push_back_type<TL, T>::type;
+	
+template <typename TL, typename T>
+using push_front_t =
+	typename detail::push_front_type<TL, T>::type;
+\end{lstlisting}
+
+Based on what we have seen so far with the previous operations, these should be straightforward to understand. The opposite operations, when we remove the first or last type from a typelist, are more complex though. The first one, pop\_front\_t, looks as follows:
+
+\begin{lstlisting}[style=styleCXX]
+namespace detail
+{
+	template <typename TL>
+	struct pop_front_type;
+	
+	template <template <typename...> typename TL,
+	          typename T, typename... Ts>
+	struct pop_front_type<TL<T, Ts...>>
+	{
+		using type = TL<Ts...>;
+	};
+
+	template <template <typename...> typename TL>
+	struct pop_front_type<TL<>>
+	{
+		using type = TL<>;
+	};
+}
+
+template <typename TL>
+using pop_front_t =
+	typename detail::pop_front_type<TL>::type;
+\end{lstlisting}
+
+We have the primary template, pop\_front\_type, and two specializations: the first for a typelist with at least one type, and the second for an empty typelist. The latter defines the member type as an empty list; the former defines the member type as a typelist with the tail composed from the typelist argument.
+
+The last operation, removing the last type in a typelist, called pop\_back\_t, is implemented as follows:
+
+\begin{lstlisting}[style=styleCXX]
+namespace detail
+{
+	template <std::ptrdiff_t N, typename R, typename TL>
+	struct pop_back_type;
+	
+	template <std::ptrdiff_t N, typename... Ts,
+			  typename U, typename... Us>
+	struct pop_back_type<N, typelist<Ts...>,
+							typelist<U, Us...>>
+	{
+		using type =
+			typename pop_back_type<N - 1,
+									typelist<Ts..., U>,
+									typelist<Us...>>::type;
+	};
+
+	template <typename... Ts, typename... Us>
+	struct pop_back_type<0, typelist<Ts...>,
+							typelist<Us...>>
+	{
+		using type = typelist<Ts...>;
+	};
+
+	template <typename... Ts, typename U, typename... Us>
+	struct pop_back_type<0, typelist<Ts...>,
+							typelist<U, Us...>>
+	{
+		using type = typelist<Ts...>;
+	};
+
+	template <>
+	struct pop_back_type<-1, typelist<>, typelist<>>
+	{
+		using type = typelist<>;
+	};
+}
+
+template <typename TL>
+using pop_back_t = typename detail::pop_back_type<
+	static_cast<std::ptrdiff_t>(length_v<TL>)-1,
+				typelist<>, TL>::type;
+\end{lstlisting}
+
+For implementing this operation, we need to start with a typelist and recursively construct another typelist, element by element, until we get to the last type in the input typelist, which should be omitted. For this, we use a counter that tells us how many times we iterated the typelist.
+
+This is initiated with the size of the typelist minus one and we need to stop when we reach zero. For this reason, the pop\_back\_type class template has four specializations, one for the general case when we are at some iteration in the typelist, two for the case when the counter reached zero, and one for the case when the counter reached the value minus one. This is the case when the initial typelist was empty (therefore, length\_t<TL> - 1 would evaluate to -1). Here are some asserts that show how to use pop\_back\_t and validate its correctness:
+
+\begin{lstlisting}[style=styleCXX]
+static_assert(std::is_same_v<pop_back_t<typelist<>>,
+							 typelist<>>);
+static_assert(std::is_same_v<pop_back_t<typelist<double>>,
+							 typelist<>>);
+static_assert(
+	std::is_same_v<pop_back_t<typelist<double, char>>,
+							  typelist<double>>);
+static_assert(
+	std::is_same_v<pop_back_t<typelist<double, char, int>>,
+							  typelist<double, char>>);
+\end{lstlisting}
+
+With these defined, we have provided a series of operations that are necessary for working with typelists. The length\_t and at\_t operations were used in the example shown earlier with the execution of functors on game\_unit objects. Hopefully, this section provided a helpful introduction to typelists and enabled you to understand not only how they are implemented but also how they can be used.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

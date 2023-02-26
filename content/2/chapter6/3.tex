@@ -1,7 +1,367 @@
-\subsubsubsection{6.3.1\hspace{0.2cm}Exploring requires expressions}
+
+A requires expression may be a complex expression, as seen earlier in the example with the container concept. The actual form of a requires expression is very similar to function syntax and is as follows:
+
+\begin{lstlisting}[style=styleCXX]
+requires (parameter-list) { requirement-seq }
+\end{lstlisting}
+
+The parameter-list is a comma-separated list of parameters. The only difference from a function declaration is that default values are not allowed. However, the parameters that are specified in this list do not have storage, linkage, or lifetime. The compiler does not allocate any memory for them; they are only used to define requirements. However, they do have a scope, and that is the closing curly brace of the requires expression.
+
+The requirements-seq is a sequence of requirements. Each such requirement must end with a semicolon, like any statement in C++. There are four types of requirements:
+
+\begin{itemize}
+\item
+Simple requirements
+
+\item
+Type requirements
+
+\item
+Compound requirements
+
+\item
+Nested requirements
+\end{itemize}
+
+These requirements may refer to the following:
+
+\begin{itemize}
+\item
+Template parameters that are in scope
+
+\item
+Local parameters introduced in the parameter list of the requires expression
+
+\item
+Any other declaration that is visible from the enclosing context
+\end{itemize}
+
+In the following subsections, we will explore all the mentioned types of requirements. In the beginning, we’ll look at the simple requirements.
+
+\subsubsubsection{6.3.1\hspace{0.2cm}Simple requirements}
+
+A simple requirement is an expression that is not evaluated but only checked for correctness. The expression must be valid for the requirement to be evaluated to the value true. The expression must not start with the requires keyword as that defines a nested requirement (which will be discussed later).
+
+We already saw examples of simple statements when we defined the arithmetic and container concepts earlier. Let’s see a few more:
+
+\begin{lstlisting}[style=styleCXX]
+template<typename T>
+concept arithmetic = requires
+{
+	std::is_arithmetic_v<T>;
+};
+
+template <typename T>
+concept addable = requires(T a, T b)
+{
+	a + b;
+};
+
+template <typename T>
+concept logger = requires(T t)
+{
+	t.error("just");
+	t.warning("a");
+	t.info("demo");
+};
+\end{lstlisting}
+
+The first concept, arithmetic, is the same one we defined earlier. The std::is\_arithmetic\_v<T> expression is a simple requirement. Notice that when the parameter list is empty it can be completely omitted, as seen in this case, where we only check that the T type template parameter is an arithmetic type.
+
+The addable and logger concepts both have a parameter list because we are checking operations on values of the T type. The expression a + b is a simple requirement, as the compiler just checks that the plus operator is overloaded for the T type. In the last example, we make sure that the T type has three member functions called error, warning, and info that take a single parameter of the const char* type or some type that can be constructed from const char*. Keep in mind that the actual values passed as arguments have no importance since these calls are never performed; they are only checked for correctness.
+
+Let’s elaborate briefly on the last example and consider the following snippet:
+
+\begin{lstlisting}[style=styleCXX]
+template <logger T>
+void log_error(T& logger)
+{}
+
+struct console_logger
+{
+	void error(std::string_view text){}
+	void warning(std::string_view text) {}
+	void info(std::string_view text) {}
+};
+
+struct stream_logger
+{
+	void error(std::string_view text, bool = false) {}
+	void warning(std::string_view text, bool = false) {}
+	void info(std::string_view text, bool) {}
+};
+\end{lstlisting}
+
+The log\_error function template requires an argument of a type that meets the logger requirements. We have two classes, called console\_logger and stream\_logger. The first meets the logger requirements, but the second does not. That is because the info function cannot be invoked with a single argument of type const char*. This function also requires a second, Boolean, argument. The first two methods, error and warning, define a default value for the second argument, so they can be invoked with calls such as t.error("just") and warning("a").
+
+However, because of the third member function, stream\_logger is not a log class that meets the expected requirements and, therefore, cannot be used with the log\_error function. The use of console\_logger and stream\_logger is exemplified in the following snippet:
+
+\begin{lstlisting}[style=styleCXX]
+console_logger cl;
+log_error(cl); // OK
+
+stream_logger sl;
+log_error(sl); // error
+\end{lstlisting}
+
+In the next section, we look at the second category of requirements, type requirements.
 
 \subsubsubsection{6.3.2\hspace{0.2cm}Type requirements}
 
+Type requirements are introduced with the keyword typename followed by the name of a type. We have already seen several examples when we defined the container constraint. The name of the type must be valid for the requirement to be true. Type requirements can be used for several purposes:
+
+\begin{itemize}
+\item
+To verify that a nested type exists (such as in typename T::value\_type;)
+
+\item
+To verify that a class template specialization names a type
+
+\item
+To verify that an alias template specialization names a type
+\end{itemize}
+
+Let’s see several examples to learn how to use type requirements. In the first example, we check whether a type contains the inner types, key\_type and value\_type:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+concept KVP = requires
+{
+	typename T::key_type;
+	typename T::value_type;
+};
+
+template <typename T, typename V>
+struct key_value_pair
+{
+	using key_type = T;
+	using value_type = V;
+	
+	key_type key;
+	value_type value;
+};
+
+static_assert(KVP<key_value_pair<int, std::string>>);
+static_assert(!KVP<std::pair<int, std::string>>);
+\end{lstlisting}
+
+The type, key\_value\_pair<int, std::string>, satisfies these type requirements, but std::pair<int, std::string> does not. The std::pair type does have inner types, but they are called first\_type and second\_type.
+
+In the second example, we check whether a class template specialization names a type. The class template is container, and the specialization is container<T>:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+requires std::is_arithmetic_v<T>
+struct container
+{ /* ... */ };
+
+template <typename T>
+concept containerizeable = requires {
+	typename container<T>;
+};
+
+static_assert(containerizeable<int>);
+static_assert(!containerizeable<std::string>);
+\end{lstlisting}
+
+In this snippet, container is a class template that can only be specialized for arithmetic types, such as int, long, float, or double. Therefore, specializations such as container<int> exist, but container<std::string> does not. The containerizeable concept specifies a requirement for a type T to define a valid specialization of container. Therefore, containerizeable<int> is true, but containerizeable<std::string> is false.
+
+Now that we have understood simple requirements and type requirements it is time to explore the more complex category of requirements. The first to look at is compound requirements.
+
 \subsubsubsection{6.3.3\hspace{0.2cm}Compound requirements}
 
+Simple requirements allow us to verify that an expression is valid. However, sometimes we need to verify some properties of an expression not just that it is valid. This can include whether an expression does not throw exceptions or requirements on the result type (such as the return type of a function). The general form is the following:
+
+\begin{lstlisting}[style=styleCXX]
+{ expression } noexcept -> type_constraint;
+\end{lstlisting}
+
+Both the noexcept specification and the type\_constraint (with the leading ->) are optional. The substitution process and the checking of the constraints occur as follows:
+
+\begin{enumerate}
+\item
+The template arguments are substituted in the expression.
+
+\item
+If noexcept is specified, then the expression must not throw exceptions; otherwise, the requirement is false.
+
+\item
+If the type constraint is present, then the template arguments are also substituted into type\_contraint and decltype((expression)) must satisfy the conditions imposed by type\_constraint; otherwise, the requirement is false.
+\end{enumerate}
+
+We will discuss a couple of examples to learn how to use compound requirements. In the first example, we check whether a function is marked with the noexcept specifier:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+void f(T) noexcept {}
+
+template <typename T>
+void g(T) {}
+
+template <typename F, typename ... T>
+concept NonThrowing = requires(F && func, T ... t)
+{
+	{func(t...)} noexcept;
+};
+
+template <typename F, typename ... T>
+	requires NonThrowing<F, T...>
+void invoke(F&& func, T... t)
+{
+	func(t...);
+}
+\end{lstlisting}
+
+In this snippet, there are two function templates: f is declared noexcept; therefore, it shall not throw any exception, and g, which potentially throws exceptions. The NonThrowing concept imposes the requirement that the variadic function of type F must not throw exceptions. Therefore, of the following two invocations, only the first is valid and the second will produce a compiler error:
+
+\begin{lstlisting}[style=styleCXX]
+invoke(f<int>, 42);
+invoke(g<int>, 42); // error
+\end{lstlisting}
+
+The error messages generated by Clang are shown in the following listing:
+
+\begin{tcblisting}{commandshell={}}
+prog.cc:28:7: error: no matching function for call to 'invoke'
+      invoke(g<int>, 42);
+       ^~~~~~
+prog.cc:18:9: note: candidate template ignored: constraints not
+satisfied [with F = void (&)(int), T = <int>]
+   void invoke(F&& func, T... t)
+          ^
+prog.cc:17:16: note: because 'NonThrowing<void (&)(int), int>'
+evaluated to false
+      requires NonThrowing<F, T...>
+                  ^
+prog.cc:13:20: note: because 'func(t)' may throw an exception
+      {func(t...)} noexcept;
+                       ^
+\end{tcblisting}
+
+These error messages tell us that the invoke(g<int>, 42) call is not valid because g<int> may throw an exception, which results in NonThrowing<F, T…> to evaluating as false.
+
+For the second example, we will define a concept that provides requirements for timer classes. Specifically, it requires that a function called start exists, that it can be invoked without any parameters, and that it returns void. It also requires that a second function called stop exists, that it can be invoked without any parameters, and that it returns a value that can be converted to long long. The concept is defined as follows:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+concept timer = requires(T t)
+{
+	{t.start()} -> std::same_as<void>;
+	{t.stop()} -> std::convertible_to<long long>;
+};
+\end{lstlisting}
+
+Notice that the type constraint cannot be any compile-time Boolean expression, but an actual type requirement. Therefore, we use other concepts for specifying the return type. Both std::same\_as and std::convertible\_to are concepts available in the standard library in the <concepts> header. We’ll learn more about these in the Exploring the standard concepts library section. Now, let’s consider the following classes that implement timers:
+
+\begin{lstlisting}[style=styleCXX]
+struct timerA
+{
+	void start() {}
+	long long stop() { return 0; }
+};
+
+struct timerB
+{
+	void start() {}
+	int stop() { return 0; }
+};
+
+struct timerC
+{
+	void start() {}
+	void stop() {}
+	long long getTicks() { return 0; }
+};
+
+static_assert(timer<timerA>);
+static_assert(timer<timerB>);
+static_assert(!timer<timerC>);
+\end{lstlisting}
+
+In this example, timerA satisfies the timer concept because it contains the two required methods: start that returns void and stop that returns long long. Similarly, timerB also satisfies the timer concept because it features the same methods, even though stop returns an int. However, the int type is implicitly convertible to the long long type; therefore, the type requirement is met. Lastly, timerC also has the same methods, but both of them return void, which means the type requirement for the return type of stop is not met, and therefore, the constraints imposed by the timer concept are not satisfied.
+
+The last category of requirements left to look into is nested requirements. We will do this next.
+
 \subsubsubsection{6.3.4\hspace{0.2cm}Nested requirements}
+
+The last category of requirements is nested requirements. A nested requirement is introduced with the requires keyword (remember we mentioned that a simple requirement is a requirement that is not introduced with the requires keyword) and has the following form:
+
+\begin{lstlisting}[style=styleCXX]
+requires constraint-expression;
+\end{lstlisting}
+
+The expression must be satisfied by the substituted arguments. The substitution of the template arguments into constraint-expression is done only to check whether the expression is satisfied or not.
+
+In the following example, we want to define a function that performs addition on a variable number of arguments. However, we want to impose some conditions:
+
+\begin{itemize}
+\item
+There is more than one argument.
+
+\item
+All the arguments have the same type.
+
+\item
+The expression arg1 + arg2 + … + argn is valid.
+\end{itemize}
+
+To ensure this, we define a concept called HomogenousRange as follows:
+
+\begin{lstlisting}[style=styleCXX]
+template<typename T, typename... Ts>
+inline constexpr bool are_same_v =
+	std::conjunction_v<std::is_same<T, Ts>...>;
+	
+template <typename ... T>
+concept HomogenousRange = requires(T... t)
+{
+	(... + t);
+	requires are_same_v<T...>;
+	requires sizeof...(T) > 1;
+};
+\end{lstlisting}
+
+This concept contains one simple requirement and two nested requirements. One nested requirement uses the are\_same\_v variable template whose value is determined by the conjunction of one or more type traits (std::is\_same), and the other, the compile-time Boolean expression size…(T) > 1.
+
+Using this concept, we can define the add variadic function template as follows:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename ... T>
+requires HomogenousRange<T...>
+auto add(T&&... t)
+{
+	return (... + t);
+}
+
+add(1, 2); // OK
+add(1, 2.0); // error, types not the same
+add(1); // error, size not greater than 1
+\end{lstlisting}
+
+The first call exemplified previously is correct, as there are two arguments, and both are of type int. The second call produces an error because the types of the arguments are different (int and double). Similarly, the third call also produces an error because only one argument was supplied.
+
+The HomogenousRange concept can also be tested with the help of several static\_assert statements, as shown next:
+
+\begin{lstlisting}[style=styleCXX]
+static_assert(HomogenousRange<int, int>);
+static_assert(!HomogenousRange<int>);
+static_assert(!HomogenousRange<int, double>);
+\end{lstlisting}
+
+We have walked through all the categories of the requires expressions that can be used for defining constraints. However, constraints can also be composed, and this is what we will discuss next.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,127 @@
+Class templates and class template specializations can also be constrained just like function templates. To start, we’ll consider the wrapper class template again, but this time with the requirement that it should only work for template arguments of integral types. This can be simply specified in C++20 as follows:
+
+\begin{lstlisting}[style=styleCXX]
+template <std::integral T>
+struct wrapper
+{
+	T value;
+};
+
+wrapper<int> a{ 42 }; // OK
+wrapper<double> b{ 42.0 }; // error
+\end{lstlisting}
+
+Instantiating the template for the int type is fine but does not work for double because this is not an integral type.
+
+Requirements that also be specified with requires clauses and class template specializations can also be constrained. To demonstrate this, let’s consider the scenario when we want to specialize the wrapper class template but only for types whose size is 4 bytes. This can be implemented as follows:
+
+\begin{lstlisting}[style=styleCXX]
+template <std::integral T>
+struct wrapper
+{
+	T value;
+};
+
+template <std::integral T>
+requires (sizeof(T) == 4)
+struct wrapper<T>
+{
+	union
+	{
+		T value;
+		struct
+		{
+			uint8_t byte4;
+			uint8_t byte3;
+			uint8_t byte2;
+			uint8_t byte1;
+		};
+	};
+};
+\end{lstlisting}
+
+We can use this class template as shown in the following snipp
+
+\begin{lstlisting}[style=styleCXX]
+wrapper<short> a{ 42 };
+std::cout << a.value << '\n';
+
+wrapper<int> b{ 0x11223344 };
+std::cout << std::hex << b.value << '\n';
+std::cout << std::hex << (int)b.byte1 << '\n';
+std::cout << std::hex << (int)b.byte2 << '\n';
+std::cout << std::hex << (int)b.byte3 << '\n';
+std::cout << std::hex << (int)b.byte4 << '\n';
+\end{lstlisting}
+
+The object a is an instance of wrapper<short>; therefore, the primary template is used. On the other hand, the object b is an instance of wrapper<int>. Since int has a size of 4 bytes (on most platforms) the specialization is used and we can access the individual types of the wrapped value through the byte1, byte2, byte3, and byte4 members.
+
+Lastly on this topic, we will discuss how variable templates and template aliases can also be constrained.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

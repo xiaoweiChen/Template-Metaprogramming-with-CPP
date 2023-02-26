@@ -1,0 +1,341 @@
+The term type erasure describes a pattern in which type information is removed, allowing types that are not necessarily related to be treated in a generic way. This is not something specific to the C++ language. This concept exists in other languages with better support than in C++ (such as Python and Java). There are different forms of type erasure such as polymorphism and using void pointers (a legacy of the C language, which is to be avoided), but true type erasure is achieved with templates. Before we discuss this, let’s briefly look at the others.
+
+The most rudimentary form of type erasure is the use of void pointers. This is typical of C and although possible in C++, it is in no way recommended. It is not type-safe and, therefore, error-prone. However, for the sake of the discussion, let’s have a look at such an approach.
+
+Let’s say we again have knight and mage types and they both have an attack function (a behavior), and we want to treat them in a common way to exhibit this behavior.
+Let’s see the classes first:
+
+\begin{lstlisting}[style=styleCXX]
+struct knight
+{
+	void attack() { std::cout << "draw sword\n"; }
+};
+
+struct mage
+{
+	void attack() { std::cout << "spell magic curse\n"; }
+};
+\end{lstlisting}
+
+In a C-like implementation, we could have a function for each of these types, taking a void* to an object of the type, casting it to the expected type of pointer, and then invoking the attack member function:
+
+\begin{lstlisting}[style=styleCXX]
+void fight_knight(void* k)
+{
+	reinterpret_cast<knight*>(k)->attack();
+}
+
+void fight_mage(void* m)
+{
+	reinterpret_cast<mage*>(m)->attack();
+}
+\end{lstlisting}
+
+These have a similar signature; the only thing that differs is the name. So, we can define a function pointer and then associate an object (or more precisely a pointer to an object) with a pointer to the right function handling it. Here is how:
+
+\begin{lstlisting}[style=styleCXX]
+using fight_fn = void(*)(void*);
+void fight(
+std::vector<std::pair<void*, fight_fn>> const& units)
+{
+	for (auto& u : units)
+	{
+		u.second(u.first);
+	}
+}
+\end{lstlisting}
+
+There is no information about types in this last snippet. All that has been erased using void pointers. The fight function can be invoked as follows:
+
+\begin{lstlisting}[style=styleCXX]
+knight k;
+mage m;
+
+std::vector<std::pair<void*, fight_fn>> units {
+	{&k, &fight_knight},
+	{&m, &fight_mage},
+};
+
+fight(units);
+\end{lstlisting}
+
+From a C++ perspective, this will probably look odd. It should. In this example, I have combined C techniques with C++ classes. Hopefully, we will not see snippets of code like this in production. Things will go wrong by a simple typing error if you pass a mage to the fight\_knight function or the other way around. Nevertheless, it’s possible and is a form of type erasure. An obvious alternative solution in C++ is using polymorphism through inheritance.
+
+This is the very first solution we saw at the beginning of this chapter. For convenience, I’ll reproduce it here again:
+
+\begin{lstlisting}[style=styleCXX]
+struct game_unit
+{
+	virtual void attack() = 0;
+};
+
+struct knight : game_unit
+{
+	void attack() override
+	{ std::cout << "draw sword\n"; }
+};
+
+struct mage : game_unit
+{
+	void attack() override
+	{ std::cout << "spell magic curse\n"; }
+};
+
+void fight(std::vector<game_unit*> const & units)
+{
+	for (auto unit : units)
+		unit->attack();
+}
+\end{lstlisting}
+
+The fight function can handle knight and mage objects homogenously. It knows nothing of the actual objects whose addresses were passed to it (within a vector). However, it can be argued that types have not been completely erased. Both knight and mage are game\_unit and the fight function handles anything that is a game\_unit. For another type to be handled by this function, it needs to derive from the game\_unit pure abstract class.
+
+And sometimes that’s not possible. Perhaps we want to treat unrelated types in a similar matter (a process called duck typing) but we are not able to change those types. For instance, we do not own the source code. The solution to this problem is true type erasure with templates.
+
+Before we get to see what this pattern looks like, let’s take it step by step to understand how the pattern developed, starting with the unrelated knight and mage, and the premise that we cannot modify them. However, we can write wrappers around them that would provide a uniform interface to the common functionality (behavior):
+
+\begin{lstlisting}[style=styleCXX]
+struct knight
+{
+	void attack() { std::cout << "draw sword\n"; }
+};
+
+struct mage
+{
+	void attack() { std::cout << "spell magic curse\n"; }
+};
+
+struct game_unit
+{
+	virtual void attack() = 0;
+	virtual ~game_unit() = default;
+};
+
+struct knight_unit : game_unit
+{
+	knight_unit(knight& u) : k(u) {}
+	void attack() override { k.attack(); }
+	
+private:
+	knight& k;
+};
+
+struct mage_unit : game_unit
+{
+	mage_unit(mage& u) : m(u) {}
+	void attack() override { m.attack(); }
+	
+private:
+	mage& m;
+};
+
+void fight(std::vector<game_unit*> const & units)
+{
+	for (auto u : units)
+	u->attack();
+}
+\end{lstlisting}
+
+We do not need to call the attack member function in game\_unit the same as it was in knight and mage. It can have any name. This choice was purely made on the grounds of mimicking the original behavior name. The fight function takes a collection of pointers to game\_unit, therefore being able to handle both knight and mage objects homogenously, as shown next:
+
+\begin{lstlisting}[style=styleCXX]
+knight k;
+mage m;
+
+knight_unit ku{ k };
+mage_unit mu{ m };
+
+std::vector<game_unit*> v{ &ku, &mu };
+fight(v);
+\end{lstlisting}
+
+The trouble with this solution is that there is a lot of duplicate code. The knight\_unit and mage\_unit classes are mostly the same. And when other classes need to be handled similarly, this duplication increases more. The solution to code duplication is using templates. We replace knight\_unit and mage\_unit with the following class template:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+struct game_unit_wrapper : public game_unit
+{
+	game_unit_wrapper(T& unit) : t(unit) {}
+	
+	void attack() override { t.attack(); }
+private:
+	T& t;
+};
+\end{lstlisting}
+
+There is only one copy of this class in our source code but the compiler will instantiate multiple specializations based on its usage. Any type information has been erased, with the exception of some type restrictions—the T type must have a member function called attack that takes no arguments. Notice that the fight function didn’t change at all. The client code needs to be slightly changed though:
+
+\begin{lstlisting}[style=styleCXX]
+knight k;
+mage m;
+
+game_unit_wrapper ku{ k };
+game_unit_wrapper mu{ m };
+
+std::vector<game_unit*> v{ &ku, &mu };
+fight(v);
+\end{lstlisting}
+
+This leads us to the form of the type erasure pattern by putting the abstract base class and wrapper class template within another class:
+
+\begin{lstlisting}[style=styleCXX]
+struct game
+{
+	struct game_unit
+	{
+		virtual void attack() = 0;
+		virtual ~game_unit() = default;
+	};
+
+	template <typename T>
+	struct game_unit_wrapper : public game_unit
+	{
+		game_unit_wrapper(T& unit) : t(unit) {}
+		
+		void attack() override { t.attack(); }
+	private:
+		T& t;
+	};
+
+	template <typename T>
+	void addUnit(T& unit)
+	{
+		units.push_back(
+		std::make_unique<game_unit_wrapper<T>>(unit));
+	}
+
+	void fight()
+	{
+		for (auto& u : units)
+			u->attack();
+	}
+private:
+	std::vector<std::unique_ptr<game_unit>> units;
+};
+\end{lstlisting}
+
+The game class contains a collection of game\_unit objects and has a method for adding new wrappers to any game unit (that has an attack member function). It also has a member function, fight, to invoke the common behavior. The client code is, this time, the following:
+
+\begin{lstlisting}[style=styleCXX]
+knight k;
+mage m;
+
+game g;
+g.addUnit(k);
+g.addUnit(m);
+
+g.fight();
+\end{lstlisting}
+
+In the type erasure pattern, the abstract base class is called a concept and the wrapper that inherits from it is called a model. If we were to implement the type erasure pattern in the established formal manner it would look as follows:
+
+\begin{lstlisting}[style=styleCXX]
+struct unit
+{
+	template <typename T>
+	unit(T&& obj) :
+		unit_(std::make_shared<unit_model<T>>(
+				std::forward<T>(obj)))
+	{}
+	
+	void attack()
+	{
+		unit_->attack();
+	}
+
+	struct unit_concept
+	{
+		virtual void attack() = 0;
+		virtual ~unit_concept() = default;
+	};
+
+	template <typename T>
+	struct unit_model : public unit_concept
+	{
+		unit_model(T& unit) : t(unit) {}
+		
+		void attack() override { t.attack(); }
+	private:
+		T& t;
+	};
+
+private:
+	std::shared_ptr<unit_concept> unit_;
+};
+
+void fight(std::vector<unit>& units)
+{
+	for (auto& u : units)
+		u.attack();
+}
+\end{lstlisting}
+
+In this snippet, game\_unit was renamed as unit\_concept and game\_unit\_wrapper was renamed as unit\_model. There is no other change to them apart from the name. They are members of a new class called unit that stores a pointer to an object that implements unit\_concept; that could be unit\_model<knight> or unit\_model<mage>. The unit class has a template constructor that enables us to create such model objects from knight and mage objects.
+
+It also has a public member function, attack (again, this can have any name). On the other hand, the fight function handles unit objects and invokes their attack member function. The client code may look as follows:
+
+\begin{lstlisting}[style=styleCXX]
+knight k;
+mage m;
+
+std::vector<unit> v{ unit(k), unit(m) };
+
+fight(v);
+\end{lstlisting}
+
+If you’re wondering where this pattern is used in real-world code, there are two examples in the standard library itself:
+
+\begin{itemize}
+\item
+std::function: This is a general-purpose polymorphic function wrapper that enables us to store, copy, and invoke anything that is callable, such as functions, lambda expressions, bind expressions, function objects, pointers to member functions, and pointers to data members. Here is an example of using std::function:
+
+\begin{lstlisting}[style=styleCXX]
+class async_bool
+{
+	std::function<bool()> check;
+public:
+	async_bool() = delete;
+	async_bool(std::function<bool()> checkIt)
+		: check(checkIt)
+	{ }
+	
+	async_bool(bool val)
+		: check([val]() {return val; })
+	{ }
+	
+	operator bool() const { return check(); }
+};
+
+async_bool b1{ false };
+async_bool b2{ true };
+async_bool b3{ []() { std::cout << "Y/N? ";
+					  char c; std::cin >> c;
+					  return c == 'Y' || c == 'y'; } };
+				  
+if (b1) { std::cout << "b1 is true\n"; }
+if (b2) { std::cout << "b2 is true\n"; }
+if (b3) { std::cout << "b3 is true\n"; }
+\end{lstlisting}
+
+\item
+std::any: This is a class that represents a container to any value of a type that is copy-constructible. An example is used in the following snippet:
+
+\begin{lstlisting}[style=styleCXX]
+std::any u;
+
+u = knight{};
+if (u.has_value())
+	std::any_cast<knight>(u).attack();
+
+u = mage{};
+if (u.has_value())
+	std::any_cast<mage>(u).attack();
+\end{lstlisting}
+\end{itemize}
+
+Type erasure is an idiom that combines inheritance from object-oriented programming with templates to create wrappers that can store any type. In this section, we have seen how the pattern looks and how it works, as well as some real-world implementations of the pattern.
+
+Next in this chapter, we will discuss a technique called tag dispatching.
+
+
+

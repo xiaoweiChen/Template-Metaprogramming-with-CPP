@@ -1,0 +1,166 @@
+When you learn about object-oriented programming, you learn about its fundamental principles, which are abstraction, encapsulation, inheritance, and polymorphism. C++ is a multi-paradigm programming language that supports object-oriented programming too. Although a broader discussion on the principles of object-oriented programming is beyond the scope of this chapter and this book, it is worth discussing at least some aspects related to polymorphism.
+
+So, what is polymorphism? The term is derived from the Greek words for “many forms”. In programming, it’s the ability of objects of different types to be treated as if they were of the same type. The C++ standard actually defines a polymorphic class as follows (see C++20 standard, paragraph 11.7.2, Virtual functions):
+
+\begin{center}
+\textit{
+A class that declares or inherits a virtual function is called a polymorphic class.
+}
+\end{center}
+
+It also defines polymorphic objects based on this definition, as follows (see C++20 standard, paragraph 6.7.2, Object model):
+
+\begin{center}
+\textit{
+Some objects are polymorphic (11.7.2); the implementation generates information associated with each such object that makes it possible to determine that object’s type during program execution.
+}
+\end{center}
+
+However, this actually refers to what is called dynamic polymorphism (or late binding), but there is yet another form of polymorphism, called static polymorphism (or early binding). Dynamic polymorphism occurs at runtime with the help of interfaces and virtual functions, while static polymorphism occurs at compile-time with the help of overloaded functions and templates. This is described in Bjarne Stroustrup’s glossary of terms for the C++ language (see \url{https://www.stroustrup.com/glossary.
+html}):
+
+\begin{center}
+\textit{
+polymorphism - providing a single interface to entities of different types. virtual functions provide dynamic (run-time) polymorphism through an interface provided by a base class. Overloaded functions and templates provide static (compile-time) polymorphism.
+}
+\end{center}
+
+Let’s look at an example of dynamic polymorphism. The following is a hierarchy of classes representing different units in a game. These units may attack others, so there is a base class with a pure virtual function called attack, and several derived classes implementing specific units that override this virtual function doing different things (of course, for simplicity, here we just print a message to the console). It looks as follows:
+
+\begin{lstlisting}[style=styleCXX]
+struct game_unit
+{
+	virtual void attack() = 0;
+};
+
+struct knight : game_unit
+{
+	void attack() override
+	{ std::cout << "draw sword\n"; }
+};
+
+struct mage : game_unit
+{
+	void attack() override
+	{ std::cout << "spell magic curse\n"; }
+};
+\end{lstlisting}
+
+Based on this hierarchy of classes (which according to the standard are called polymorphic classes), we can write the function fight shown as follows. This takes a sequence of pointers to objects of the base game\_unit type and calls the attack member function. Here is its implementation:
+
+\begin{lstlisting}[style=styleCXX]
+void fight(std::vector<game_unit*> const & units)
+{
+	for (auto unit : units)
+	{
+		unit->attack();
+	}
+}
+\end{lstlisting}
+
+This function does not need to know the actual type of each object because due to dynamic polymorphism, it can handle them as if they were of the same (base) type. Here is an example of using it:
+
+\begin{lstlisting}[style=styleCXX]
+knight k;
+mage m;
+fight({&k, &m});
+\end{lstlisting}
+
+But now let’s say you could combine a mage and a knight and create a new unit, a knight mage with special abilities from both these units. C++ enables us to write code as follows:
+
+\begin{lstlisting}[style=styleCXX]
+knight_mage km = k + m;
+km.attack();
+\end{lstlisting}
+
+This does not come out of the box, but the language supports overloading operators, and we could do that for any user-defined types. To make the preceding line possible, we need the following:
+
+\begin{lstlisting}[style=styleCXX]
+struct knight_mage : game_unit
+{
+	void attack() override
+	{ std::cout << "draw magic sword\n"; }
+};
+
+knight_mage operator+(knight const& k, mage const& m)
+{
+	return knight_mage{};
+}
+\end{lstlisting}
+
+Keep in mind these are just some simple snippets without any complex code. But the ability to add a knight and a mage together to create a knight\_mage is nothing short of the ability to add two integers together, or a double and an int, or two std::string objects. This happens because there are many overloads of the + operator (both for built-in types and user-defined types) and based on the operands, the compiler is selecting the appropriate overload. Therefore, it can be said there are many forms of this operator. This is true for all the operators that can be overloaded; the + operator is just a typical example since it is ubiquitous. And this is the compile-time version of polymorphism, called static polymorphism.
+
+Operators are not the only functions that can be overloaded. Any function can be overloaded. Although we have seen many examples in the book, let’s take another one:
+
+\begin{lstlisting}[style=styleCXX]
+struct attack { int value; };
+struct defense { int value; };
+
+void increment(attack& a) { a.value++; }
+void increment(defense& d) { d.value++; }
+\end{lstlisting}
+
+In this snippet, the increment function is overloaded for both the attack and defense types, allowing us to write code as follows:
+
+\begin{lstlisting}[style=styleCXX]
+attack a{ 42 };
+defense d{ 50 };
+
+increment(a);
+increment(d);
+\end{lstlisting}
+
+We can replace the two overloads of increment with a function template. The changes are minimal, as shown in the next snippet:
+
+\begin{lstlisting}[style=styleCXX]
+template <typename T>
+void increment(T& t) { t.value++; }
+\end{lstlisting}
+
+The previous code continues to work, but there is a significant difference: in the former example, we had two overloads, one for attack and one for defense, so you could call the function with objects of these types but nothing else. In the latter, we have a template that defines a family of overloaded functions for any possible type T that has a data member called value whose type supports the post-increment operator. We can define constraints for such a function template, which is something we have seen in the previous two chapters of the book. However, the key takeaway is that overloaded functions and templates are the mechanisms to implement static polymorphism in the C++ language.
+
+Dynamic polymorphism incurs a performance cost because in order to know what functions to call, the compiler needs to build a table of pointers to virtual functions (and also a table of pointers to virtual base classes in case of virtual inheritance). So, there is some level of indirection when calling virtual functions polymorphically. Moreover, the details of virtual functions are not made available to the compiler who cannot optimize them.
+
+When these things can be validated as performance issues, we could raise the question: can we get the benefits of dynamic polymorphism at compile time? The answer is yes and there is one way to achieve this: the Curiously Recurring Template Pattern, which we will discuss next.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
