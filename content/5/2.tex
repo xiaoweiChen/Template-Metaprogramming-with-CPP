@@ -1,0 +1,72 @@
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Question 1}
+
+What category of types can be used for non-type template parameters?
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Answer}
+
+Non-type template parameters can only have structural types. Structure types are integral types, floating-point types (as of C++20), enumeration types, pointer types (either to objects or functions), pointer to member types (either to member objects or member functions), lvalue reference types (either to objects or functions), and literal class types that meet several requirements: all base classes are public and non-mutable, all non-static data members are public and non-mutable, and the types of all the base classes and the non-static data members are also structural types or arrays thereof. const and volatile qualified versions of these types are also allowed.
+
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Question 2}
+
+Where are default template arguments not allowed?
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Answer}
+
+Default template arguments cannot be used for parameter packs, in declarations of friend class templates, and in the declaration or definition of an explicit specialization of a function template or member function template.
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Question 3}
+
+What is explicit instantiation declaration and how does it differ syntactically from explicit instantiation definition?
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Answer}
+
+Explicit instantiation declaration is the way you can tell the compiler that the definition of a template instantiation is found in a different translation unit and that a new definition should not be generated. The syntax is the same as for explicit instantiation definitions, except that the extern keyword is used in front of the declaration.
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Question 4}
+
+What is an alias template?
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Answer}
+
+An alias template is a name that, unlike type aliases, which refer to another type, refers to a template or, in other words, a family of types. Alias templates are introduced with using declarations. They cannot be introduced with typedef declarations.
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Question 5}
+
+What are template lambdas?
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Answer}
+
+Template lambdas are an improved form of generic lambdas, introduced in C++20. They allow us to use the template syntax to explicitly specify the shape of the templatized function-call operator of the function object that the compiler is generating for a lambda expression.
+
+
+
+
+
+
+
+
+
+
+
+

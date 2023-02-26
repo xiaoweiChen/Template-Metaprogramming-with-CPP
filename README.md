@@ -2,7 +2,7 @@
 
 *Learn everything about C++ templates and unlock the power of template metaprogramming*
 
-*详细的了解C++模板，解锁模板元编程的真正力量*
+*详细的了解C++模板，解锁模板元编程的力量*
 
  <a href=""><img src="cover.jpg" height="256px" align="right"></a>
 

@@ -1,0 +1,82 @@
+We have used the term range many times in the previous chapter. A range is an abstraction of a sequence of elements, delimited by two iterators (one to the first element of the sequence, and one to the one-past-the-last element). Containers such as std::vector, std::list, and std::map are concrete implementations of the range abstraction. They have ownership of the elements and they are implemented using various data structures, such as arrays, linked-lists, or trees. The standard algorithms are generic. They are container-agnostic. They know nothing about std::vector, std::list, or std::map. They handle range abstractions with the help of iterators. However, this has a shortcoming: we always need to retrieve a beginning and end iterator from a container. Here are some examples:
+
+\begin{lstlisting}[style=styleCXX]
+// sorts a vector
+std::vector<int> v{ 1, 5, 3, 2, 4 };
+std::sort(v.begin(), v.end());
+
+// counts even numbers in an array
+std::array<int, 5> a{ 1, 5, 3, 2, 4 };
+auto even = std::count_if(
+	a.begin(), a.end(),
+	[](int const n) {return n % 2 == 0; });
+\end{lstlisting}
+
+There are few cases when you need to process only a part of the container’s elements. In the vast majority of cases, you just have to write v.begin() and v.end() over and over again. This includes variations such as calls to cbegin()/cend(), rbegin()/rend(), or the stand-alone functions std::begin()/std::end(), and so on. Ideally, we would prefer to shorten all this and be able to write the following:
+
+\begin{lstlisting}[style=styleCXX]
+// sorts a vector
+std::vector<int> v{ 1, 5, 3, 2, 4 };
+sort(v);
+
+// counts even numbers in an array
+std::array<int, 5> a{ 1, 5, 3, 2, 4 };
+auto even = std::count_if(
+	a,
+	[](int const n) {return n % 2 == 0; });
+\end{lstlisting}
+
+On the other hand, we often need to compose operations. Most of the time that involves many operations and code that is too verbose even when using standard algorithms. Let’s consider the following example: given a sequence of integers, we want to print to the console the square of all even numbers, except the first two, in descending order of their value (not their position in the sequence). There are multiple ways to solve the problem. The following is a possible solution:
+
+\begin{lstlisting}[style=styleCXX]
+std::vector<int> v{ 1, 5, 3, 2, 8, 7, 6, 4 };
+
+// copy only the even elements
+std::vector<int> temp;
+std::copy_if(v.begin(), v.end(),
+			std::back_inserter(temp),
+			[](int const n) {return n % 2 == 0; });
+			
+// sort the sequence
+std::sort(temp.begin(), temp.end(),
+		[](int const a, int const b) {return a > b; });
+		
+// remove the first two
+temp.erase(temp.begin() + temp.size() - 2, temp.end());
+
+// transform the elements
+std::transform(temp.begin(), temp.end(),
+				temp.begin(),
+				[](int const n) {return n * n; });
+
+// print each element
+std::for_each(temp.begin(), temp.end(),
+				[](int const n) {std::cout << n << '\n'; });
+\end{lstlisting}
+
+I believe most people would agree that, although anyone familiar with the standard algorithms can easily read this code, it’s still a lot to write. It also requires a temporary container and repetitive calls to begin/end. Therefore, I also expect most people would more easily understand the following version of the previous code, and probably prefer to write it as such:
+
+\begin{lstlisting}[style=styleCXX]
+std::vector<int> v{ 1, 5, 3, 2, 8, 7, 6, 4 };
+sort(v);
+auto r = v
+		| filter([](int const n) {return n % 2 == 0; })
+		| drop(2)
+		| reverse
+		| transform([](int const n) {return n * n; });
+		
+for_each(r, [](int const n) {std::cout << n << '\n'; });
+\end{lstlisting}
+
+This is what the C++20 standard provides with the help of the ranges library. This has two main components:
+
+\begin{itemize}
+\item
+Views or range adaptors, which represent non-owning iterable sequences. They enable us to compose operations more easily such as in the last example.
+
+\item
+Constrained algorithms, which enable us to operate on concrete ranges (standard containers or ranges) and not on abstract ranges delimited with a pair of iterators (although that’s possible too).
+\end{itemize}
+
+We will explore these two offerings of the ranges library in the next sections, and we will begin with ranges.
+

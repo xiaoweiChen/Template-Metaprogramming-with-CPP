@@ -1,0 +1,72 @@
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Question 1}
+
+What are constraints? What about concepts?
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Answer}
+
+A constraint is a requirement imposed on a template argument. A concept is a named set of one or more constraints.
+
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Question 2}
+
+What is a requires clause and a requires expression?
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Answer}
+
+A requires clause is a construct that allows us to specify a constraint on a template argument or function declaration. This construct is composed of the requires keyword followed by a compile-time Boolean expression. A requires clause affects the behavior of a function, including it for overload resolution only if the Boolean expression is true. On the other hand, a requires expression has the requires (parameters-list) expression; form, where parameters-list is optional. Its purpose is to verify that some expressions are well-formed, without having any side effects or affecting the behavior of the function. Requires expressions can be used with requires clauses, although named concepts are preferred, mainly for readability.
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Question 3}
+
+What are the categories of requires expressions?
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Answer}
+
+There are four categories of requires expressions: simple requirements, type requirements, compound requirements, and nested requirements.
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Question 4}
+
+How do constraints affect the ordering of templates in overload resolution?
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Answer}
+
+The constraining of functions affects their order in the overload resolution set. When multiple overloads match the set of arguments, the overload that is more constrained is selected. However, keep in mind that constraining with type traits (or Boolean expressions in general) and concepts is not semantically equal. For details on this topic, revisit the Learning about the ordering of templates with constraints section.
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Question 5}
+
+What are abbreviated function templates?
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Answer}
+
+Abbreviated function templates are a new feature introduced in C++20 that provides a simplified syntax for function templates. The auto specifier can be used to define function parameters and the template syntax can be skipped. The compiler will automatically generate a function template from an abbreviated function template. Such functions can be constrained using concepts, therefore imposing requirements on the template arguments.
+
+
+
+
+
+
+
+
+
+
+
+

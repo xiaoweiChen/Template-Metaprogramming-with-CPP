@@ -1,0 +1,72 @@
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Question 1}
+
+What is a range?
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Answer}
+
+A range is an abstraction for a sequence of elements, defined with a beginning and end iterator. The beginning iterator points to the first element in the sequence. The end iterator points to the one-past-last element of the sequence.
+
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Question 2}
+
+What is a view in the ranges library?
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Answer}
+
+A view in the C++ ranges library, also called a range adaptor, is an object that implements an algorithm that takes one or more ranges as input and perhaps other arguments and returns an adapted range. Views are lazy-evaluated, meaning they do not perform the adaptation until their elements are iterated.
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Question 3}
+
+What are constrained algorithms?
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Answer}
+
+Constrained algorithms are implementations of the existing standard library algorithms but in the C++20 ranges library. They are called constrained because their template arguments are constrained using C++20 concepts. In these algorithms, instead of requiring a begin-end pair of iterators for specifying, a range of values accepts a single range argument. However, overloads that accept an iterator-sentinel pair also exist.
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Question 4}
+
+What is a sentinel?
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Answer}
+
+A sentinel is an abstraction for an end iterator. This makes it possible for the end iterator to have a different type than the range iterator. Sentinels cannot be dereferenced or incremented. Sentinels are useful when the test for the end of a range depends on some variable (dynamic) condition and you don’t know you are at the end of the range until something happens (for instance, a condition becomes false).
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Question 5}
+
+How can you check that a sentinel type corresponds to an iterator type?
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Answer}
+
+You can check that a sentinel type can be used with an iterator type by using the std::sentinel\_for concept from the <iterator> header.
+
+
+
+
+
+
+
+
+
+
+
+

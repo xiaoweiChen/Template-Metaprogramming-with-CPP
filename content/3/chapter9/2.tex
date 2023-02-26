@@ -1,1 +1,553 @@
+
+The term range refers to an abstraction that defines a sequence of elements bounded by start and end iterators. A range, therefore, represents an iterable sequence of elements. However, such a sequence can be defined in several ways:
+
+\begin{itemize}
+\item
+With a begin iterator and an end sentinel. Such a sequence is iterated from the beginning to the end. A sentinel is an object that indicates the end of the sequence. It can have the same type as the iterator type or it can be of a different type.
+
+\item
+With a start object and a size (number of elements), representing a so-called counted sequence. Such a sequence is iterated N times (where N represents the size) from the start.
+
+\item
+With a start and a predicate, representing a so-called conditionally terminated sequence. Such a sequence is iterated from the start until the predicate returns false.
+
+\item
+With only a start value, representing a so-called unbounded sequence. Such a sequence can be iterated indefinitely.
+\end{itemize}
+
+All these kinds of iterable sequences are considered ranges. Because a range is an abstraction, the C++20 library defines a series of concepts to describe requirements for range types. These are available in the <ranges> header and the std::ranges namespace. The following table presents the list of range concepts:
+
+\begin{table}[H]
+\centering
+	\begin{tabular}{|l|l|}
+		\hline
+		\textbf{Name} &
+		\textbf{Description} \\ \hline
+		range &
+		\begin{tabular}[c]{@{}l@{}}Defines the requirements for a type R to be a range by\\ providing a begin iterator and an end sentinel. The iterator\\ and sentinel can be of different types.\end{tabular} \\ \hline
+		bgorrowed\_range &
+		\begin{tabular}[c]{@{}l@{}}Defines the requirements for a type R so that a function\\ can take an object of this type by value and return iterators,\\ obtained from this object without the danger of dangling.\end{tabular} \\ \hline
+		sized\_range &
+		\begin{tabular}[c]{@{}l@{}}Defines the requirements for a type R to be a range that\\ knows it s size in constant time.\end{tabular} \\ \hline
+		common\_range &
+		\begin{tabular}[c]{@{}l@{}}Defines the requirements for a type R to be a range whose\\ iterator and sentinal types are identical.\end{tabular} \\ \hline
+		view &
+		\begin{tabular}[c]{@{}l@{}}Defines the requirements for a type R that is a range to\\ have constant time copy, move, and assignment operations.\end{tabular} \\ \hline
+		viewable\_range &
+		\begin{tabular}[c]{@{}l@{}}Defines the requirements for a range type R to be convertible\\ to a view.\end{tabular} \\ \hline
+		input\_range &
+		\begin{tabular}[c]{@{}l@{}}Requires that a range type has the iterator type satisfy the\\ input\_iterator concept.\end{tabular} \\ \hline
+		output\_range &
+		\begin{tabular}[c]{@{}l@{}}Requires that a range type has the iterator type satisfy the \\ output\_iterator concept.\end{tabular} \\ \hline
+		forward\_range &
+		\begin{tabular}[c]{@{}l@{}}Requires that a range type has the iterator type satisfy the\\ forward\_iterator concept.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}bidirectional\_\\ range\end{tabular} &
+		\begin{tabular}[c]{@{}l@{}}Requires that a range type has the iterator type satisfy the\\ bidirectional\_iterator concept.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}random\_access\_\\ range\end{tabular} &
+		\begin{tabular}[c]{@{}l@{}}Requires that a range type has the iterator type satisfy the\\ random\_access\_iterator concept.\end{tabular} \\ \hline
+		contiguous\_range &
+		\begin{tabular}[c]{@{}l@{}}Requires that a range type has the iterator type satisfy the\\ contiguous\_iterator concept.\end{tabular} \\ \hline
+	\end{tabular}
+\end{table}
+
+\begin{center}
+Table 9.1
+\end{center}
+
+The standard library defines a series of access functions for containers and arrays. These include std::begin and std::end instead of member functions begin and end, std::size instead of member function size, and so on. These are called range access functions. Similarly, the ranges library defines a set of range access functions. These are designed for ranges and are available in the <ranges> and <iterator> headers and the std::ranges namespace. They are listed in the next table:
+
+\begin{table}[H]
+\centering
+	\begin{tabular}{|l|l|l|}
+		\hline
+		\textbf{Rnage access for ranges} &
+		\textbf{\begin{tabular}[c]{@{}l@{}}Equivalent\\ range access for\\ containers/arrays\end{tabular}} &
+		\textbf{Description} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}begin/end\\ cbegin/cend\end{tabular} &
+		\begin{tabular}[c]{@{}l@{}}begin/end\\ cbegin/cend\end{tabular} &
+		\begin{tabular}[c]{@{}l@{}}Returns an iterator and constant iterator\\ respectively to the beginning/end of a range.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}rbegin/rend\\ crbegin/crend\end{tabular} &
+		\begin{tabular}[c]{@{}l@{}}rbegin/rend\\ crbegin/crend\end{tabular} &
+		\begin{tabular}[c]{@{}l@{}}Returns a reverse iterator and constant\\ reverse iterator respectively, to the\\ beginning/end of a range.\end{tabular} \\ \hline
+		size/ssize &
+		size/ssize &
+		\begin{tabular}[c]{@{}l@{}}Returns the size of a range as an integral\\ or signed integral value.\end{tabular} \\ \hline
+		empty &
+		empty &
+		\begin{tabular}[c]{@{}l@{}}Returns a Boolean value, indicating whether\\ the range is empty.\end{tabular} \\ \hline
+		data/cdata &
+		data &
+		\begin{tabular}[c]{@{}l@{}}Returns a pointer to the beginning of a\\ contiguous range and a read-only contiguous\\ ranges respectively.\end{tabular} \\ \hline
+	\end{tabular}
+\end{table}
+
+\begin{center}
+Table 9.2
+\end{center}
+
+The use of some of these functions is demonstrated in the following snippet:
+
+\begin{lstlisting}[style=styleCXX]
+std::vector<int> v{ 8, 5, 3, 2, 4, 7, 6, 1 };
+auto r = std::views::iota(1, 10);
+
+std::cout << "size(v)=" << std::ranges::size(v) << '\n';
+std::cout << "size(r)=" << std::ranges::size(r) << '\n';
+
+std::cout << "empty(v)=" << std::ranges::empty(v) << '\n';
+std::cout << "empty(r)=" << std::ranges::empty(r) << '\n';
+
+std::cout << "first(v)=" << *std::ranges::begin(v) << '\n';
+std::cout << "first(r)=" << *std::ranges::begin(r) << '\n';
+
+std::cout << "rbegin(v)=" << *std::ranges::rbegin(v)
+		  << '\n';
+std::cout << "rbegin(r)=" << *std::ranges::rbegin(r)
+		  << '\n';
+		  
+std::cout << "data(v)=" << *std::ranges::data(v) << '\n';
+\end{lstlisting}
+
+In this snippet, we used a type called std::views::iota. As the namespace implies, this is a view. A view is a range with additional restrictions. Views are lightweight objects with non-owning semantics. They present a view of an underlying sequence of elements (a range) in a way that does not require copying or mutating the sequence. The key feature is lazy evaluation. That means that regardless of the transformation they apply, they perform it only when an element is requested (iterated) and not when the view is created.
+
+There is a series of views provided with C++20, and new views have been also included in C++23. Views are available in the <ranges> header and std::ranges namespace in the form, std::ranges::abc\_view, such as std::ranges::iota\_view. However, for convenience of use, in the std::views namespace, a variable template of the form, std::views::abc, such as std::views::iota, also exists. This is what we saw in the previous example. Here are two equivalent examples for using iota:
+
+\begin{lstlisting}[style=styleCXX]
+// using the iota_view type
+for (auto i : std::ranges::iota_view(1, 10))
+	std::cout << i << '\n';
+
+// using the iota variable template
+for (auto i : std::views::iota(1, 10))
+	std::cout << i << '\n';
+\end{lstlisting}
+
+The iota view is part of a special category of views called factories. These factories are views over newly generated ranges. The following factories are available in the ranges library:
+
+\begin{table}[H]
+\centering
+	\begin{tabular}{|l|l|l|}
+		\hline
+		\textbf{Type} &
+		\textbf{Variable} &
+		\textbf{Description} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}ranges::empty\_\\ view\end{tabular} &
+		ranges::views::empty &
+		\begin{tabular}[c]{@{}l@{}}Generates a view with no\\ elements of a T type.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}ranges::single\_\\ view\end{tabular} &
+		ranges::views::single &
+		\begin{tabular}[c]{@{}l@{}}Generates a view with a\\ single element of a T type.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}ranges::iota\_\\ view\end{tabular} &
+		ranges::views::iota &
+		\begin{tabular}[c]{@{}l@{}}Generates a view of a\\ sequence of consecutive\\ elements, from a start value\\ to an end value(a bounded\\ view) or indefinitely(an \\ unbounded view).\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}ranges::basic\_\\ iostream\_view\end{tabular} &
+		ranges::views::istream &
+		\begin{tabular}[c]{@{}l@{}}Generates a view of a \\ sequence of elements by\\ applying the operator \textgreater{}\textgreater\\ repeatedly.\end{tabular} \\ \hline
+	\end{tabular}
+\end{table}
+
+\begin{center}
+Table 9.3
+\end{center}
+
+If you are wondering why empty\_view and single\_view are useful, the answer should not be hard to find. These are useful in template code that handles ranges where empty ranges or ranges with one element are valid inputs. You don’t want multiple overloads of a function template for handling these special cases; instead, you can pass an empty\_view or single\_view range. The following snippets show several examples of using these factories. These snippets should be self-explanatory:
+
+\begin{lstlisting}[style=styleCXX]
+constexpr std::ranges::empty_view<int> ev;
+static_assert(std::ranges::empty(ev));
+static_assert(std::ranges::size(ev) == 0);
+static_assert(std::ranges::data(ev) == nullptr);
+
+constexpr std::ranges::single_view<int> sv{42};
+static_assert(!std::ranges::empty(sv));
+static_assert(std::ranges::size(sv) == 1);
+static_assert(*std::ranges::data(sv) == 42);
+\end{lstlisting}
+
+For iota\_view, we have already seen a couple of examples with a bounded view. The next snippet shows again an example not only using a bounded view generated with iota but also an unbounded view, also generated with iota:
+
+\begin{lstlisting}[style=styleCXX]
+auto v1 = std::ranges::views::iota(1, 10);
+std::ranges::for_each(
+	v1,
+	[](int const n) {std::cout << n << '\n'; });
+	
+auto v2 = std::ranges::views::iota(1) |
+		  std::ranges::views::take(9);
+std::ranges::for_each(
+	v2,
+	[](int const n) {std::cout << n << '\n'; });
+\end{lstlisting}
+
+This last example utilizes another view called take\_view. This produces a view of the first N elements (in our example, 9) of another view (in our case, the unbounded view produced with iota). We will discuss more about this shortly. But first, let’s take an example using the fourth view factory, basic\_iostream\_view. Let’s consider we have a list of article prices in a text, separated by a space. We need to print the total sum of these prices. There are different ways to solve it, but a possible solution is given here:
+
+\begin{lstlisting}[style=styleCXX]
+auto text = "19.99 7.50 49.19 20 12.34";
+auto stream = std::istringstream{ text };
+std::vector<double> prices;
+
+double price;
+while (stream >> price)
+{
+	prices.push_back(price);
+}
+
+auto total = std::accumulate(prices.begin(), prices.end(),
+							 0.0);
+std::cout << std::format("total: {}\n", total);
+\end{lstlisting}
+
+The highlighted part can be replaced with the following two lines of code that use basic\_iostream\_view or, more precisely, the istream\_view alias template:
+
+\begin{lstlisting}[style=styleCXX]
+for (double const price :
+		std::ranges::istream_view<double>(stream))
+{
+	prices.push_back(price);
+}
+\end{lstlisting}
+
+What the istream\_view range factory is doing is applying the operator >{}> repeatedly on the istringstream object and producing a value each time it is applied. You cannot specify a delimiter; it only works with whitespaces. If you prefer to use standard algorithms rather than handcrafted loops, you can use the ranges::for\_each constrained algorithm to produce the same result, as follows:
+
+\begin{lstlisting}[style=styleCXX]
+std::ranges::for_each(
+	std::ranges::istream_view<double>(stream),
+	[&prices](double const price) {
+		prices.push_back(price); });
+\end{lstlisting}
+
+The examples given so far in this chapter included views such as filter, take, drop, and reverse. These are just a few of the standard views available in C++20. More are being added to C++23, and probably even more to future standard versions. The entire set of standard views is listed in the following table:
+
+\begin{table}[H]
+\centering
+	\begin{tabular}{|l|l|l|l|}
+		\hline
+		\textbf{\begin{tabular}[c]{@{}l@{}}Type\\ (in namespace\\ ranges)\end{tabular}} &
+		\textbf{\begin{tabular}[c]{@{}l@{}}Variable\\ (in namespace\\ ranges::view)\end{tabular}} &
+		\textbf{\begin{tabular}[c]{@{}l@{}}C++\\ version\end{tabular}} &
+		\textbf{Description} \\ \hline
+		fileter\_view &
+		fileter &
+		C++20 &
+		\begin{tabular}[c]{@{}l@{}}A type that represents a range adaptor\\ that provides a view of an underling\\ range, which only includes the elements\\ that satisfy a predicate.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}transform\_\\ view\end{tabular} &
+		transform &
+		C++20 &
+		\begin{tabular}[c]{@{}l@{}}A type that represents a range adaptor\\ that provides a view of an underlying\\ range, with a transformation applied\\ to each element of the range.\end{tabular} \\ \hline
+	\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+	\begin{tabular}{|l|l|l|l|}
+		\hline
+		\textbf{\begin{tabular}[c]{@{}l@{}}Type\\ (in namespace\\ ranges)\end{tabular}} &
+		\textbf{\begin{tabular}[c]{@{}l@{}}Vaiable\\ (in namespace\\ ranges::view)\end{tabular}} &
+		\textbf{\begin{tabular}[c]{@{}l@{}}C++\\ version\end{tabular}} &
+		\textbf{Description} \\ \hline
+		split\_view &
+		split &
+		C++20 &
+		\begin{tabular}[c]{@{}l@{}}A type that represents a range adaptor\\ that provides a view of a sequence of\\ ranges produced from splitting a range\\ on a specified delimited. The range\\ cannot be a input range and the lazy\\ semantics of views are not observed.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}lazy\_split\_\\ view\end{tabular} &
+		lazy\_split &
+		C++20 &
+		\begin{tabular}[c]{@{}l@{}}Same as split\_view, except that it also\\ works with input ranges and observes the\\ lazy mechanism of ranges.\end{tabular} \\ \hline
+		reverse\_view &
+		reverse &
+		C++20 &
+		\begin{tabular}[c]{@{}l@{}}A type that represents a range adaptor\\ that provides a view of the elements of\\ an underlying range in reverse order.\end{tabular} \\ \hline
+		keys\_view &
+		keys &
+		C++20 &
+		\begin{tabular}[c]{@{}l@{}}A type that represents a range adaptor\\ that provides a view projected from the\\ first element of tuple-like values(\\ std::pari and std::tuple) of an underlying\\ view.\end{tabular} \\ \hline
+		values\_view &
+		values &
+		C++20 &
+		\begin{tabular}[c]{@{}l@{}}A type that represents a range adaptor\\ that provides a view projected from the \\ second element of tuple-like values(\\ std::pair and std::tuple) of an underlying\\ view.\end{tabular} \\ \hline
+		elements\_view &
+		elements &
+		C++20 &
+		\begin{tabular}[c]{@{}l@{}}A type that represent a range adaptor \\ that provides a view projected from the\\ Nth element of tuple-like values of an\\ unferlying view.\end{tabular} \\ \hline
+		zip\_view &
+		zip &
+		C++23 &
+		\begin{tabular}[c]{@{}l@{}}A type that represent a range adaptor\\ that provides a view built from one or\\ more underlying views, projecting the Nth\\ element from each view into a tuple.\end{tabular} \\ \hline
+	\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+	\begin{tabular}{|l|l|l|l|}
+		\hline
+		\textbf{\begin{tabular}[c]{@{}l@{}}Type\\ (in namespace\\ ranges)\end{tabular}} &
+		\textbf{\begin{tabular}[c]{@{}l@{}}Variable\\ (in namespace\\ ranges::view)\end{tabular}} &
+		\textbf{\begin{tabular}[c]{@{}l@{}}C++\\ version\end{tabular}} &
+		\textbf{Description} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}zip\_\\ transform\_\\ view\end{tabular} &
+		\begin{tabular}[c]{@{}l@{}}zip\_\\ transform\end{tabular} &
+		C++23 &
+		\begin{tabular}[c]{@{}l@{}}A type that represents a range adaptor\\ that provides a view built from one or\\ more underlying views and an invocable\\ object, whose elements are computed by\\ applying the invocable object to the\\ Nth element of each underlying view.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}adjacent\_\\ view\end{tabular} &
+		adjacent &
+		C++23 &
+		\begin{tabular}[c]{@{}l@{}}A type that represents a range adaptor\\ that provides a view of tuple-like values,\\ projected by taking N consecutive elements\\ of an underlying view.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}adjacent\_\\ transform\_\\ view\end{tabular} &
+		\begin{tabular}[c]{@{}l@{}}adjacent\_\\ transform\end{tabular} &
+		C++23 &
+		\begin{tabular}[c]{@{}l@{}}A type that represents a range adaptor\\ that provides a view of values projected\\ by applying an invocable object to N \\ consecutive elements of an underlying view.\end{tabular} \\ \hline
+	\end{tabular}
+\end{table}
+
+\begin{center}
+Table 9.4
+\end{center}
+
+Apart from the views (range adaptors) listed in the previous table, there are a few more that can be useful in some particular scenarios. For completeness, these are listed in the next table:
+
+\begin{table}[H]
+\centering
+	\begin{tabular}{|l|l|l|l|}
+		\hline
+		\textbf{\begin{tabular}[c]{@{}l@{}}Type\\ (in namespace\\ ranges)\end{tabular}} &
+		\textbf{\begin{tabular}[c]{@{}l@{}}Variable\\ (in namespace\\ ranges::view)\end{tabular}} &
+		\textbf{\begin{tabular}[c]{@{}l@{}}C++\\ version\end{tabular}} &
+		\textbf{Description} \\ \hline
+		&
+		all &
+		C++20 &
+		\begin{tabular}[c]{@{}l@{}}An object that creates a view that\\ includes all the elements of the range\\ argument.\end{tabular} \\ \hline
+		&
+		all\_t &
+		C++20 &
+		\begin{tabular}[c]{@{}l@{}}An alias template for the view type of\\ a range that can be safely converted to\\ a view.\end{tabular} \\ \hline
+		&
+		counted &
+		C++20 &
+		\begin{tabular}[c]{@{}l@{}}An object that creates a view with N\\ elements of a range, starting with the\\ one represented by a given iterator.\end{tabular} \\ \hline
+		ref\_view &
+		&
+		C++20 &
+		\begin{tabular}[c]{@{}l@{}}A view type that wraps a reference to\\ another range.\end{tabular} \\ \hline
+		owning\_view &
+		&
+		C++20 &
+		\begin{tabular}[c]{@{}l@{}}A view type that stores a given range.\\ It has sole ownership of the stored\\ range and move-only semantics.\end{tabular} \\ \hline
+		common\_view &
+		common &
+		C++20 &
+		\begin{tabular}[c]{@{}l@{}}A type that adapts aview with different\\ types for the iterator and sentinel pair,\\ with a view that uses the same type for \\ both iterator and sentinel types.\end{tabular} \\ \hline
+	\end{tabular}
+\end{table}
+
+\begin{center}
+Table 9.5
+\end{center}
+
+Now that we have enumerated all the standard range adaptors, let’s take a look at more examples using some of them.
+
 \subsubsubsection{9.2.1\hspace{0.2cm}Exploring more examples}
+
+Previously, in this section, we saw the following example (this time with explicit namespaces):
+
+\begin{lstlisting}[style=styleCXX]
+namespace rv = std::ranges::views;
+std::ranges::sort(v);
+auto r = v
+		| rv::filter([](int const n) {return n % 2 == 0; })
+		| rv::drop(2)
+		| rv::reverse
+		| rv::transform([](int const n) {return n * n; });
+\end{lstlisting}
+
+This is actually the shorter and more readable version of the following:
+
+\begin{lstlisting}[style=styleCXX]
+std::ranges::sort(v);auto r =
+	rv::transform(
+		rv::reverse(
+			rv::drop(
+				rv::filter(
+					v,
+					[](int const n) {return n % 2 == 0; }),
+					2)),
+		[](int const n) {return n * n; });
+\end{lstlisting}
+
+The first version is possible because the pipe operator (|) is overloaded to simplify the composition of views in a more human-readable form. Some range adaptors take one argument, and some may take multiple arguments. The following rules apply:
+
+\begin{itemize}
+\item
+If a range adaptor A takes one argument, a view V, then A(V) and V|A are equivalent. Such a range adaptor is reverse\_view, and an example is shown here:
+
+\begin{lstlisting}[style=styleCXX]
+std::vector<int> v{ 1, 5, 3, 2, 8, 7, 6, 4 };
+namespace rv = std::ranges::views;
+auto r1 = rv::reverse(v);
+auto r2 = v | rv::reverse;
+\end{lstlisting}
+
+\item
+If a range adaptor A takes multiple arguments, a view V and args…, then A(V, args…), A(args…)(V), and V|A(args…) are equivalent. Such a range adaptor is take\_view, and an example is shown here:
+
+\begin{lstlisting}[style=styleCXX]
+std::vector<int> v{ 1, 5, 3, 2, 8, 7, 6, 4 };
+namespace rv = std::ranges::views;
+auto r1 = rv::take(v, 2);
+auto r2 = rv::take(2)(v);
+auto r3 = v | rv::take(2);
+\end{lstlisting}
+
+\end{itemize}
+
+So far, we have seen the likes of filter, transform, reverse, and drop put to use. To complete this part of the chapter, let’s take a series of examples to demonstrate the use of the views from Table 8.7. In all the following examples, we will consider rv as an alias for the std::ranges::views namespace:
+
+\begin{itemize}
+\item
+Print the last two odd numbers from a sequence, in reverse order:
+
+\begin{lstlisting}[style=styleCXX]
+std::vector<int> v{ 1, 5, 3, 2, 4, 7, 6, 8 };
+for (auto i : v |
+	rv::reverse |
+	rv::filter([](int const n) {return n % 2 == 1; }) |
+	rv::take(2))
+{
+	std::cout << i << '\n'; // prints 7 and 3
+}
+\end{lstlisting}
+
+\item
+Print the subsequence of consecutive numbers smaller than 10 from a range that does not include the first consecutive odd numbers:
+
+\begin{lstlisting}[style=styleCXX]
+std::vector<int> v{ 1, 5, 3, 2, 4, 7, 16, 8 };
+for (auto i : v |
+	rv::take_while([](int const n){return n < 10; }) |
+	rv::drop_while([](int const n){return n % 2 == 1; })
+) {
+	std::cout << i << '\n'; // prints 2 4 7
+}
+\end{lstlisting}
+
+\item
+Print the first elements, the second elements, and, respectively, the third elements from a sequence of tuples:
+
+\begin{lstlisting}[style=styleCXX]
+std::vector<std::tuple<int,double,std::string>> v =
+{
+	{1, 1.1, "one"},
+	{2, 2.2, "two"},
+	{3, 3.3, "three"}
+};
+
+for (auto i : v | rv::keys)
+	std::cout << i << '\n'; // prints 1 2 3
+	
+for (auto i : v | rv::values)
+	std::cout << i << '\n'; // prints 1.1 2.2 3.3
+	
+for (auto i : v | rv::elements<2>)
+	std::cout << i << '\n'; // prints one two three
+\end{lstlisting}
+
+\item
+Print all the elements from a vector of vectors of integers:
+
+\begin{lstlisting}[style=styleCXX]
+std::vector<std::vector<int>> v {
+	{1,2,3}, {4}, {5, 6}
+};
+
+for (int const i : v | rv::join)
+	std::cout << i << ' '; // prints 1 2 3 4 5 6
+\end{lstlisting}
+
+\item
+Print all the elements from a vector of vectors of integers but insert a 0 between the elements of each vector. The range adaptor join\_with is new to C++23 and may not be supported yet by compilers:
+
+\begin{lstlisting}[style=styleCXX]
+std::vector<std::vector<int>> v{
+	{1,2,3}, {4}, {5, 6}
+};
+for(int const i : v | rv::join_with(0))
+	std::cout << i << ' '; // print 1 2 3 0 4 0 5 6
+\end{lstlisting}
+
+\item
+Print the individual words from a sentence, where the delimited is a space:
+
+\begin{lstlisting}[style=styleCXX]
+std::string text{ "this is a demo!" };
+constexpr std::string_view delim{ " " };
+for (auto const word : text | rv::split(delim))
+{
+	std::cout << std::string_view(word.begin(),
+								  word.end())
+			  << '\n';
+}
+\end{lstlisting}
+
+\item
+Create a view of tuples from the elements of an array of integers and a vector of doubles:
+
+\begin{lstlisting}[style=styleCXX]
+std::array<int, 4> a {1, 2, 3, 4};
+std::vector<double> v {10.0, 20.0, 30.0};
+
+auto z = rv::zip(a, v)
+// { {1, 10.0}, {2, 20.0}, {3, 30.0} }
+\end{lstlisting}
+
+\item
+Create a view with the multiplied elements of an array of integers and a vector of doubles:
+
+\begin{lstlisting}[style=styleCXX]
+std::array<int, 4> a {1, 2, 3, 4};
+std::vector<double> v {10.0, 20.0, 30.0};
+
+auto z = rv::zip_transform(
+	std::multiplies<double>(), a, v)
+// { {1, 10.0}, {2, 20.0}, {3, 30.0} }
+\end{lstlisting}
+
+\item
+Print the pairs of adjacent elements of a sequence of integers:
+
+\begin{lstlisting}[style=styleCXX]
+std::vector<int> v {1, 2, 3, 4};
+for (auto i : v | rv::adjacent<2>)
+{
+	// prints: (1, 2) (2, 3) (3, 4)
+	std::cout << std::format("({},{})",
+							 i.first, i.second)";
+}
+\end{lstlisting}
+
+\item
+Print the values obtained from multiplying each three consecutive values from a sequence of integers:
+
+\begin{lstlisting}[style=styleCXX]
+std::vector<int> v {1, 2, 3, 4, 5};
+for (auto i : v | rv::adjacent_transform<3>(
+	std::multiplies()))
+{
+	std::cout << i << ' '; // prints: 3 24 60
+}
+\end{lstlisting}
+
+\end{itemize}
+
+These examples will hopefully help you understand the possible use cases for each of the available views. You can find more examples in the source code accompanying the book, as well as in the articles mentioned in the Further reading section. In the next section, we will discuss the other part of the ranges library, the constrained algorithms.
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,72 @@
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Question 1}
+
+What are type traits?
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Answer}
+
+Type traits are small class templates that enable us to either query properties of types or perform transformations of types.
+
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Question 2}
+
+What is SFINAE?
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Answer}
+
+SFINAE is an acronym for Substitution Failure Is Not An Error. This is a rule for template substitution and works as follows: when the compiler encounters the use of a function template, it substitutes the arguments in order to instantiate the template; if an error occurs at this point, it is not regarded as an ill-formed code, only as a deduction failure. As a result, the function is removed from the overload set instead of causing an error. Therefore, an error only occurs if there is no match in the overload set for a particular function call.
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Question 3}
+
+What is constexpr if?
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Answer}
+
+constexpr if is a compile-time version of the if statement. The syntax for it is if constexpr(condition). It’s been available since C++17 and allows us to discard a branch, at compile time, based on the value of a compile-time expression.
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Question 4}
+
+What does std::is\_same do?
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Answer}
+
+std::is\_same is a type trait that checks whether two types are the same. It includes checks for the const and volatile qualifiers, yielding false for two types that have different qualifiers (such as int and int const).
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Question 5}
+
+What does std::conditional do?
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Answer}
+
+std::conditional is a metafunction that chooses one type or another based on a compile-time constant.
+
+
+
+
+
+
+
+
+
+
+
+

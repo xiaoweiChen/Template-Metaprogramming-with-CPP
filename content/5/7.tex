@@ -1,0 +1,72 @@
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Question 1}
+
+What are typical problems for which the Curiously Recuring Template Pattern is used?
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Answer}
+
+The Curiously Recurring Template Pattern (CRTP) is typically used for solving problems such as adding common functionality to types and avoiding code duplication, limiting the number of times a type can be instantiated, or implementing the composite design pattern.
+
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Question 2}
+
+What are mixins and what is their purpose?
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Answer}
+
+Mixins are small classes that are designed to add functionality to other classes, by inheriting from the classes they are supposed to complement. This is the opposite of the CRTP pattern.
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Question 3}
+
+What is type erasure?
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Answer}
+
+Type erasure is the term used to describe a pattern that removes information from types, making it possible for types that are not related to be treated in a generic way. Although forms of type erasure can be achieved with void pointers or polymorphism, the true type erasure pattern is achieved in C++ with templates.
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Question 4}
+
+What is tag dispatching and what are its alternatives?
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Answer}
+
+Tag dispatching is a technique that enables us to select one or another function overload at compile time. Although tag dispatching itself is an alternative to std::enable\_if and SFINAE, it also has its own alternatives. These are constexpr if in C++17 and concepts in C++20.
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Question 5}
+
+What are expression templates and where are they used?
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Answer}
+
+Expression templates are a metaprogramming technique that enables a lazy evaluation of a computation at compile-time. The benefit of this technique is that it avoids performing inefficient operations at runtime at the expense of more complex code that could be difficult to comprehend. Expression templates are typically used to implement linear algebra libraries.
+
+
+
+
+
+
+
+
+
+
+
+

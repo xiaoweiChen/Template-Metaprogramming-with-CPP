@@ -1,0 +1,72 @@
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Question 1}
+
+What are the sequence containers from the standard library?
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Answer}
+
+The sequence containers from the C++ standard library are std::vector, std::deque, std::list, std::array, and std::forward\_list.
+
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Question 2}
+
+What are the common member functions defined in the standard containers?
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Answer}
+
+The member functions that are defined for most containers in the standard library are size (not present in std::forward\_list), empty, clear (not present in std::array, std::stack, std::queue, and std::priority\_queue), swap, begin, and end.
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Question 3}
+
+What are iterators and how many categories exist?
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Answer}
+
+An iterator is an abstraction that enables us to access the elements of a container in a generic way, without having to know the implementation details of each container. Iterators are key for writing general-purpose algorithms. There are six categories of iterators in C++: input, forward, bidirectional, random-access, contiguous (as of C++17), and output.
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Question 4}
+
+What operations does a random-access iterator support?
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Answer}
+
+The random-access iterators must support the following operations (in addition to those required for input, forward, and bidirectional iterators): the + and - arithmetic operators, inequality comparison (with other iterators), compound assignment, and offset dereference operators.
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Question 5}
+
+What are range access functions?
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Answer}
+
+Range access functions are non-member functions that provide a uniform way to access the data or properties of containers, arrays, and the std::initializer\_list class. These functions include std::size/std::ssize, std::empty, std::data, std::begin, and std::end.
+
+
+
+
+
+
+
+
+
+
+
+

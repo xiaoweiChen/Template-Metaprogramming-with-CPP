@@ -1,0 +1,72 @@
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Question 1}
+
+What are variadic templates and why are they useful?
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Answer}
+
+Variadic templates are templates with a variable number of arguments. They allow us to write not only functions with variable number of arguments but also class templates, variable templates, and alias templates. Unlike other approaches, such as the use of the va\_ macros, they are type-safe, do not require macros, and do not require us to explicitly specify the number of arguments.
+
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Question 2}
+
+What is a parameter pack?
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Answer}
+
+There are two kinds of parameter packs: template parameter packs and function parameter packs. The former are template parameters that accept zero, one, or more template arguments. The latter are function parameters that accept zero, one, or more function arguments.
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Question 3}
+
+What are the contexts where parameter packs can be expanded?
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Answer}
+
+Parameter packs can be expanded in a multitude of contexts, as follows: template parameter lists, template argument lists, function parameter lists, function argument lists, parenthesized initializers, brace-enclosed initializers, base specifiers and member initializer lists, fold expressions, using declarations, lambda captures, the sizeof… operator, alignment specifiers, and attribute lists.
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Question 4}
+
+What are fold expressions?
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Answer}
+
+A fold expression is an expression involving a parameter pack that folds (or reduces) the elements of the parameter pack over a binary operator.
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Question 5}
+
+What are the benefits of using fold expressions?
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Answer}
+
+The benefits of using fold expressions include having less and simpler code to write, fewer template instantiations, which lead to faster compile times, and potentially faster code, since multiple function calls are replaced with a single expression.
+
+
+
+
+
+
+
+
+
+
+
+
