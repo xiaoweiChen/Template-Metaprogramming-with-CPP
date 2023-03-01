@@ -2,55 +2,55 @@
   \zihao{1} 前言
 \end{flushright}
 
-The C++ programming language is one of the most widely used in the world and it has been so for decades. Its success isn’t due just to the performance it provides or maybe to its ease of use, which many would argue against, but probably to its versatility. C++ is a general-purpose, multi-paradigm programming language that blends together procedural, functional, and generic programming.
+历经数十载，C++已经成为适用范围广泛的编程语言之一。它的成功不仅是因为其性能或易用性(许多人会反对)，而且是因为其的多功能性。C++是一种通用的、多范式的编程语言，混合了过程式、函数式和泛型编程。
 
-Generic programming is a paradigm of writing code such as that entities such as functions and classes are written in terms of types that are specified later. These generic entities are instantiated only when needed for specific types that are specified as arguments. These generic entities are known as templates in C++.
+泛型编程是一种编写代码的方式，例如：函数和类等实体为根据之后指定的类型编写。这些泛型实体仅在指参数指定为特定类型需要时才进行实例化。这些泛型实体在C++中称为模板。
 
-Metaprogramming is the programming technique of using templates (and constexpr functions in C++) to generate code at compile-time that is then merged with the rest of the source code for compiling a final program. Metaprogramming implies that at least an input or an output is a type.
+元编程是一种编程技术，使用模板(和C++中的constexpr函数)在编译时生成代码，然后与其余源代码合并，最终用于编译程序。元编程需要(至少)指定一个输入或输出的类型。
 
-Templates in C++ have a reputation of being pretty horrendous, as described in the C++ Core Guideless (a document of dos and don’ts maintained by Bjarne Stroustrup and Herb Sutter). However, they make generic libraries possible such as the C++ Standard Library that C++ developers use all the time. Whether you’re writing templates yourself or just using templates written by others (such as standard containers or algorithms), templates are most likely part of your daily code.
+C++的模板可谓是声名狼藉，就如《C++核心指南》(Bjarne Stroustrup和Herb Sutter维护的一份关于该做什么和不该做什么的文档)中所描述的那样。不过，模板使泛型库成为可能，就如同C++开发人员会一直使用的C++标准库一样。无论是自己编写模板，还是使用他人编写的模板(如标准容器或算法)，模板都很可能是日常代码的一部分。
 
-This book is intended to provide a good understanding of all the spectrum of templates available in C++ (from their basic syntax to concepts in C++20). This will be the focus of the first two parts of the book. The third and final part will help you put the newly acquired knowledge into practice to perform metaprogramming with templates.
-
-\hspace*{\fill} \\ %插入空行
-\noindent
-\textbf{Who this book is for?}
-
-This book is for beginner-to-intermediate C++ developers who want to learn about template metaprogramming as well as advanced C++ developers looking to get up to speed with the new C++20 features related to templates and the various idioms and patterns. Basic C++ coding experience is necessary to get started with this book.
+本书的目的是为让读者更加容易理解C++模板(从基本语法到C++20中的概念)，这将是本书前两部分的重点内容。第三部分(也是最后一部分)将使用前面了解到的知识付诸实践，并使用模板进行元编程。
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{What this book covers}
+\textbf{适读人群}
 
-Chapter 1, Introduction to Templates, provides an introduction to the concept of template metaprogramming in C++, with several simple examples, and a discussion on why we need templates and what are the pros and cons of using templates.
-
-Chapter 2, Template Fundamentals, explores all forms of templates in C++: function templates, class templates, variable templates, and alias templates. For each of these, we discuss the syntax and the details of how they work. Furthermore, the key concepts of template instantiation and specialization are addressed here.
-
-Chapter 3, Variadic Templates, is dedicated entirely to variadic templates which are templates that have a variable number of template parameters. We discuss in detail variadic function templates, variadic class templates, variadic alias templates, and variadic variable templates, parameter packs and how they are expanded, as well as fold expressions that help us simplify the writing of variadic templates.
-
-Chapter 4, Advanced Template Concepts, groups a series of advanced template concepts such as dependent names and name lookup, template argument deduction, template recursion, perfect forwarding, generic and template lambdas. By understanding these topics, readers will be able to greatly expand the variety of templates they can read or write.
-
-Chapter 5, Type Traits and Conditional Compilation, is dedicated to type traits. The reader will learn about type traits, what traits the standard library provides, and how they can be used to solve different problems.
-
-Chapter 6, Concepts and Constraints, presents the new C++20 mechanism for defining requirements for template arguments with concepts and constraints. You will learn about the various ways to specify constraints. Moreover, we provide an overview of the content of the C++20 standard concepts library.
-
-Chapter 7, Patterns and Idioms, explores a series of unrelated advanced topics of using the knowledge learned so far into implementing various patterns. We explore the concepts of static polymorphism, type erasure, tag dispatching, and patterns such as the curiously recursive template pattern, expression templates, mixins, and typelists.
-
-Chapter 8, Ranges and Algorithms, is dedicated to understanding containers, iterators, and algorithms, which are the core components of the standard template library. You will learn here how to write a generic container and an iterator type for it as well as a general-purpose algorithm.
-
-Chapter 9, The Ranges Library, explores the new C++20 Ranges library with its key features such as ranges, range adaptors, and constrained algorithms. These enable us to write simpler code for working with ranges. Furthermore, you will also learn here how to write your own range adaptor.
-
-Appendix is a short epilog that provides a summary of the book.
-
-Assignment Answers contains all the answers to the questions from all the chapters.
+这本书是为初学者到中级C++开发人员(想要学习和了解模板元编程的人员)，以及高级C++开发人员(希望了解与模板相关的新C++20特性和各种习语和模式)。阅读这本书之前，需要有基本的C++编程经验。
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{To get the most out of this book}
+\textbf{本书内容}
 
-To get started with this book, you need to have some basic knowledge of the C++ programming language. You need to know the syntax and fundamentals about classes, functions, operators, function overloading, inheritance, virtual functions, and more. However, no knowledge of templates is required, as this book will teach you everything from scratch.
+\textit{第1章，模板简介。}通过几个简单的例子介绍C++中模板元编程的概念，并讨论了为什么需要模板，以及使用模板的优缺点。
 
-All the code samples in this book are cross-platform. That means you can use any compiler to build and run them. However, although many snippets work with a C++11 compiler, there are also snippets that require a C++17 or C++20 compliant compiler. Therefore, we recommend you use a compiler version that supports C++20 so you can run all the samples. The samples in this book have been tested with MSVC 19.30 (Visual Studio 2022), GCC 12.1/13, and Clang 13/14. If you don’t have such a C++20 compliant compiler on your machine, you can try one online. We recommend one of the following:
+\textit{第2章，了解模板。}探讨了C++中所有形式的模板:函数模板、类模板、变量模板和别名模板。对于其中的每一个，都会讨论其语法和工作方式等细节。此外，这里还讨论了模板实例化和特化的关键概念。
+
+\textit{第3章，可变参数模板。}专注于可变参数模板，将详细讨论可变参数函数模板、可变参数类模板、可变参数别名模板、可变参数变量模板、参数包及其展开方式，以及帮助如何简化编写可变参数模板的折叠表达式。
+
+\textit{第4章，高级模板概念。}汇集了一系列高级模板概念，如名称依赖和名称查找、模板参数推导、模板递归、完美转发、泛型和模板Lambda。通过理解这些内容，读者将能够极大地扩展阅读或编写的模板的种类。
+
+\textit{第5章，类型特征和条件编译。}专注于讨论类型特征，将了解类型特征，标准库提供了哪些特征，以及如何使用它们来解决不同的问题。
+
+\textit{第6章，概念和约束。}介绍了C++20的新机制，使用概念和约束定义模板参数的需求，可以了解指定约束的各种方法。此外，这里还概述了C++20标准概念库的内容。
+
+\textit{第7章，模式和习语。}探讨了一系列独立的高级主题，如何使用学到的知识来实现各种模式。我们将探讨静态多态性、类型擦除、标记分派和模式(例如奇怪的递归模板模式、表达式模板、mixin和类型列表)的概念。
+
+\textit{第8章，范围和算法。}容器、迭代器和算法是标准模板库的核心组件，本章将学习如何为其编写泛型容器和迭代器类型以及通用算法。
+
+\textit{第9章，范围库。}探讨了C++20中新添加的范围库的关键特性，如范围、范围适配器和约束算法，可使我们能够编写更简单的代码来使用范围。此外，还将在这里学习如何编写自己的范围适配器。
+
+附录是一个简短的尾声，对本书进行了总结。
+
+习题解答包含了所有章节中所有问题的答案.
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{读者福利}
+
+阅读这本书时，需要具备基础的C++编程知识。需要了解有关类、函数、操作符、函数重载、继承、虚函数等的语法和基础知识。若对模板不是很了解也没关系，因为本书将从零开始帮助读者了解模板。
+
+本书中的所有代码示例都是跨平台的，可以使用任何编译器来构建和运行。然而，虽然许多示例使用需要使用C++11，但也有一些示例需要支持C++17或C++20兼容的编译器。因此，建议您使用支持C++20的编译器版本，这样就可以运行本书所有示例。书中的示例都使用MSVC 19.30 (Visual Studio 2022)、GCC 12.1/13和Clang 13/14进行过测试。若机器上没有兼容C++20的编译器，可以在Web上试试。这里推荐几个平台:
 
 \begin{itemize}
 \item
@@ -63,40 +63,38 @@ Wandbox (\url{https://wandbox.org/})
 C++ Insights (\url{https://cppinsights.io/})
 \end{itemize}
 
-The C++ Insights online tools will be referred several times in the book for analyzing the code generated by the compiler.
+本书将多次引用C++ Insights在线工具来分析编译器生成的代码。
 
-You should refer to the page, \url{https://en.cppreference.com/w/cpp/compiler
-\_support}, if you want to check compilers support for different versions of the C++ standard.
+若想了解编译器对不同C++标准的支持程度，可以参考\url{https://en.cppreference.com/w/cpp/compiler\_support}。
 
-If you are using the digital version of this book, we advise you to type the code yourself or access the code from the book’s GitHub repository (a link is available in the next section). Doing so will help you avoid any potential errors related to the copying and pasting of code.
-
-\hspace*{\fill} \\ %插入空行
-\noindent
-\textbf{Mentions and further readings}
-
-Throughout the book, we are referring multiple times to the C++ standard. This document is copy-righted by the International Organization for Standardization. The official C++ standard document can be purchased from here: \url{https://www.iso.org/standard/79358.html}. However, multiple drafts of the C++ standard as well as the sources used to generate them are freely available on GitHub at \url{https://github.com/cplusplus/draft}. You cand find additional information about the C++ standard at \url{https://isocpp.org/std/the-standard}.
-
-A great online resource for C++ developers is the C++ Reference website, available at \url{https://en.cppreference.com/}. This provides exhaustive documentation of the C++ language directly derived from the C++ standard. Content from the C++ Reference is quoted several times in the book. The C++ Reference content is licensed under CC-BY-SA license, \url{https://en.cppreference.com/w/Cppreference:Copyright/CC-BY-SA}.
-
-At the end of each chapter, you will find a section called Further reading. This section contains a list of readings used as a bibliography and recommended for deepening your knowledge of the presented topics.
-
-
+\textbf{
+如果正在使用本书的数字版本，我们建议您自己输入代码或通过GitHub访问代码(下一节提供链接)，将避免复制和粘贴代码。
+}
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Download the example code files}
+\textbf{扩展阅读}
 
-You can download the example code files for this book from GitHub at \url{https:// github.com/PacktPublishing/Template-Metaprogramming-with-CPP}.
-If there’s an update to the code, it will be updated in the GitHub repository.
+本书中，我们会多次提到C++标准，其文件版权归国际标准化组织所有。官方的C++标准文档可以从这里购买:\url{https://www.iso.org/standard/79358.html}。然而，C++标准的多个草案，以及用于生成它们的源代码都可以在GitHub上的\url{https://github.com/cplusplus/draft}免费获得。并且，可以在\url{https://isocpp.org/std/the-standard}上找到关于C++标准的更多信息。
 
-We also have other code bundles from our rich catalog of books and videos available at \url{https://github.com/PacktPublishing/}. Check them out!
+cppreference网站\url{https://en.cppreference.com/}，是一个很好的在线资源，提供了直接从C++标准派生的C++语言的详尽文档。本书多次引用了cppreference中的内容。cppreference的内容基于CC-BY-SA协议，\url{https://en.cppreference.com/w/Cppreference:Copyright/CC-BY-SA}。
+
+每一章的末尾，都会发现一个叫做“扩展阅读”的部分。本节包含了一份参考书目，相关条目中的具体内容，可用于加深对所介绍主题的理解。
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{下载例程}
+
+可以从GitHub上的\url{https:// github.com/PacktPublishing/Template-Metaprogramming-with-CPP}下载这本书的示例代码文件。若代码有更新，将会体现在GitHub的库中。
+
+我们还有其他的代码包，还有丰富的书籍和视频目录，都在\url{https://github.com/PacktPublishing/}。去看看吧!
 
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Download the color images}
+\textbf{下载彩图}
 
-We also provide a PDF file that has color images of the screenshots and diagrams used in this book. You can download it here: \url{https://packt.link/Un8j5}.
+我们还提供了一个PDF文件，其中有本书中使用的屏幕截图和图表的彩色图。可以在这里下载:\url{https://packt.link/Un8j5}。
 
 
 

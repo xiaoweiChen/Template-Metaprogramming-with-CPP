@@ -1,55 +1,55 @@
-So far in this chapter, we have used the general term templates. However, there are four different terms describing the kind of templates we have written:
+本章中，我们已经使用了模板。然而，有四个不同的术语可以描述我们所编写的模板类型:
 
 \begin{itemize}
 \item
-Function template is the term used for a templated function. An example is the max template seen previously.
+\textbf{函数模板}是用于模板化函数的术语。例子就是前面看到的max模板。
 
 \item
-Class template is the term used for a templated class (which can be defined either with the class, struct, or union keyword). An example is the vector class we wrote in the previous section.
+\textbf{类模板}是用于模板化类的术语(可以用class、struct或union关键字定义)。例子就是前一节中的vector类。
 
 \item
-Variable template is the term used for templated variables, such as the NewLine template from the previous section.
+\textbf{可变参模板}是用于模板化变量的术语，例如上一节中的NewLine模板。
 
 \item
-Alias template is the term used for templated type aliases. We will see examples for alias templates in the next chapter.
+\textbf{别名模板}是用于模板化类型别名的术语。我们将在下一章看到别名模板的例子。
 \end{itemize}
 
-Templates are parameterized with one or more parameters (in the examples we have seen so far, there was a single parameter). These are called template parameters and can be of three categories:
+模板用一个或多个参数进行参数化(迄今为止看到的示例中，只有一个参数)。这些参数被称为\textbf{模板参数}，可以分为三类:
 
 \begin{itemize}
 \item
-Type template parameters, such as in template<typename T>, where the parameter represents a type specified when the template is used.
+\textbf{类型模板参数}，例如template<typename T>，其中参数表示使用模板时指定的类型。
 
 \item
-Non-type template parameters, such as in template<size\_t N> or template<auto n>, where each parameter must have a structural type, which includes integral types, floating-point types (as for C++20), pointer types, enumeration types, lvalue reference types, and others.
+\textbf{非类型模板形参}，如template<size\_t N>或template<auto N>，其中每个形参必须有一个结构类型，包括整型、浮点型(C++20)、指针类型、枚举类型、左值引用类型等。
 
 \item
-Template template parameters, such as in template<typename K, typename V, template<typename> typename C>, where the type of a parameter is another template.
+\textbf{模板模板参数}，如template<typename K, typename V, template<typename> typename C>，其中参数类型为另一个模板。
 \end{itemize}
 
-Templates can be specialized by providing alternative implementations. These implementations can depend on the characteristics of the template parameters. The purpose of specialization is to enable optimizations or reduce code bloat. There are two forms of specialization:
+模板可以通过提供替代实现进行特化。这些实现可以依赖于模板参数的特征。特化的目的是实现优化或减少代码膨胀，其有两种形式:
 
 \begin{itemize}
 \item
-Partial specialization: This is an alternative implementation provided for only some of the template parameters.
+\textbf{偏特化}:这是仅为某些模板参数提供的替代实现。
 
 \item
-(Explicit) full specialization: This is a specialization of a template when all the template arguments are provided.
+\textbf{(显式)全特化}:当提供了所有模板参数时，这是一个模板的特化实例。
 \end{itemize}
 
-The process of generating code from a template by the compiler is called template instantiation. This happens by substituting the template arguments for the template parameters used in the definition of the template. For instance, in the example where we used vector<int>, the compiler substituted the int type in every place where T appeared.
+编译器从模板生成代码的过程称为\textbf{模板实例化}，通过将模板实参替换为模板定义中使用的模板形参实现。例如，在vector<int>的例子中，编译器在T出现的每一个地方都替换了int类型。
 
-Template instantiation can have two forms:
+模板实例化可以有两种形式:
 
 \begin{itemize}
 \item
-Implicit instantiation: This occurs when the compiler instantiates a template due to its use in code. This happens only for those combinations or arguments that are in use. For instance, if the compiler encounters the use of vector<int> and vector<double>, it will instantiate the vector class template for the types int and double and nothing more.
+\textbf{隐式实例化}:当编译器由于在代码中使用模板而实例化模板时，就会发生这种情况，这只发生在那些正在使用的组合或参数上。例如，编译器遇到vector<int>和vector<double>的使用，将实例化vector类模板为类型int和double。
 
 \item
-Explicit instantiation: This is a way to explicitly tell the compiler what instantiations of a template to create, even if those instantiations are not explicitly used in your code. This is useful, for instance, when creating library files, because uninstantiated templates are not put into object files. They also help reduce compile times and object sizes, in ways that we will see at a later time.
+\textbf{显式实例化}:一种显式地告诉编译器要创建模板的哪些实例化的方法，即使这些实例化没有显式地在您的代码中使用。例如，在创建库文件时，因为未实例化的模板不会放入目标文件中。其还有助于减少编译时间和对象大小，我们将在后面的内容中看到这些方法。
 \end{itemize}
 
-All the terms and topics mentioned in this section will be detailed in other chapters of the book. This section is intended as a short reference guide to template terminology. Keep in mind though that there are many other terms related to templates that will be introduced at the appropriate time.
+本节中提到的所有术语和主题都将在本书的其他章节中详细介绍。本节旨在作为模板的参考指南。但是请记住，还有许多其他与模板相关的术语会在适当的时候进行介绍。
 
 
 

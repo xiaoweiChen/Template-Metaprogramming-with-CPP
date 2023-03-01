@@ -1,6 +1,6 @@
-Each language feature is designed to help with a problem or task that developers face when using that language. The purpose of templates is to help us avoid writing repetitive code that only differs slightly.
+每种语言特性都旨在帮助开发人员解决当前的问题或任务，模板的目的是为了避免编写只有细微差别的重复性代码。
 
-To exemplify this, let's take the classical example of a max function. Such a function takes two numerical arguments and returns the largest of the two. We can easily implement this as follows:
+为了证明这一点，我们以一个经典的max函数为例。函数接受两个数值参数，并返回两个参数中最大的一个。可以简单地实现:
 
 \begin{lstlisting}[style=styleCXX]
 int max(int const a, int const b)
@@ -9,7 +9,7 @@ int max(int const a, int const b)
 }
 \end{lstlisting}
 
-This works pretty well, but as you can see, it will only work for values of the type int (or those that are convertible to int). What if we need the same function but with arguments of the type double? Then, we can overload this function (create a function with the same name but a different number or type of arguments) for the double type:
+这个函数没毛病，但它只适用于int类型的值(或那些可转换为int的值)。若需要相同的函数，但参数类型是double怎么办呢？直接为double类型重载这个函数就好了(创建一个具有相同名称，但参数数量或类型不同的函数):
 
 \begin{lstlisting}[style=styleCXX]
 double max(double const a, double const b)
@@ -18,18 +18,21 @@ double max(double const a, double const b)
 }
 \end{lstlisting}
 
-However, int and double are not the only numeric types. There is char, short, long, long and their unsigned counterparts, unsigned char, unsigned short, unsigned long, and unsigned long. There are also the types float and long double. And other types, such as int8\_t, int16\_t, int32\_t, and int64\_t. And there could be other types that can be compared, such as bigint, Matrix, point2d, and any user-defined type that overloads operator>. How can a general-purpose library provide a general-purpose function such as max for all these types? It can overload the function for all the built-in types and perhaps other library types but cannot do so for any user-defined type.
+然而，int和double并不是唯一的数字类型。有char, short, long, long和它们的unsigned对等物，unsigned char, unsigned short, unsigned long, unsigned long。还有浮点型和长双精度型。以及其他类型，如int8\_t, int16\_t, int32\_t和int64\_t。可以比较其他类型，例如bigint、Matrix、point2d和任何支持大于运算符的自定义类型。通用库如何为所有这些类型提供诸如max这样的通用函数呢?它可以重载所有内置类型和其他库类型的函数，但不能重载任何自定义类型。
 
-An alternative to overloading functions with different parameters is to use void* to pass arguments of different types. Keep in mind this is a bad practice and the following example is shown only as a possible alternative in a world without templates. However, for the sake of discussion, we can design a sorting function that will run the quick sort algorithm on an array of elements of any possible type that provides a strict weak ordering. The details of the quicksort algorithm can be looked up online, such as on Wikipedia at \url{https://en.wikipedia.org/wiki/Quicksort}.
+使用不同参数重载函数的另一种方法是使用void*来传递不同类型的参数，但这是一种糟糕的做法。下面的示例只是在没有模板的情况下作为一种可能的替代方案。为了便于讨论，我们设计了一个排序函数，该函数将对任何可能类型的元素数组运行快速排序算法，该数组提供严格的弱排序。快速排序算法的详细信息可以在网上查询，例如：\url{https://en.wikipedia.org/wiki/Quicksort}。
 
-The quicksort algorithm needs to compare and swap any two elements. However, since we don't know their type, the implementation cannot do this directly. The solution is to rely on callbacks, which are functions passed as arguments that will be invoked when necessary. A possible implementation can be as follows:
+快速排序算法需要比较和交换两个元素，但由于提前不知道其数据类型，不能直接实现。解决方案是依赖回调，回调是作为参数传递的函数，在必要时调用。可能的实现方式如下:
+
 \begin{lstlisting}[style=styleCXX]
 using swap_fn = void(*)(void*, int const, int const);
 using compare_fn = bool(*)(void*, int const, int const);
+
 int partition(void* arr, int const low, int const high,
-compare_fn fcomp, swap_fn fswap)
+			  compare_fn fcomp, swap_fn fswap)
 {
 	int i = low - 1;
+	
 	for (int j = low; j <= high - 1; j++)
 	{
 		if (fcomp(arr, j, high))
@@ -38,23 +41,26 @@ compare_fn fcomp, swap_fn fswap)
 			fswap(arr, i, j);
 		}
 	}
+
 	fswap(arr, i + 1, high);
+	
 	return i + 1;
 }
+
 void quicksort(void* arr, int const low, int const high,
-compare_fn fcomp, swap_fn fswap)
+			   compare_fn fcomp, swap_fn fswap)
 {
 	if (low < high)
 	{
 		int const pi = partition(arr, low, high, fcomp,
-		fswap);
+			fswap);
 		quicksort(arr, low, pi - 1, fcomp, fswap);
 		quicksort(arr, pi + 1, high, fcomp, fswap);
 	}
 }
 \end{lstlisting}
 
-In order to invoke the quicksort function, we need to provide implementations for these comparisons and swapping functions for each type of array that we pass to the function. The following are implementations for the int type:
+为了调用快速排序函数，需要为传递给函数的每种类型的数组提供这些比较和交换函数的实现。以下是int类型的实现:
 
 \begin{lstlisting}[style=styleCXX]
 void swap_int(void* arr, int const i, int const j)
@@ -72,7 +78,7 @@ bool less_int(void* arr, int const i, int const j)
 }
 \end{lstlisting}
 
-With all these defined, we can write code that sorts arrays of integers as follows:
+定义了所有这些后，可以编写如下代码对整数数组进行排序:
 
 \begin{lstlisting}[style=styleCXX]
 int main()
@@ -83,7 +89,7 @@ int main()
 }
 \end{lstlisting}
 
-These examples focused on functions but the same problem applies to classes. Consider that you want to write a class that models a collection of numerical values that has variable size and stores the elements contiguously in memory. You could provide the following implementation (only the declaration is sketched here) for storing integers:
+这些例子关注的是函数，但同样的问题也适用于类。假设要编写一个类，该类对具有可变大小的数值集合建模，并将元素连续存储在内存中。可以提供以下实现(这里仅概述声明)来存储整数:
 
 \begin{lstlisting}[style=styleCXX]
 struct int_vector
@@ -109,15 +115,15 @@ private:
 };
 \end{lstlisting}
 
-This all looks good but the moment you need to store values of the type double, or std::string, or any user-defined type you'll have to write the same code, each time only changing the type of the elements. This is something nobody wants to do because it is repetitive work and because when something needs to change (such as adding a new feature or fixing a bug) you need to apply the same change in multiple places.
+这一切看起来都很好，但当需要存储类型为double、std::string或自定义类型的值时，将需要编写相同的代码，每次只更改元素的类型。应该没有人愿意干这种事情吧，这明显就是一项重复性极高的工作，而且当需要更改某些内容时(例如添加新功能或修复错误)，就需要在多个地方进行相同的更改。
 
-Lastly, a similar problem can be encountered, although less often, when you need to define variables. Let's consider the case of a variable that holds the new line character. You can declare it as follows:
+最后，当要定义变量时，可能会遇到类似的问题(尽管不太常见)。让我们考虑保存新行字符的变量的情况。可以考虑以下方式:
 
 \begin{lstlisting}[style=styleCXX]
 constexpr char NewLine = '\n';
 \end{lstlisting}
 
-What if you need the same constant but for a different encoding, such as wide string literals, UTF-8, and so on? You can have multiple variables, having different names, such as in the following example:
+若需要相同的常量，但需要不同的编码，比如：宽字符串字面值、UTF-8等，该怎么办？可以有多个变量，有不同的名字，比如下面的例子:
 
 \begin{lstlisting}[style=styleCXX]
 constexpr wchar_t NewLineW = L'\n';
@@ -126,7 +132,7 @@ constexpr char16_t NewLineU16 = u'\n';
 constexpr char32_t NewLineU32 = U'\n';
 \end{lstlisting}
 
-Templates are a technique that allows developers to write blueprints that enable the compiler to generate all this repetitive code for us. In the following section, we will see how to transform the preceding snippets into C++ templates.
+模板是一种技术手段，其允许开发人员编写蓝图，使编译器能够为我们生成所有这些重复的代码。下一节中，我们将看到如何将前面的代码转换为C++模板。
 
 
 

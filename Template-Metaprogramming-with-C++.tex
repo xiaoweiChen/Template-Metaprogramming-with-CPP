@@ -428,8 +428,12 @@
 		\hspace*{\fill} \\ %插入空行
 		\noindent\textbf{作者简介}
 		
-		\textbf{Marius Bancila}是一名软件工程师，为工业和金融部门开发解决方案方面，拥有近20年的经验。他是《现代C++挑战》的作者和《学习C\#编程》的合著者。并且是一名软件架构师，专注于Microsoft技术，主要使用C++和C\#开发桌面应用程序。他热衷于与他人分享他的技术专长，自2006年以来，他一直是微软C++和开发人员眼中的技术MVP。Marius住在罗马尼亚，并且活跃在各种网络社区。。
+		\textbf{Marius Bancila}是一名软件工程师，为工业和金融部门开发解决方案方面，拥有近20年的经验。他是《现代C++挑战》的作者和《学习C\#编程》的合著者。并且是一名软件架构师，专注于Microsoft技术，主要使用C++和C\#开发桌面应用程序。他热衷于与他人分享他的技术专长，自2006年以来，他一直是微软C++和开发人员眼中的技术MVP。Marius住在罗马尼亚，并且活跃在各种网络社区。
+		
+		\hspace*{\fill} \\ %插入空行
+		\noindent\textbf{审阅者简介}
 	
+		\textbf{Aleksei Goriachikh}使用的C++编程超过8年。Aleksei于2012年从新西伯利亚州立大学(Novosibirsk State University)数学硕士学位毕业后，之后一直从事计算数学和优化、CAD系统的几何核，以及自动驾驶的多线程实现等领域的研究。Aleksei目前的兴趣是前硅建模。
 		
 		\hspace*{\fill} \\ %插入空行
 		\noindent\textbf{本书相关}
@@ -437,6 +441,15 @@
 			\item Github地址：
 			\url{https://github.com/xiaoweiChen/Template-Metaprogramming-with-CPP}
 		\end{itemize}
+		\newpage
+		
+		\vspace*{\fill}
+		\begin{center}
+		\textit{献给自己那“该死的”好奇心。}
+		
+		\textit{– Marius Bancila}
+		\end{center}
+		\vspace*{\fill}
 		\newpage
 		
 		%前言
@@ -450,36 +463,36 @@
 		\setsecnumdepth{section}
 		
 		\color{white}
-		\section*{\zihao{1}第一部分：Core Template Concepts}
+		\section*{\zihao{1}第一部分：模板的核心概念}
 		\pagecolor{mygray}
-		\addcontentsline{toc}{section}{第一部分：Core Template Concepts}
+		\addcontentsline{toc}{section}{第一部分：模板的核心概念}
 		\textbf{\subfile{content/1/section.tex}}
 		\newpage
 		\color{black}
 		\pagecolor{white}
 		
-		\subsection*{\zihao{2} 第1章\hspace{0.5cm}An Introduction to Templates}
-		\addcontentsline{toc}{subsection}{第1章\hspace{0.5cm}An Introduction to Templates}
+		\subsection*{\zihao{2} 第1章\hspace{0.5cm}模板简介}
+		\addcontentsline{toc}{subsection}{第1章\hspace{0.5cm}模板简介}
 		\subfile{content/1/chapter1/0.tex}
 		
-		\subsubsection*{\zihao{3} 1.1.\hspace{0.2cm}Understanding the need for templates}
-		\addcontentsline{toc}{subsubsection}{1.1.\hspace{0.2cm}Understanding the need for templates}
+		\subsubsection*{\zihao{3} 1.1.\hspace{0.2cm}使用模板的动机}
+		\addcontentsline{toc}{subsubsection}{1.1.\hspace{0.2cm}使用模板的动机}
 		\subfile{content/1/chapter1/1.tex}
 		
-		\subsubsection*{\zihao{3} 1.2.\hspace{0.2cm}Writing your first templates}
-		\addcontentsline{toc}{subsubsection}{1.2.\hspace{0.2cm}Writing your first templates}
+		\subsubsection*{\zihao{3} 1.2.\hspace{0.2cm}编写模板}
+		\addcontentsline{toc}{subsubsection}{1.2.\hspace{0.2cm}编写模板}
 		\subfile{content/1/chapter1/2.tex}
 		
-		\subsubsection*{\zihao{3} 1.3.\hspace{0.2cm}Understanding template terminology}
-		\addcontentsline{toc}{subsubsection}{1.3.\hspace{0.2cm}Understanding template terminology}
+		\subsubsection*{\zihao{3} 1.3.\hspace{0.2cm}理解模板}
+		\addcontentsline{toc}{subsubsection}{1.3.\hspace{0.2cm}理解模板}
 		\subfile{content/1/chapter1/3.tex}
 		
-		\subsubsection*{\zihao{3} 1.4.\hspace{0.2cm}A brief history of templates}
-		\addcontentsline{toc}{subsubsection}{1.4.\hspace{0.2cm}A brief history of templates}
+		\subsubsection*{\zihao{3} 1.4.\hspace{0.2cm}模板简史}
+		\addcontentsline{toc}{subsubsection}{1.4.\hspace{0.2cm}模板简史}
 		\subfile{content/1/chapter1/4.tex}
 		
-		\subsubsection*{\zihao{3} 1.5.\hspace{0.2cm}The pros and cons of templates}
-		\addcontentsline{toc}{subsubsection}{1.5.\hspace{0.2cm}The pros and cons of templates}
+		\subsubsection*{\zihao{3} 1.5.\hspace{0.2cm}模板的优缺点}
+		\addcontentsline{toc}{subsubsection}{1.5.\hspace{0.2cm}模板的优缺点}
 		\subfile{content/1/chapter1/5.tex}
 		
 		\subsubsection*{\zihao{3} 1.6.\hspace{0.2cm}总结}
@@ -495,8 +508,8 @@
 		\subfile{content/1/chapter1/8.tex}
 		\newpage
 		
-		\subsection*{\zihao{2} 第2章\hspace{0.5cm}Template Fundamentals}
-		\addcontentsline{toc}{subsection}{第2章\hspace{0.5cm}Template Fundamentals}
+		\subsection*{\zihao{2} 第2章\hspace{0.5cm}了解模板}
+		\addcontentsline{toc}{subsection}{第2章\hspace{0.5cm}了解模板}
 		\subfile{content/1/chapter2/0.tex}
 		
 		\subsubsection*{\zihao{3} 2.1.\hspace{0.2cm}Defining function templates}
@@ -548,8 +561,8 @@
 		\subfile{content/1/chapter2/12.tex}
 		\newpage
 		
-		\subsection*{\zihao{2} 第3章\hspace{0.5cm}Variadic Templates}
-		\addcontentsline{toc}{subsection}{第3章\hspace{0.5cm}Variadic Templates}
+		\subsection*{\zihao{2} 第3章\hspace{0.5cm}可变参数模板}
+		\addcontentsline{toc}{subsection}{第3章\hspace{0.5cm}可变参数模板}
 		\subfile{content/1/chapter3/0.tex}
 		
 		\subsubsection*{\zihao{3} 3.1.\hspace{0.2cm}Understanding the need for variadic templates}
@@ -594,16 +607,16 @@
 		\newpage
 		
 		\color{white}
-		\section*{\zihao{1}第二部分：Advanced Template Features}
+		\section*{\zihao{1}第二部分：模板进阶特性}
 		\pagecolor{mygray}
-		\addcontentsline{toc}{section}{第二部分：Advanced Template Features}
+		\addcontentsline{toc}{section}{第二部分：模板进阶特性}
 		\textbf{\subfile{content/2/section.tex}}
 		\newpage
 		\color{black}
 		\pagecolor{white}
 		
-		\subsection*{\zihao{2} 第4章\hspace{0.5cm}Advanced Template Concepts}
-		\addcontentsline{toc}{subsection}{第4章\hspace{0.5cm}Advanced Template Concepts}
+		\subsection*{\zihao{2} 第4章\hspace{0.5cm}高级模板概念}
+		\addcontentsline{toc}{subsection}{第4章\hspace{0.5cm}高级模板概念}
 		\subfile{content/2/chapter4/0.tex}
 		
 		\subsubsection*{\zihao{3} 4.1.\hspace{0.2cm}Understanding name binding and dependent names}
@@ -651,8 +664,8 @@
 		\subfile{content/2/chapter4/11.tex}
 		\newpage
 		
-		\subsection*{\zihao{2} 第5章\hspace{0.5cm}Type Traits and Conditional Compilation}
-		\addcontentsline{toc}{subsection}{第5章\hspace{0.5cm}Type Traits and Conditional Compilation}
+		\subsection*{\zihao{2} 第5章\hspace{0.5cm}类型特征和条件编译}
+		\addcontentsline{toc}{subsection}{第5章\hspace{0.5cm}类型特征和条件编译}
 		\subfile{content/2/chapter5/0.tex}
 		
 		\subsubsection*{\zihao{3} 5.1.\hspace{0.2cm}Understanding and defining type traits}
@@ -692,8 +705,8 @@
 		\subfile{content/2/chapter5/9.tex}
 		\newpage
 		
-		\subsection*{\zihao{2} 第6章\hspace{0.5cm}Concepts and Constraints}
-		\addcontentsline{toc}{subsection}{第6章\hspace{0.5cm}Concepts and Constraints}
+		\subsection*{\zihao{2} 第6章\hspace{0.5cm}概念和约束}
+		\addcontentsline{toc}{subsection}{第6章\hspace{0.5cm}概念和约束}
 		\subfile{content/2/chapter6/0.tex}
 		
 		\subsubsection*{\zihao{3} 6.1.\hspace{0.2cm}Understanding the need for concep}
@@ -754,16 +767,16 @@
 		\newpage
 		
 		\color{white}
-		\section*{\zihao{1}第三部分：Applied Templates}
+		\section*{\zihao{1}第三部分：模板的应用}
 		\pagecolor{mygray}
-		\addcontentsline{toc}{section}{第三部分：Applied Templates}
+		\addcontentsline{toc}{section}{第三部分：模板的应用}
 		\textbf{\subfile{content/3/section.tex}}
 		\newpage
 		\color{black}
 		\pagecolor{white}
 		
-		\subsection*{\zihao{2} 第7章\hspace{0.5cm}Patterns and Idioms}
-		\addcontentsline{toc}{subsection}{第7章\hspace{0.5cm}Patterns and Idioms}
+		\subsection*{\zihao{2} 第7章\hspace{0.5cm}模式和习语}
+		\addcontentsline{toc}{subsection}{第7章\hspace{0.5cm}模式和习语}
 		\subfile{content/3/chapter7/0.tex}
 		
 		\subsubsection*{\zihao{3} 7.1.\hspace{0.2cm}Dynamic versus static polymorphism}
@@ -807,8 +820,8 @@
 		\subfile{content/3/chapter7/10.tex}
 		\newpage
 		
-		\subsection*{\zihao{2} 第8章\hspace{0.5cm}Ranges and Algorithms}
-		\addcontentsline{toc}{subsection}{第8章\hspace{0.5cm}Ranges and Algorithms}
+		\subsection*{\zihao{2} 第8章\hspace{0.5cm}范围和算法}
+		\addcontentsline{toc}{subsection}{第8章\hspace{0.5cm}范围和算法}
 		\subfile{content/3/chapter8/0.tex}
 		
 		\subsubsection*{\zihao{3} 8.1.\hspace{0.2cm}Understanding the design of containers, iterators, and algorithms}
@@ -832,8 +845,8 @@
 		\subfile{content/3/chapter8/5.tex}
 		\newpage
 		
-		\subsection*{\zihao{2} 第9章\hspace{0.5cm}The Ranges Library}
-		\addcontentsline{toc}{subsection}{第9章\hspace{0.5cm}The Ranges Library}
+		\subsection*{\zihao{2} 第9章\hspace{0.5cm}范围库}
+		\addcontentsline{toc}{subsection}{第9章\hspace{0.5cm}范围库}
 		\subfile{content/3/chapter9/0.tex}
 		
 		\subsubsection*{\zihao{3} 9.1.\hspace{0.2cm}Advancing from abstract ranges to the ranges library}
@@ -865,48 +878,48 @@
 		\subfile{content/3/chapter9/7.tex}
 		\newpage
 		
-		\section*{\zihao{1}Appendix Closing Notes}
-		\addcontentsline{toc}{section}{Appendix Closing Notes}
+		\section*{\zihao{1}附录\hspace{0.2cm}结束语}
+		\addcontentsline{toc}{section}{附录\hspace{0.2cm}结束语}
 		\subfile{content/4/0.tex}
 		\newpage
 		
-		\section*{\zihao{1}Assignment Answers}
-		\addcontentsline{toc}{section}{Assignment Answers}
+		\section*{\zihao{1}参考答案}
+		\addcontentsline{toc}{section}{参考答案}
 		
-		\subsection*{\zihao{2} Chapter 1, Introduction to Templates}
-		\addcontentsline{toc}{subsection}{Chapter 1, Introduction to Templates}
+		\subsection*{\zihao{2} 第1章，模板简介}
+		\addcontentsline{toc}{subsection}{第1章，模板简介}
 		\subfile{content/5/1.tex}
 		
-		\subsection*{\zihao{2} Chapter 2, Template Fundamentals}
-		\addcontentsline{toc}{subsection}{Chapter 2, Template Fundamentals}
+		\subsection*{\zihao{2} 第2章，了解模板}
+		\addcontentsline{toc}{subsection}{第2章，了解模板}
 		\subfile{content/5/2.tex}
 		
-		\subsection*{\zihao{2} Chapter 3, Variadic Templates}
-		\addcontentsline{toc}{subsection}{Chapter 3, Variadic Templates}
+		\subsection*{\zihao{2} 第3章，可变参数模板s}
+		\addcontentsline{toc}{subsection}{第3章，可变参数模板}
 		\subfile{content/5/3.tex}
 		
-		\subsection*{\zihao{2} Chapter 4, Advanced Template Concepts}
-		\addcontentsline{toc}{subsection}{Chapter 4, Advanced Template Concepts}
+		\subsection*{\zihao{2} 第4章，高级模板概念}
+		\addcontentsline{toc}{subsection}{第4章，高级模板概念}
 		\subfile{content/5/4.tex}
 		
-		\subsection*{\zihao{2} Chapter 5, Type Traits and Conditional Compilation}
-		\addcontentsline{toc}{subsection}{Chapter 5, Type Traits and Conditional Compilation}
+		\subsection*{\zihao{2} 第5章，类型特征和条件编译}
+		\addcontentsline{toc}{subsection}{第5章，类型特征和条件编译}
 		\subfile{content/5/5.tex}
 		
-		\subsection*{\zihao{2} Chapter 6, Concepts and Constraints}
-		\addcontentsline{toc}{subsection}{Chapter 6, Concepts and Constraints}
+		\subsection*{\zihao{2} 第6章，概念和约束}
+		\addcontentsline{toc}{subsection}{第6章，概念和约束}
 		\subfile{content/5/6.tex}
 		
-		\subsection*{\zihao{2} Chapter 7, Patterns and Idioms}
-		\addcontentsline{toc}{subsection}{Chapter 7, Patterns and Idioms}
+		\subsection*{\zihao{2} 第7章，模式和习语}
+		\addcontentsline{toc}{subsection}{第7章，模式和习语}
 		\subfile{content/5/7.tex}
 		
-		\subsection*{\zihao{2} Chapter 8, Ranges and Algorithms}
-		\addcontentsline{toc}{subsection}{Chapter 8, Ranges and Algorithms}
+		\subsection*{\zihao{2} 第8章，范围和算法}
+		\addcontentsline{toc}{subsection}{第8章，范围和算法}
 		\subfile{content/5/8.tex}
 		
-		\subsection*{\zihao{2} Chapter 9, The Ranges Library}
-		\addcontentsline{toc}{subsection}{Chapter 9, The Ranges Library}
+		\subsection*{\zihao{2} 第9章，范围库}
+		\addcontentsline{toc}{subsection}{第9章，范围库}
 		\subfile{content/5/9.tex}
 	
 		\newpage
