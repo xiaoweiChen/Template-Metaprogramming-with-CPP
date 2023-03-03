@@ -1,7 +1,7 @@
 
-So far in the book, we have seen multiple examples of templates with one or more parameters. In all these examples, the parameters represented types supplied at instantiation, either explicitly by the user, or implicitly by the compiler when it could deduce them. These kinds of parameters are called type template parameters. However, templates can also have non-type template parameters and template template parameters. In the following sections, we'll explore all of them.
+目前为止，我们已经看到了带有一个或多个参数的模板的多个示例。这些示例中，参数表示实例化时提供的类型，这些类型可以由用户显式提供，也可以由编译器在可以推导时隐式提供。这些类型的参数称为类型模板参数，但模板也可以有非类型模板参数和双重模板参数。在接下来的部分中，我们将探讨所有这些问题。
 
-\subsubsubsection{2.4.1\hspace{0.2cm}Type template parameters}
+\subsubsubsection{2.4.1\hspace{0.2cm}类型模板参数}
 
 As already mentioned, these are parameters representing types supplied as arguments during the template instantiation. They are introduced either with the typename or the class keyword. There is no difference between using these two keywords. A type template parameter can have a default value, which is a type. This is specified the same way you would specify a default value for a function parameter. Examples for these are shown in the following snippet:
 
@@ -47,7 +47,7 @@ class wrapper { /* ... */ };
 Concepts and constraints are discussed in Chapter 6, Concepts and Constraints. We will learn more about these kinds of parameters in that chapter. For now, let's look at the second kind of template parameters, non-type template parameters.
 
 
-\subsubsubsection{2.4.2\hspace{0.2cm}Non-type template parameters}
+\subsubsubsection{2.4.2\hspace{0.2cm}非类型模板参数}
 
 Template arguments don't always have to represent types. They can also be compile-time expressions, such as constants, addresses of functions or objects with external linkage, or addresses of static class members. Parameters supplied with compile-time expressions are called non-type template parameters. This category of parameters can only have a structural type. The following are the structural types:
 
@@ -358,7 +358,7 @@ In this example, the compiler deduces the types of the template arguments as int
 
 The third and last category of template parameters are template template parameters. We will look at them next.
 
-\subsubsubsection{2.4.3\hspace{0.2cm}Template template parameters}
+\subsubsubsection{2.4.3\hspace{0.2cm}双重模板参数}
 
 Although the name may sound a bit strange, it refers to a category of template parameters that are themselves templates. These can be specified similarly to type template parameters, with or without a name, with or without a default value, and as a parameter pack with or without a name. As of C++17, both the keywords class and typename can be used to introduce a template template parameter. Prior to this version, only the class keyword could be used.
 
@@ -426,7 +426,7 @@ In this example, p1 is a wrapping\_pair object that contains two values, an int 
 
 In this example, we have seen the use of a default template argument for a template parameter. This topic is explored in detail in the next section.
 
-\subsubsubsection{2.4.4\hspace{0.2cm}Default template arguments}
+\subsubsubsection{2.4.4\hspace{0.2cm}默认模板参数}
 
 Default template arguments are specified similarly to default function arguments, in the parameter list after the equal sign. The following rules apply to default template arguments:
 

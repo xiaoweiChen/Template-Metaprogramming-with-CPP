@@ -1,4 +1,4 @@
-So far, we have learned about function templates and class templates. It is possible to define member function templates too, both in non-template classes and class templates. In this section, we will learn how to do this. To understand the differences, let's start with the following example:
+目前为止，我们已经学习了函数模板和类模板。也可以在非模板类和类模板中定义成员函数模板。本节中，我们将学习如何做到这一点。为了理解它们的区别，让我们从下面的例子开始:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -12,16 +12,16 @@ public:
 };
 \end{lstlisting}
 
-The composition class is a class template. It has a single member function called add that uses the type parameter T. This class can be used as follows:
+复合类是一个类模板，有一个名为add的成员函数，使用类型形参T。这个类可以这样使用:
 
 \begin{lstlisting}[style=styleCXX]
 composition<int> c;
 c.add(41, 21);
 \end{lstlisting}
 
-We first need to instantiate an object of the composition class. Notice that we must explicitly specify the argument for the type parameter T because the compiler is not able to figure it out by itself (there is no context from which to infer it). When we invoke the add function, we just provide the arguments. Their type, represented by the T type template parameter that was previously resolved to int, is already known. A call such as c.add<int>(42, 21) would trigger a compiler error. The add function is not a function template, but a regular function that is a member of the composition class template.
+首先需要实例化组合类的一个对象，必须显式地指定类型形参T的实参，因为编译器不能自己推导出来(没有上下文)。当调用add函数时，只提供参数。其类型(由T类型模板形参表示，之前解析为int)是已知的，像c.add<int>(42, 21)这样的调用会触发编译器错误。add函数不是一个函数模板，而是一个常规函数，它是复合类模板的成员。
 
-In the next example, the composition class changes slightly, but significantly. Let's see the definition first:
+下一个示例中，复合类略有变化。先来看看定义:
 
 \begin{lstlisting}[style=styleCXX]
 class composition
@@ -35,16 +35,16 @@ public:
 };
 \end{lstlisting}
 
-This time, composition is a non-template class. However, the add function is a function template. Therefore, to call this function, we must do the following:
+composition是非模板类，但add函数是一个函数模板。因此，要调用这个函数，必须执行以下操作:
 
 \begin{lstlisting}[style=styleCXX]
 composition c;
 c.add<int>(41, 21);
 \end{lstlisting}
 
-The explicit specification of the int type for the T type template parameter is redundant since the compiler can deduce it by itself from the arguments of the call. However, it was shown here to better comprehend the differences between these two implementations.
+为T类型模板形参显式指定int类型是多余的，因为编译器可以从调用的实参中自行推导出int类型。这里是为了更好地理解这两种实现之间的差异。
 
-Apart from these two cases, member functions of class templates and member function templates of classes, we can also have member function templates of class templates. In this case, however, the template parameters of the member function template must differ from the template parameters of the class template; otherwise, the compiler will generate an error. Let's return to the wrapper class template example and modify it as follows:
+除了类模板的成员函数和类的成员函数模板这两种情况外，还可以有类模板的成员函数模板。但在这种情况下，成员函数模板的模板形参必须与类模板的模板形参不同;否则，编译器将生成一个错误。让我们回到包装器类模板示例，并对其进行如下修改:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -66,7 +66,7 @@ private:
 };
 \end{lstlisting}
 
-As you can see here, this implementation features one more member, a function called as. This is a function template and has a type template parameter called U. This function is used to cast the wrapped value from a type T to a type U, and return it to the caller. We can use this implementation as follows:
+这个实现还有一个成员，一个名为as的函数。这是一个函数模板，有一个名为U的类型模板形参。该函数用于将包装的值从类型T转换为类型U，并将其返回给调用者。我们可以像下面这样使用这个实现:
 
 
 \begin{lstlisting}[style=styleCXX]
@@ -75,9 +75,9 @@ auto d = a.get(); // double
 auto n = a.as<int>(); // int
 \end{lstlisting}
 
-Arguments for the template parameters were specified when instantiating the wrapper class (double) – although in C++17 this is redundant, and when invoking the as function (int) to perform the cast.
+模板形参的实参在实例化包装器类时指定(double)——尽管在C++17中这是冗余的，并且在调用as函数(int)执行校正时也指定了。
 
-Before we continue with other topics such as instantiation, specialization, and other forms of templates, including variables and aliases, it's important that we take the time to learn more about template parameters. This will make the subject of the next section.
+在继续讨论其他主题(例如实例化、特化和其他形式的模板，包括变量和别名)之前，花点时间了解更多关于模板参数的知识非常重要。
 
 
 

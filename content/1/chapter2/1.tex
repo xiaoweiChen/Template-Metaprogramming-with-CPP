@@ -1,4 +1,4 @@
-Function templates are defined in a similar way to regular functions, except that the function declaration is preceded by the keyword template followed by a list of template parameters between angle brackets. The following is a simple example of a function template:
+函数模板的定义方式与常规函数类似，只是函数声明之前是关键字template，尖括号之间是模板形参列表。下面是一个简单的函数模板示例:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -8,22 +8,22 @@ T add(T const a, T const b)
 }
 \end{lstlisting}
 
-This function has two parameters, called a and b, both of the same T type. This type is listed in the template parameters list, introduced with the keyword typename or class (the former is used in this example and throughout the book). This function does nothing more than add the two arguments and returns the result of this operation, which should have the same T type.
+这个函数有两个参数a和b，为相同的T类型。该类型列在模板参数列表中，通过关键字typename或class(前者在本例中使用，本书中也使用)引入。这个函数所做的只是将两个参数相加，并返回该操作的结果，该结果应该具有相同的T类型。
 
-Function templates are only blueprints for creating actual functions and only exist in source code. Unless explicitly called in your source code, the function templates will not be present in the compiled executable. However, when the compiler encounters a call to a function template and is able to match the supplied arguments and their types to a function template's parameters, it generates an actual function from the template and the arguments used to invoke it. To understand this, let's look at some examples:
+函数模板只是创建实际函数的蓝图，只存在于源代码中。除非在源代码中显式调用，否则函数模板不会出现在编译后的可执行文件中。然而，当编译器遇到对函数模板的调用，并且能够将提供的实参及其类型与函数模板的形参匹配时，它将根据模板和用于调用它的实参生成一个实际的函数。为了理解这一点，来看一个例子:
 
 \begin{lstlisting}[style=styleCXX]
 auto a = add(42, 21)
 \end{lstlisting}
 
-In this snippet, we call the add function with two int parameters, 42 and 21. The compiler is able to deduce the template parameter T from the type of the supplied arguments, making it unnecessary to explicitly provide it. However, the following two invocations are also possible, and, in fact, identical to the earlier one:
+这段代码中，使用两个int形参42和21调用add函数。编译器能够从所提供参数的类型推导出模板形参T，因此无需显式地提供。然而，下面两个调用也是可能的，而且实际上与前面的调用相同:
 
 \begin{lstlisting}[style=styleCXX]
 auto a = add<int>(42, 21);
 auto a = add<>(42, 21);
 \end{lstlisting}
 
-From this invocation, the compiler will generate the following function (keep in mind that the actual code may differ for various compilers):
+这种使用方式，将使编译器将生成以下函数(不同编译器的实际代码可能不同):
 
 \begin{lstlisting}[style=styleCXX]
 int add(const int a, const int b)
@@ -32,13 +32,13 @@ int add(const int a, const int b)
 }
 \end{lstlisting}
 
-However, if we change the call to the following form, we explicitly provide the argument for the template parameter T, as the short type:
+若将调用方式更改为以下形式，则显式地为模板形参T提供实参short:
 
 \begin{lstlisting}[style=styleCXX]
 auto b = add<short>(42, 21);
 \end{lstlisting}
 
-In this case, the compiler will generate another instantiation of this function, with short instead of int. This new instantiation would look as follows:
+这种情况下，编译器将生成该函数的另一个实例化，使用short而不是int。这个新的实例化会如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 short add(const short a, const int b)
@@ -47,19 +47,19 @@ short add(const short a, const int b)
 }
 \end{lstlisting}
 
-If the type of the two parameters is ambiguous, the compiler will not be able to deduce them automatically. This is the case with the following invocation:
+若两个参数的类型不明确，编译器将无法自动推断出它们的类型。下面的调用就是这种情况:
 
 \begin{lstlisting}[style=styleCXX]
 auto d = add(41.0, 21);
 \end{lstlisting}
 
-In this example, 41.0 is a double but 21 is an int. The add function template has two parameters of the same type, so the compiler is not able to match it with the supplied arguments and will issue an error. To avoid this, and suppose you expected it to be instantiated for double, you have to specify the type explicitly, as shown in the following snippet:
+这个例子中，41.0是一个double类型，而21是一个int类型。add函数模板有两个相同类型的形参，因此编译器无法将其与提供的实参进行匹配，并将发出错误。为了避免这种情况，并且假设希望模板为double实例化，这时必须显式地指定类型，如下面的代码片段所示:
 
 \begin{lstlisting}[style=styleCXX]
 auto d = add<double>(41.0, 21);
 \end{lstlisting}
 
-As long as the two arguments have the same type and the + operator is available for the type of the arguments, you can call the function template add in the ways shown previously. However, if the + operator is not available, then the compiler will not be able to generate an instantiation, even if the template parameters are correctly resolved. This is shown in the following snippet:
+只要两个实参具有相同的类型，并且加法运算符可用于实参的类型，就可以按照前面所示的方式调用函数模板add。但若加法操作符不可用，则编译器将无法生成实例化，即使模板参数已正确解析。如下面的代码片段所示:
 
 \begin{lstlisting}[style=styleCXX]
 class foo
@@ -75,7 +75,7 @@ public:
 auto f = add(foo(42), foo(41));
 \end{lstlisting}
 
-In this case, the compiler will issue an error that a binary + operator is not found for arguments of type foo. Of course, the actual message differs for different compilers, which is the case for all errors. To make it possible to call add for arguments of type foo, you'd have to overload the + operator for this type. A possible implementation is the following:
+这种情况下，编译器将发出一个错误，即没有为类型为foo的参数找到二进制加法操作符。当然，对于不同的编译器，实际的消息是不同的，所有错误都是如此。为了能够对foo类型的参数调用add，必须重载此类型的加法操作符。可能的实现如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 foo operator+(foo const a, foo const b)
@@ -84,7 +84,7 @@ foo operator+(foo const a, foo const b)
 }
 \end{lstlisting}
 
-All the examples that we have seen so far represented templates with a single template parameter. However, a template can have any number of parameters and even a variable number of parameters. This latter topic will be addressed in Chapter 3, Variadic Templates. The next function is a function template that has two type template parameters:
+目前为止，我们看到的所有例子都是只有一个模板形参。但当模板可以有任意数量的参数，甚至可以有可变数量的参数(后一个主题将在第3章中讨论)。下面的函数是一个有两个类型模板形参的函数模板:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename Input, typename Predicate>
@@ -100,9 +100,9 @@ int count_if(Input start, Input end, Predicate p)
 }
 \end{lstlisting}
 
-This function takes two input iterators to the start and end of a range and a predicate and returns the number of elements in the range that match the predicate. This function, at least conceptually, is very similar to the std::count\_if general-purpose function from the <algorithm> header in the standard library and you should always prefer to use standard algorithms over hand-crafted implementations. However, for the purpose of this topic, this function is a good example to help you understand how templates work.
+此函数接受两个指向范围和谓词的开始和结束的输入迭代器，并返回范围内与谓词匹配的元素数量。这个函数，至少在概念上，非常类似于标准库中<algorithm>头文件中的std::count\_if函数，开发者应该始终倾向于使用标准算法，而不是自己手工实现。但对于本主题而言，这个函数是一个很好的示例，可以帮助理解模板的工作方式。
 
-We can use the count\_if function as follows:
+可以这样使用count\_if函数:
 
 \begin{lstlisting}[style=styleCXX]
 int main()
@@ -115,9 +115,9 @@ int main()
 }
 \end{lstlisting}
 
-Again, there is no need to explicitly specify the arguments for the type template parameters (the type of the input iterator and the type of the unary predicate) because the compiler is able to infer them from the call.
+同样，不需要显式地指定类型模板形参的实参(输入迭代器的类型和一元谓词的类型)，因为编译器能够从调用中进行推断。
 
-Although there are more things to learn about function templates, this section provided an introduction to working with them. Let's now learn the basics of defining class templates.
+关于函数模板还有很多东西需要学习，本节仅提供了使用方面的介绍。现在让我们学习定义类模板的基础知识。
 
 
 

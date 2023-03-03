@@ -1,42 +1,42 @@
 
-Before you start using templates, it's important to understand the benefits of using them as well as the disadvantages they may incur.
+使用模板之前，了解使用模板的优缺点相当重要。
 
-Let's start by pointing out the advantages:
-
-\begin{itemize}
-\item
-Templates help us avoid writing repetitive code.
-
-\item
-Templates foster the creation of generic libraries providing algorithms and types, such as the standard C++ library (sometimes incorrectly referred to as the STL), which can be used in many applications, regardless of their type.
-
-\item
-The use of templates can result in less and better code. For instance, using algorithms from the standard library can help write less code that is likely easier to understand and maintain and also probably more robust because of the effort put into the development and testing of these algorithms.
-\end{itemize}
-
-When it comes to disadvantages, the following are worth mentioning:
+先看看优点:
 
 \begin{itemize}
 \item
-The syntax is considered complex and cumbersome, although with a little practice this should not really pose a real hurdle in the development and use of templates.
+避免编写重复的代码。
 
 \item
-Compiler errors related to template code can often be long and cryptic, making it very hard to identify their cause. Newer versions of the C++ compilers have made progress in simplifying these kinds of errors, although they generally remain an important issue. The inclusion of concepts in the C++20 standard has been seen as an attempt, among others, to help provide better diagnostics for compiling errors.
+提供算法和类型的泛型库的创建，例如标准C++库(有时\textit{错误地}称为STL)，无论是何类型，都可以在许多应用程序中使用。
 
 \item
-They increase the compilation times because they are implemented entirely in headers. Whenever a change to a template is made, all the translation units in which that header is included must be recompiled.
-
-\item
-Template libraries are provided as a collection of one or more headers that must be compiled together with the code that uses them.
-
-\item
-Another disadvantage that results from the implementation of templates in headers is that there is no information hiding. The entire template code is available in headers for anyone to read. Library developers often resort to the use of namespaces with names such as detail or details to contain code that is supposed to be internal for a library and should not be called directly by those using the library.
-
-\item
-They could be harder to validate since code that is not used is not instantiated by the compiler. It is, therefore, important that when writing unit tests, good code coverage must be ensured. This is especially the case for libraries.
+使用模板可以得到少而优的代码。例如，使用标准库中的算法可以帮助编写更少的代码，这些代码可能更容易理解和维护，并且可能更健壮(这些算法的开发和测试投入了相当多的精力)。
 \end{itemize}
 
-Although the list of disadvantages may seem longer, the use of templates is not a bad thing or something to be avoided. On the contrary, templates are a powerful feature of the C++ language. Templates are not always properly understood and sometimes are misused or overused. However, the judicious use of templates has unquestionable advantages. This book will try to provide a better understanding of templates and their use.
+再来看看缺点：
+
+\begin{itemize}
+\item
+语法非常复杂，但只要进行过一些实践，这应该不会对模板的开发和使用造成影响。
+
+\item
+与模板代码相关的编译器错误通常很长而且神秘，很难确定其原因。新版本的C++编译器已经简化了这类错误(仍然是一个重要的问题)，C++20标准中的概念就可以看做为是一种尝试(包括帮助为编译错误提供更好的诊断信息)。
+
+\item
+增加了编译时间，因为其完全在头文件中实现。每当对模板进行更改时，包含该头文件的所有翻译单元都必须重新编译。
+
+\item
+模板库是作为一个或多个头文件的集合，必须与使用其代码一起编译。
+
+\item
+头文件中实现模板的另一个缺点是没有信息隐藏，所有人都可以在头文件阅读整个模板代码。标准库开发人员经常使用具有诸如detail或details等命名空间来包含标准库内部的代码，但这些代码是标准库的使用者不应该使用的。
+
+\item
+由于编译器没有实例化未使用的代码，因此这部分代码可能更难验证。因此，在编写单元测试时，必须确保良好的代码覆盖率，对于库来说尤是如此。
+\end{itemize}
+
+虽然缺点有点多，但使用模板并不是一件坏事或应该避免的事情。相反，模板是C++语言的强大特性。模板并不总能被正确理解，有时还会误用或过度使用。然而，明智地使用模板具有毋庸置疑的优势。这本书将提供一中更好的理解模板及其使用的方式。
 
 
 
