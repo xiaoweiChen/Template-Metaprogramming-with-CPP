@@ -3,16 +3,17 @@
 
 \subsubsubsection{2.4.1\hspace{0.2cm}类型模板参数}
 
-As already mentioned, these are parameters representing types supplied as arguments during the template instantiation. They are introduced either with the typename or the class keyword. There is no difference between using these two keywords. A type template parameter can have a default value, which is a type. This is specified the same way you would specify a default value for a function parameter. Examples for these are shown in the following snippet:
+如前所述，这些参数表示模板实例化期间作为参数提供的类型，由typename或class关键字引入。使用这两个关键字没什么区别。类型模板参数可以有一个默认值，即类型。这与为函数形参指定默认值的方式相同，如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
 class wrapper { /* ... */ };
+
 template <typename T = int>
 class wrapper { /* ... */ };
 \end{lstlisting}
 
-The name of the type template parameter can be omitted, which can be useful in forwarding declarations:
+类型模板参数的名称可以省略，这在转发声明时很有用:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename>
@@ -22,16 +23,16 @@ template <typename = int>
 class wrapper;
 \end{lstlisting}
 
-C++11 has introduced variadic templates, which are templates with a variable number of arguments. A template parameter that accepts zero or more arguments is called a parameter pack. A type template parameter pack has the following form:
+C++11引入了可变参数模板，这些模板的参数数量可变。接受零个或多个参数的模板形参称为形参包，类型模板参数包具有以下形式:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename... T>
 class wrapper { /* ... */ };
 \end{lstlisting}
 
-Variadic templates will be addressed in Chapter 3, Variadic Templates. Therefore, we will not get into details about these kinds of parameters at this point.
+可变参数模板将在第3章中讨论。这里，我们不会详细讨论这类参数。
 
-C++20 has introduced concepts and constraints. Constraints specify requirements on template arguments. A named set of constraints is called a concept. Concepts can be specified as type template parameters. However, the syntax is a little bit different. The name of the concept (followed by a list of template arguments in angle brackets if the case) is used instead of the typename or the class keyword. Examples, including concepts with a default value and constrained type template parameter pack, are shown as follows:
+C++20引入了概念和约束。约束指定了对模板参数的要求，一系列命名的约束称为概念。概念可以指定为类型模板参数，但它们语法有点不同。使用概念的名称(若有的话，后面跟着尖括号中的模板参数列表)来代替typename或class关键字。示例，包括具有默认值和约束类型模板参数包的概念，如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template <WrappableType T>
@@ -44,47 +45,47 @@ template <WrappableType... T>
 class wrapper { /* ... */ };
 \end{lstlisting}
 
-Concepts and constraints are discussed in Chapter 6, Concepts and Constraints. We will learn more about these kinds of parameters in that chapter. For now, let's look at the second kind of template parameters, non-type template parameters.
+概念和约束将在第6章中讨论，将在那一章学习更多关于这类参数的知识。现在，让我们看看第二种模板参数，非类型模板参数。
 
 
 \subsubsubsection{2.4.2\hspace{0.2cm}非类型模板参数}
 
-Template arguments don't always have to represent types. They can also be compile-time expressions, such as constants, addresses of functions or objects with external linkage, or addresses of static class members. Parameters supplied with compile-time expressions are called non-type template parameters. This category of parameters can only have a structural type. The following are the structural types:
+模板参数并不总是必须表示类型，也可以是编译时表达式，例如常量、具有外部链接的函数，或对象的地址或静态类成员的地址。编译时表达式提供的参数称为非类型模板参数。这类参数只能有结构类型。以下是结构类型:
 
 \begin{itemize}
 \item 
-Integral types
+整数类型
 
 \item 
-Floating-point types, as of C++20
+浮点类型(始于C++20)
 
 \item 
-Enumerations
+枚举类型
 
 \item 
-Pointer types (either to objects or functions)
+指针类型(指向对象或函数)
 
 \item 
-Pointer to member types (either to member objects or member functions)
+指向成员类型的指针(指向成员对象或成员函数)
 
 \item 
-Lvalue reference types (either to objects or functions)
+左值引用类型(指向对象或函数)
 
 \item 
-A literal class type that meets the following requirements:
+字面量类类型，需要满足以下要求:
 \begin{itemize}
 \item 
-All base classes are public and non-mutable.
+所有基类都是public且不可变的。
 
 \item 
-All non-static data members are public and non-mutable.
+所有非静态数据成员都是public且不可变的。
 
 \item 
-The types of all base classes and non-static data members are also structural types or arrays thereof.
+所有基类和非静态数据成员的类型也是结构类型或其数组。
 \end{itemize}
 \end{itemize}
 
-cv-qualified forms of these types can also be used for non-type template parameters. Non-type template parameters can be specified in different ways. The possible forms are shown in the following snippet:
+这些类型的cv限定形式也可以用于非类型模板参数。非类型模板参数可以以不同的方式指定，可能的形式显示在下面的代码段中:
 
 \begin{lstlisting}[style=styleCXX]
 template <int V>
@@ -97,9 +98,9 @@ template <int... V>
 class foo { /*...*/ };
 \end{lstlisting}
 
-In all these examples, the type of the non-type template parameters is int. The first and second examples are similar, except that in the second example a default value is used. The third example is significantly different because the parameter is actually a parameter pack. This will be discussed in the next chapter.
+这些例子中，非类型模板形参的类型都是int。第一个示例和第二个示例类似，只是第二个示例使用了默认值。第三个示例有很大不同，因为参数实际上是一个参数包，这将在下一章讨论。
 
-To understand non-type template parameters better, let's look at the following example, where we sketch a fixed-size array class, called buffer:
+为了更好地理解非类型模板参数，让我们看看下面的例子，在这里我们描绘了一个固定大小的数组类，称为buffer:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T, size_t S>
@@ -121,26 +122,26 @@ public:
 };
 \end{lstlisting}
 
-This buffer class holds an internal array of S elements of type T. Therefore, S needs to be a compile-type value. This class can be instantiated as follows:
+这个buffer类包含S个T类型元素的内部数组。因此，S需要是一个编译类型的值。这个类可以进行如下的实例化:
 
 \begin{lstlisting}[style=styleCXX]
 buffer<int, 10> b1;
 buffer<int, 2*5> b2;
 \end{lstlisting}
 
-These two definitions are equivalent, and both b1 and b2 are two buffers holding 10 integers. Moreover, they are of the same type, since 2*5 and 10 are two expressions evaluated to the same compile-time value. You can easily check this with the following statement:
+这两个定义相同，b1和b2都是两个存储10个整数的buffer。此外，其具有相同的类型，因为2*5和10是两个表达式，其计算值为相同的编译时值。你可以用下面的语句来检查:
 
 \begin{lstlisting}[style=styleCXX]
 static_assert(std::is_same_v<decltype(b1), decltype(b2)>);
 \end{lstlisting}
 
-This is not the case anymore, for the type of the b3 object is declared as follows:
+现在不再是这样了，b3对象的类型声明如下:
 
 \begin{lstlisting}[style=styleCXX]
 buffer<int, 3*5> b3;
 \end{lstlisting}
 
-In this example, b3 is a buffer holding 15 integers, which is different from the buffer type from the previous example that held 10 integers. Conceptually, the compiler generates the following code:
+b3是一个包含15个整数的buffer，这与前面示例中包含10个整数的buffer类型不同。从概念上讲，编译器会生成以下代码:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T, size_t S>
@@ -162,7 +163,7 @@ public:
 };
 \end{lstlisting}
 
-This is the code for the primary template but there are also a couple of specializations shown next:
+这是主要模板的代码，下面显示了一些特化:
 
 \begin{lstlisting}[style=styleCXX]
 template<>
@@ -188,13 +189,13 @@ public:
 };
 \end{lstlisting}
 
-The concept of specialization, seen in this code sample, is detailed further on in this chapter, in the Understanding template specialization section. For the time being, you should notice the two different buffer types. Again, it's possible to verify that the types of b1 and b3 are different with the following statement:
+在这个示例中，可以看到的特化的概念(将在本章后续的内容中详细介绍)。目前，应该注意到这两种不同的buffer类型。同样，可以用下面的语句验证b1和b3的类型是否相同:
 
 \begin{lstlisting}[style=styleCXX]
 static_assert(!std::is_same_v<decltype(b1), decltype(b3)>);
 \end{lstlisting}
 
-The use of structural types such as integer, floating-point, or enumeration types is encountered in practice more often than the rest. It's probably easier to understand their use and find useful examples for them. However, there are scenarios where pointers or references are used. In the following example, we will examine the use of a pointer to function parameter. Let's see the code first:
+实践中，结构类型(如整数、浮点数或枚举类型)的使用比其他类型更常见。理解其用法，并找到相应的例子可能更容易。然而，也有使用指针或引用的场景。在下面的例子中，我们将研究如何使用指向函数参数的指针。先来看看代码:
 
 \begin{lstlisting}[style=styleCXX]
 struct device
@@ -213,7 +214,7 @@ struct smart_device : device
 };
 \end{lstlisting}
 
-In this snippet, device is a base class with a pure virtual function called output (and a virtual destructor). This is the base class for a class template called smart\_device that implements the output virtual function by calling a function through a function pointer. This function pointer is passed an argument for the non-type template parameter of the class template. The following sample shows how it can be used:
+这段代码中，device是一个基类，具有一个名为output的纯虚函数(以及一个虚析构函数)。这是名为smart\_device的类模板的基类，该类模板通过函数指针调用函数来实现输出虚函数，此函数的指针会作为传递给类模板的非类型模板的实参。下面的示例展示了如何使用它:
 
 \begin{lstlisting}[style=styleCXX]
 void say_hello_in_english()
@@ -235,13 +236,13 @@ auto w2 =
 w2->output();
 \end{lstlisting}
 
-Here, w1 and w2 are two unique\_ptr objects. Although, apparently, they point to objects of the same type, that is not true, because smart\_device<\&say\_hello\_in\_english> and smart\_device<\&say\_hello\_in\_spanish> are different types since they are instantiated with different values for the function pointer. This can be easily checked with the following statement:
+这里，w1和w2是两个unique\_ptr对象，指向相同类型的对象，但事实并非如此，因为smart\_device<\&say\_hello\_in\_english>和smart\_device<\&say\_hello\_in\_spanish>是不同的类型，它们的函数指针实例化不同。这可以很容易确定:
 
 \begin{lstlisting}[style=styleCXX]
 static_assert(!std::is_same_v<decltype(w1), decltype(w2)>);
 \end{lstlisting}
 
-If we, on the other hand, change the auto specifier with std::unique\_ptr<device>, as shown in the following snippet, then w1 and w2 are smart pointers to the base class device, and therefore have the same type:
+另一方面，若用std::unique\_ptr<device>替换auto，如下段所示，那么w1和w2是指向基类device的智能指针，因此具有相同的类型:
 
 \begin{lstlisting}[style=styleCXX]
 std::unique_ptr<device> w1 =
@@ -255,7 +256,7 @@ w2->output();
 static_assert(std::is_same_v<decltype(w1), decltype(w2)>);
 \end{lstlisting}
 
-Although this example uses a pointer to function, a similar example can be conceived for pointer to member functions. The previous example can be transformed to the following (still using the same base class device):
+虽然这个例子使用的是指向函数的指针，但也可以假设一个类似的例子，用于指向成员函数的指针。前面的例子可以转换为以下(仍然使用相同的基类设备):
 
 \begin{lstlisting}[style=styleCXX]
 template <typename Command, void (Command::*action)()>
@@ -285,7 +286,7 @@ struct hello_command
 };
 \end{lstlisting}
 
-These classes can be used as follows:
+这些类的使用方式如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 hello_command cmd;
@@ -301,7 +302,7 @@ auto w2 = std::make_unique<
 w2->output();
 \end{lstlisting}
 
-In C++17, a new form of specifying non-type template parameters was introduced, using the auto specifier (including the auto* and auto\& forms) or decltype(auto) instead of the name of the type. This allows the compiler to deduce the type of the parameter from the expression supplied as the argument. If the deduced type is not permitted for a non-type template parameter the compiler will generate an error. Let's see an example:
+C++17中，引入了一种指定非类型模板参数的新形式，使用auto(包括auto*和auto\&)或decltype(auto)来代替类型名，编译器可以从作为实参提供的表达式中推断参数的类型。若派生的类型不允许用于非类型模板参数，编译器将生成错误的类型。让我们来看一个例子:
 
 \begin{lstlisting}[style=styleCXX]
 template <auto x>
@@ -309,7 +310,7 @@ struct foo
 { /* … */ };
 \end{lstlisting}
 
-This class template can be used as follows:
+这个类模板可以这样用:
 
 \begin{lstlisting}[style=styleCXX]
 foo<42> f1;   // foo<int>
@@ -318,9 +319,9 @@ foo<42.0> f2; // foo<double> in C++20, error for older
 foo<"42"> f3; // error
 \end{lstlisting}
 
-In the first example, for f1, the compiler deduces the type of the argument as int. In the second example, for f2, the compiler deduces the type as double. However, this is only the case for C++20. In previous versions of the standard, this line would yield an error, since floating-point types were not permitted as arguments for non-type template parameters prior to C++20. The last line, however, produces an error because "42" is a string literal and string literals cannot be used as arguments for non-type template parameters.
+第一个例子中，对于f1，编译器将实参的类型推断为int。在第二个例子中，对于f2，编译器将类型推断为double，但这需要支持C++20。以前的C++版本中，这一行会产生错误。C++20之前，浮点类型不允许作为非类型模板参数。所以，最后一行会出错，因为“42”是一个字符串字面量，字符串字面量不能用作非类型模板参数。
 
-The last example can be, however, worked around in C++20 by wrapping the literal string in a structural literal class. This class would store the characters of the string literal in a fixed-length array. This is exemplified in the following snippet:
+然而，最后一个例子可以在C++20中通过将字面值字符串，包装在结构字面值类中来解决。这个类将字符串字面值的字符存储在一个固定长度的数组中。下面的代码片段说明了这一点:
 
 \begin{lstlisting}[style=styleCXX]
 template<size_t N>
@@ -334,7 +335,7 @@ struct string_literal
 };
 \end{lstlisting}
 
-However, the foo class template shown previously needs to be modified to use string\_literal explicitly and not the auto specifier:
+然而，前面显示的foo类模板需要修改，需要显式使用string\_literal，而不是auto:
 
 \begin{lstlisting}[style=styleCXX]
 template <string_literal x>
@@ -343,26 +344,27 @@ struct foo
 };
 \end{lstlisting}
 
-With this is in place, the foo<"42"> f; declaration shown earlier will compile without any errors in C++20.
+在C++20中，foo<"42"> f;的声明将在编译时通过。
 
-The auto specifier can also be used with a non-type template parameter pack. In this case, the type is deduced independently for each template argument. The types of the template arguments do not need to be the same. This is shown in the following snippet:
+auto也可以与非类型模板参数包一起使用，类型是为每个模板参数独立推导的。模板参数的类型不需要相同:
 
 \begin{lstlisting}[style=styleCXX]
 template<auto... x>
 struct foo
 { /* ... */ };
+
 foo<42, 42.0, false, 'x'> f;
 \end{lstlisting}
 
-In this example, the compiler deduces the types of the template arguments as int, double, bool, and char, respectively.
+本例中，编译器将模板参数的类型分别推断为int、double、bool和char。
 
-The third and last category of template parameters are template template parameters. We will look at them next.
+第三类也是最后一类模板参数是双重模板参数。
 
 \subsubsubsection{2.4.3\hspace{0.2cm}双重模板参数}
 
-Although the name may sound a bit strange, it refers to a category of template parameters that are themselves templates. These can be specified similarly to type template parameters, with or without a name, with or without a default value, and as a parameter pack with or without a name. As of C++17, both the keywords class and typename can be used to introduce a template template parameter. Prior to this version, only the class keyword could be used.
+尽管这个名字有点奇怪，但它指的是一类模板参数，这些参数本身就是模板。这些参数可以像类型模板参数一样指定，带或不带名称，带或不带默认值，以及作为带或不带名称的参数包。C++17起，关键字class和typename都可以用来引入双重模板参数。在此版本之前，只能使用class关键字。
 
-To showcase the use of template template parameters, let's consider the following two class templates first:
+为了展示双重模板参数的使用，首先来看一下下面两个类模板:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -392,7 +394,7 @@ private:
 };
 \end{lstlisting}
 
-The simple\_wrapper class is a very simple class template that holds a value of the type template parameter T. On the other hand, fancy\_wrapper is a more complex wrapper implementation that hides the wrapped value and exposes member functions for data access. Next, we implement a class template called wrapping\_pair that contains two values of a wrapping type. This can be either simpler\_wrapper, fancy\_wrapper, or anything else that is similar:
+simple\_wrapper类是一个简单的类模板，保存类型模板参数T的值。另一方面，fancy\_wrapper是一个更复杂的包装器实现，它隐藏了包装的值，并公开了用于数据访问的成员函数。接下来，我们实现一个名为wrapped\_pair的类模板，包含两个包装类型的值。这可以是simple\_wrapper，fancy\_wrapper，或任何类似的类型:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T, typename U,
@@ -410,7 +412,7 @@ public:
 };
 \end{lstlisting}
 
-The wrapping\_pair class template has three parameters. The first two are type template parameters, named T and U. The third parameter is a template template parameter, called W, that has a default value, which is the fancy\_wrapper type. We can use this class template as shown in the following snippet:
+wrapping\_pair类模板有三个参数。前两个是类型模板形参，名为T和U。第三个形参是模板模板参数为W，有一个默认值，即fancy\_wrapper类型。我们可以使用这个类模板，如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 wrapping_pair<int, double> p1(42, 42.0);
@@ -422,38 +424,38 @@ std::cout << p2.item1.value << ' '
 		  << p2.item2.value << '\n';
 \end{lstlisting}
 
-In this example, p1 is a wrapping\_pair object that contains two values, an int and a double, each wrapped in a fancy\_wrapper object. This is not explicitly specified but is the default value of the template template parameter. On the other hand, p2 is also a wrapping\_pair object, also containing an int and a double, but these are wrapped by a simple\_wrapper object, which is now specified explicitly in the template instantiation.
+这个例子中，p1是一个wrapping\_pair对象，包含两个值，一个int和一个double，每个值都包装在一个fancy\_wrapper对象中。这没有显式指定，但是双重模板参数的默认值。另一方面，p2也是一个wrapping\_pair对象，也包含一个int和一个double，但是由一个simple\_wrapper对象包装的，该对象在模板实例化中进行了显式指定。
 
-In this example, we have seen the use of a default template argument for a template parameter. This topic is explored in detail in the next section.
+这个例子中，我们看到了默认模板参数的使用。
 
 \subsubsubsection{2.4.4\hspace{0.2cm}默认模板参数}
 
-Default template arguments are specified similarly to default function arguments, in the parameter list after the equal sign. The following rules apply to default template arguments:
+默认模板参数的指定与默认函数参数类似，在参数列表中的等号后面。以下规则适用于默认模板参数:
 
 \begin{itemize}
 \item 
-They can be used with any kind of template parameters with the exception of parameter packs.
+可以与任何类型的模板参数一起使用，参数包除外。
 
 \item 
-If a default value is specified for a template parameter of a class template, variable template, or type alias, then all subsequent template parameters must also have a default value. The exception is the last parameter if it is a template parameter pack.
+若为类模板、变量模板或类型别名的模板参数指定了默认值，则所有后续模板参数也必须具有默认值。若最后一个参数是模板参数包，则是一个例外。
 
 \item 
-If a default value is specified for a template parameter in a function template, then subsequent template parameters are not restricted to also have a default value.
+若在函数模板中为模板参数指定了默认值，则后续模板参数也不限于具有默认值。
 
 \item 
-In a function template, a parameter pack may be followed by more type parameters only if they have default arguments or their value can be deduced by the compiler from the function arguments.
+函数模板中，只有当参数包有默认实参或者其值可以由编译器从函数实参推导出来时，形参包才可以后面跟更多的类型参数。
 
 \item 
-They are not allowed in declarations of friend class templates.
+不允许出现在友元类模板的声明中。
 
 \item 
-They are allowed in the declaration of a friend function template only if the declaration is also a definition and there is no other declaration of the function in the same translation unit.
+只有当友元函数模板的声明也有定义，并且在同一个翻译单元中没有其他函数声明时，才允许在友元函数模板的声明中使用。
 
 \item 
-They are not allowed in the declaration or definition of an explicit specialization of a function template or member function template.
+不允许出现在函数模板或成员函数模板的显式特化的声明或定义中。
 \end{itemize}
 
-The following snippet shows examples for using default template arguments:
+下面的代码段展示了使用默认模板参数的示例:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T = int>
@@ -463,7 +465,7 @@ template <typename T = int, typename U = double>
 class bar { /*...*/ };
 \end{lstlisting}
 
-As mentioned previously, a template parameter with a default argument cannot be followed by parameters without a default argument when declaring a class template but this restriction does not apply to function templates. This is shown in the next snippet:
+声明类模板时，带默认实参的模板参数不能后面跟着不带默认实参的形参，但此限制不适用于函数模板:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T = int, typename U>
@@ -473,7 +475,7 @@ template <typename T = int, typename U>
 void func() {} // OK
 \end{lstlisting}
 
-A template may have multiple declarations (but only one definition). The default template arguments from all the declarations and the definition are merged (the same way they are merged for default function arguments). Let's look at an example to understand how it works:
+一个模板可以有多个声明(但只有一个定义)，来自所有声明和定义的默认模板参数可以进行合并(与合并默认函数参数的方式相同):
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T, typename U = double>
@@ -490,7 +492,7 @@ struct foo
 };
 \end{lstlisting}
 
-This is semantically equivalent to the following definition:
+这在语义上等价于:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T = int, typename U = double>
@@ -501,7 +503,7 @@ struct foo
 };
 \end{lstlisting}
 
-However, these multiple declarations with different default template arguments cannot be provided in any order. The rules mentioned earlier still apply. Therefore, a declaration of a class template where the first parameter has a default argument and the ensuing parameters do not have one is illegal:
+但是，这些具有不同默认模板参数的多个声明不能按任何顺序提供，前面提到的规则仍然适用。若类模板声明的第一个形参有默认实参，而后面的形参没有默认实参即是非法:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T = int, typename U>
@@ -511,7 +513,7 @@ template <typename T, typename U = double>
 struct foo;
 \end{lstlisting}
 
-Another restriction on default template arguments is that the same template parameter cannot be given multiple defaults in the same scope. Therefore, the next example will produce an error:
+对默认模板实参的另一个限制是，同一个模板形参不能在同一个作用域中赋予多个默认值。因此，下面的例子将产生错误:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T = int>
@@ -522,7 +524,7 @@ template <typename T = int> // error redefinition
 struct foo {};
 \end{lstlisting}
 
-When a default template argument uses names from a class, the member access restrictions are checked at the declaration, not at the instantiation of the template:
+当默认模板实参使用来自类名时，成员访问限制会在声明时进行检查，而不是在模板实例化时:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -541,9 +543,9 @@ struct bar
 bar<foo<int>> x;
 \end{lstlisting}
 
-When the x variable is defined, the bar class template is instantiated, but the foo::value\_type typedef is protected and therefore cannot be used outside of foo. The result is a compiler error at the declaration of the bar class template.
+当x变量定义时，bar类模板即会实例化，但是foo::value\_type的类型的定义是protected，因此不能在foo之外使用。结果是在bar类模板的声明处出现编译错误。
 
-With these mentions, we wrap up the topic of template parameters. The next one we will explore in the following section is template instantiation, which is the creation of a new definition of a function, class, or variable from a template definition and a set of template arguments.
+了解了这些内容后，我们就先结束模板参数的话题。下一节中我们将探讨的是模板实例化，是根据模板定义和一组模板参数创建函数、类或变量的新定义。
 
 
 

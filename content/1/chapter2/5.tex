@@ -1,9 +1,9 @@
 
-As mentioned before, templates are only blueprints from which the compiler creates actual code when it encounters their use. The act of creating a definition for a function, a class, or a variable from the template declaration is called template instantiation. This can be either explicit, when you tell the compiler when it should generate a definition, or implicit, when the compiler generates a new definition as needed. We will look at these two forms in detail in the next sections.
+模板只是蓝图，编译器在遇到模板时，会根据模板创建实际代码。从模板声明中为函数、类或变量创建定义的行为称为\textbf{模板实例化}。这可以是\textbf{显式的}(告诉编译器何时应该生成定义时)，也可以是\textbf{隐式的}(编译器根据需要生成新定义时)。我们将在接下来的内容来了解这两种实例化方式。
 
-\subsubsubsection{2.5.1\hspace{0.2cm}Implicit instantiation}
+\subsubsubsection{2.5.1\hspace{0.2cm}隐式实例化}
 
-Implicit instantiation occurs when the compiler generates definitions based on the use of templates and when no explicit instantiation is present. Implicitly instantiated templates are defined in the same namespace as the template. However, the way compilers create definitions from templates may differ. This is something we will see in the following example. Let's consider this code:
+当编译器基于模板的使用生成定义，并且没有显式实例化时，就会触发隐式实例化。隐式实例化模板定义在与模板相同的命名空间中，不过编译器从模板创建定义的方式可能有所不同。先来看看这段代码:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -18,7 +18,7 @@ int main()
 }
 \end{lstlisting}
 
-Here, we have a class template called foo with a member function f. In main, we define a variable of the type foo<int> but do not use any of its members. Because it encounters this use of foo, the compiler implicitly defines a specialization of foo for the int type. If you use cppinsights.io, which runs in Clang, you will see the following code:
+这里，我们有一个名为foo的类模板，有一个成员函数f。在main函数中，定义了一个类型为foo<int>的变量，但没有使用其成员。因为采用这种方式使用foo，所以编译器隐式地为int类型定义foo的特化。可以在cppinsights.io上使用在Clang运行，会看到下面的代码:
 
 \begin{lstlisting}[style=styleCXX]
 template<>
@@ -153,13 +153,13 @@ The class template foo has a static member variable called data that is initiali
 
 Having learned how implicit instantiation works, it is time to move forward and understand the other form of template instantiation, which is explicit instantiation.
 
-\subsubsubsection{2.5.2\hspace{0.2cm}Explicit instantiation}
+\subsubsubsection{2.5.2\hspace{0.2cm}显式实例化}
 
 As a user, you can explicitly tell the compiler to instantiate a class template or a function template. This is called explicit instantiation and it has two forms: explicit instantiation definition and explicit instantiation declaration. We will discuss them in this order.
 
 
 \hspace*{\fill} \\ %插入空行
-\noindent\textbf{Explicit instantiation definition}
+\noindent\textbf{定义}
 
 An explicit instantiation definition may appear anywhere in a program but after the definition of the template it refers to. The syntax for explicit template instantiation definitions takes the following forms:
 
@@ -259,7 +259,7 @@ Having seen what explicit instantiation definition is and how it works, the ques
 A problem that can arise with template instantiations is that you can end up with multiple definitions, one per translation unit. If the same header that contains a template is included in multiple translation units (.cpp files) and the same template instantiation is used (let's say wrapper<int> from our previous examples), then identical copies of these instantiations are put in each translation unit. This leads to increased object sizes. The problem can be solved with the help of explicit instantiation declarations, which we will look at next.
 
 \hspace*{\fill} \\ %插入空行
-\noindent\textbf{Explicit instantiation declaration}
+\noindent\textbf{声明}
 
 An explicit instantiation declaration (available with C++11) is the way you can tell the compiler that the definition of a template instantiation is found in a different translation unit and that a new definition should not be generated. The syntax is the same as for explicit instantiation definitions except that the keyword extern is used in front of the declaration:
 
