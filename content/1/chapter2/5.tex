@@ -28,7 +28,7 @@ struct foo<int>
 };
 \end{lstlisting}
 
-Because the function f is not invoked in our code, it is only declared but not defined. Should we add a call f in main, the specialization would change as follows:
+因为函数f在代码中没有调用，所以其只是声明而没有定义。若在main中添加调用f的代码，会发生如下的特化:
 
 \begin{lstlisting}[style=styleCXX]
 template<>
@@ -38,7 +38,7 @@ struct foo<int>
 };
 \end{lstlisting}
 
-However, if we add one more function, g, with the following implementation that contains an error, we will get different behaviors with different compilers:
+若在下面的实现中添加一个包含错误的函数g，会在不同的编译器中看到不同的行为:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -55,10 +55,10 @@ int main()
 }
 \end{lstlisting}
 
-The body of g contains an error (you could also use a static\_assert(false) statement as an alternative). This code compiles without any problem with VC++, but fails with Clang and GCC. This is because VC++ ignores the parts of the template that are not used, provided that the code is syntactically correct, but the others perform semantic validation before proceeding with template instantiation.
+g的主体包含一个错误(也可以使用static\_assert(false)语句作为替代)。这段代码在VC++中编译没有问题，但是在Clang和GCC中就会失败了。因为VC++忽略了模板中未使用的部分，前提是代码语法正确，但其他部分在模板实例化之前进行了语义验证。
 
 
-For function templates, implicit instantiation occurs when the user code refers to a function in a context that requires its definition to exist. For class templates, implicit instantiation occurs when the user code refers to a template in a context when a complete type is required or when the completeness of the type affects the code. The typical example of such a context is when an object of such a type is constructed. However, this is not the case when declaring pointers to a class template. To understand how this works, let's consider the following example:
+对于函数模板，当用户代码在需要函数定义存在的上下文中引用函数时，就会发生隐式实例化。对于类模板，当用户代码在需要完整类型的上下文中引用模板时，或者当类型的完整性影响代码时，也会隐式实例化。此类上下文的示例是构造此类类型的对象，但在声明指向类模板的指针时就是另外一种情况了。来看看下面的例子:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -76,7 +76,7 @@ int main()
 }
 \end{lstlisting}
 
-In this snippet, we use the same foo class template from the previous examples, and we declare several variables: p which is a pointer to foo<int>, x which is a foo<int>, and q which is a pointer to foo<double>. The compiler is required to instantiate only foo<int> at this point because of the declaration of x. Now, let's consider some invocations of the member functions f and g as follows:
+这段代码中，使用与前面示例相同的foo类模板，并声明了几个变量:p是指向foo<int>的指针，x是指向foo<int>的指针，q是指向foo<double>的指针。由于声明了x，此时编译器只需要实例化foo<int>。现在，考虑成员函数f和g的调用:
 
 \begin{lstlisting}[style=styleCXX]
 int main()
@@ -84,25 +84,26 @@ int main()
 	foo<int>* p;
 	foo<int> x;
 	foo<double>* q;
+	
 	x.f();
 	q->g();
 }
 \end{lstlisting}
 
-With these changes, the compiler is required to instantiate the following:
+通过这些更改，编译器需要实例化以下内容:
 
 \begin{itemize}
 \item 
-foo<int> when the x variable is declared
+当声明x变量时，实例化foo<int>
 
 \item 
-foo<int>::f() when the x.f() call occurs
+当x.f()调用发生时，实例化foo<int>::f()
 
 \item 
-foo<double> and foo<double>::g() when the q->g() call occurs.
+当q->g()调用发生时，实例化foo<double>和foo<double>::g()。
 \end{itemize}
 
-On the other hand, the compiler is not required to instantiate foo<int> when the p pointer is declared nor foo<double> when the q pointer is declared. However, the compiler does need to implicitly instantiate a class template specialization when it is involved in pointer conversion. This is shown in the following example:
+另外，当声明指针p时，编译器不需要实例化foo<int>，当声明指针q时，也不需要实例化foo<double>。然而，当涉及到指针转换时，编译器确实需要隐式实例化类模板特化。如下例所示:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -119,9 +120,9 @@ void show(button<int>* ptr)
 }
 \end{lstlisting}
 
-In the function show, a conversion between button<int>* and control<int>* takes place. Therefore, at this point, the compiler must instantiate button<int>.
+函数show中，button<int>*和control<int>*之间进行了转换，此时编译器必须实例化button<int>。
 
-When a class template contains static members, those members are not implicitly instantiated when the compiler implicitly instantiates the class template but only when the compiler needs their definition. On the other hand, every specialization of a class template has its own copy of static members as exemplified in the following snippet:
+当类模板包含静态成员时，编译器隐式实例化类模板，这些成员不会隐式实例化；而只在编译器需要它们的定义时，才会隐式实例化。另外，类模板的每个特化都有自己的静态成员副本，如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -149,38 +150,38 @@ int main()
 }
 \end{lstlisting}
 
-The class template foo has a static member variable called data that is initialized after the definition of foo. In the main function, we declare the variable a as an object of foo<int> and b and c as objects of foo<double>. Initially, all of them have the member field data initialized with 0. However, the variables b and c share the same copy of data. Therefore, after the assignment b.data = 42, a.data is still 0, but both b.data and c.data are 42.
+类模板foo有一个名为data的静态成员变量，在foo定义之后初始化。main函数中，变量a的类型为foo<int>，b和c的类型为foo<double>。最初，它们都将成员数据初始化为0，但变量b和c共享相同的数据副本。因此，赋值b.data = 42后，a.data仍然是0，但b.data和c.data都是42。
 
-Having learned how implicit instantiation works, it is time to move forward and understand the other form of template instantiation, which is explicit instantiation.
+了解了隐式实例化如何工作之后，是时候来了解显式实例化了。
 
 \subsubsubsection{2.5.2\hspace{0.2cm}显式实例化}
 
-As a user, you can explicitly tell the compiler to instantiate a class template or a function template. This is called explicit instantiation and it has two forms: explicit instantiation definition and explicit instantiation declaration. We will discuss them in this order.
+可以显式地告诉编译器实例化类模板或函数模板，这称为显式实例化。它有两种形式:\textbf{显式实例化定义}和\textbf{显式实例化声明}。
 
 
 \hspace*{\fill} \\ %插入空行
 \noindent\textbf{定义}
 
-An explicit instantiation definition may appear anywhere in a program but after the definition of the template it refers to. The syntax for explicit template instantiation definitions takes the following forms:
+显式实例化定义可以出现在程序中的任何地方，但不能出现在所引用的模板定义之后。显式模板实例化定义的语法采用以下形式:
 
 \begin{itemize}
 \item 
-The syntax for class templates is as follows:
+类模板的语法如下:
 \begin{lstlisting}[style=styleCXX]
 template class-key template-name <argument-list>
 \end{lstlisting}
 
 \item 
-The syntax for function templates is as follows:
+函数模板的语法如下:
 \begin{lstlisting}[style=styleCXX]
 template return-type name<argument-list>(parameter-list);
 template return-type name(parameter-list);
 \end{lstlisting}
 \end{itemize}
 
-As you can see, in all cases, the explicit instantiation definition is introduced with the template keyword but not followed by any parameter list. For class templates, the class-key can be any of the class, struct, or union keywords. For both class and function templates, an explicit instantiation definition with a given argument list can only appear once in the entire program.
+显式实例化定义用template关键字引入，但后面没有任何参数列表。对于类模板，类键可以是类、结构或联合关键字中的一个。对于类模板和函数模板，带有给定参数列表的显式实例化定义只能在整个程序中出现一次。
 
-We will look at some examples to understand how this works. Here is the first example:
+我们将通过一些例子来理解这是如何工作的。下面是第一个例子:
 
 \begin{lstlisting}[style=styleCXX]
 namespace ns
@@ -198,7 +199,7 @@ template struct ns::wrapper<double>; // [2]
 int main() {}
 \end{lstlisting}
 
-In this snippet, wrapper<T> is a class template defined in the ns namespace. The statements marked with [1] and [2] in the code are both representing an explicit instantiation definition, for wrapper<int> and wrapper<double> respectively. An explicit instantiation definition can only appear in the same namespace as the template it refers to (as in [1]) to or it must be fully qualified (as in [2]). We can write similar explicit template definitions for a function template:
+这个代码片段中，wrapper<T>是在ns命名空间中定义的类模板。代码中标记为[1]和[2]的语句都表示显式实例化定义，分别为wrapper<int>和wrapper<double>。显式实例化定义只能出现在与其引用的模板(如[1])相同的命名空间中，或者必须是完全限定的(如[2])。可以为函数模板编写类似的显式模板定义:
 
 \begin{lstlisting}[style=styleCXX]
 namespace ns
@@ -217,9 +218,9 @@ template double ns::add(double, double); // [2]
 int main() { }
 \end{lstlisting}
 
-This second example has a striking resemblance to the first. Both [1] and [2] represent explicit template definitions for add<int>() and add<double>().
+第二个例子与第一个例子很相似。[1]和[2]都表示add<int>()和add<double>()的显式模板定义。
 
-If the explicit instantiation definition is not in the same namespace as the template, the name must be fully qualified. The use of a using statement does not make the name visible in the current namespace. This is shown in the following example:
+若显式实例化定义与模板不在同一个命名空间中，则名称必须完全限定。using语句的使用不会使名称在当前命名空间中可见。如下例所示:
 
 \begin{lstlisting}[style=styleCXX]
 namespace ns
@@ -233,9 +234,9 @@ using namespace ns;
 template struct wrapper<double>; // error
 \end{lstlisting}
 
-The last line in this example generates a compile error because wrapper is an unknown name and must be qualified with the namespace name, as in ns::wrapper.
+本例中的最后一行生成了一个编译错误，因为wrapper是一个未知的名称，必须使用命名空间名称进行限定，如ns::wrapper。
 
-When class members are used for return types or parameter types, member access specification is ignored in explicit instantiation definitions. An example is shown in the following snippet:
+当类成员用于返回类型或参数类型时，显式实例化定义会忽略成员访问规则。示例如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -252,35 +253,35 @@ class foo
 template int foo<int>::f(foo<int>::bar);
 \end{lstlisting}
 
-Both the class X<T>::bar and the function foo<T>::f() are private to the foo<T> class, but they can be used in the explicit instantiation definition shown on the last line.
+类X<T>::bar和函数foo<T>::f()都是foo<T>类的私有部分，但它们可以在最后一行显示的显式实例化定义中使用。
 
-Having seen what explicit instantiation definition is and how it works, the question that arises is when is it useful. Why would you tell the compiler to generate instantiation from a template? The answer is that it helps distribute libraries, reduce build times, and executable sizes. If you are building a library that you want to distribute as a .lib file and that library uses templates, the template definitions that are not instantiated are not put into the library. But that leads to increased build times of your user code every time you use the library. By forcing instantiations of templates in the library, those definitions are put into the object files and the .lib file you are distributing. As a result, your user code only needs to be linked to those available functions in the library file. This is what the Microsoft MSVC CRT libraries do for all the stream, locale, and string classes. The libstdc++ library does the same for string classes and others.
+了解了显式实例化定义是什么，以及它如何工作之后，现在的问题就是它什么时候有使用。为什么要告诉编译器从模板生成实例化?答案是其有助于分发库、减少构建时间和可执行文件大小。若正在构建一个.lib文件作为发布库，并且该库使用模板，则未实例化的模板定义不会放入库中，这将导致每次使用库时用户代码的构建时间增加。通过强制在库中实例化模板，这些定义会放入目标文件和分发的.lib文件中。因此，用户代码只需要链接到库文件中可用的函数即可，这就是Microsoft MSVC CRT库为所有流、区域设置和字符串类所做的工作。libstdc++库对字符串类和其他类执行相同的操作。
 
-A problem that can arise with template instantiations is that you can end up with multiple definitions, one per translation unit. If the same header that contains a template is included in multiple translation units (.cpp files) and the same template instantiation is used (let's say wrapper<int> from our previous examples), then identical copies of these instantiations are put in each translation unit. This leads to increased object sizes. The problem can be solved with the help of explicit instantiation declarations, which we will look at next.
+模板实例化可能会出现的问题是，最终可能会得到多个定义，每个翻译单元一个定义。若包含模板的同一个头文件包含在多个翻译单元(.cpp文件)中，并且使用了相同的模板实例化(假设wrapper<int>来自前面的例子)，那么这些实例化的相同副本将放在每个翻译单元中，这将导致目标文件大小的增加。这个问题可以在显式实例化声明的帮助下解决，我们将在下面进行讨论。
 
 \hspace*{\fill} \\ %插入空行
 \noindent\textbf{声明}
 
-An explicit instantiation declaration (available with C++11) is the way you can tell the compiler that the definition of a template instantiation is found in a different translation unit and that a new definition should not be generated. The syntax is the same as for explicit instantiation definitions except that the keyword extern is used in front of the declaration:
+显式实例化声明(C++11中提供)可以告诉编译器模板实例化的定义在不同的翻译单元中，并且不应该生成新的定义。语法与显式实例化定义相同，除了关键字extern用在声明前:
 
 \begin{itemize}
 \item 
-The syntax for class templates is as follows:
+类模板的语法如下所示:
 \begin{lstlisting}[style=styleCXX]
 extern template class-key template-name <argument-list>
 \end{lstlisting}
 
 \item 
-The syntax for function templates is as follows:
+函数模板的语法如下所示:
 \begin{lstlisting}[style=styleCXX]
 extern template return-type name<argumentlist>(parameter-list);
 extern template return-type name(parameter-list);
 \end{lstlisting}
 \end{itemize}
 
-If you provide an explicit instantiation declaration but no instantiation definition exists in any translation unit of the program, then the result is a compiler warning and a linker error. The technique is to declare an explicit template instantiation in one source file and explicit template declarations in the remaining ones. This will reduce both compilation times and object file sizes.
+若提供了显式的实例化声明，但在程序的翻译单元中都不存在实例化定义，则结果是编译器警告和链接器错误。该技术是在一个源文件中声明显式模板实例化，在其余的源文件中声明显式模板声明，这将减少编译时间和目标文件的大小。
 
-Let's look at the following example:
+来看看下面的例子:
 
 \begin{lstlisting}[style=styleCXX]
 // wrapper.h
@@ -289,11 +290,13 @@ struct wrapper
 {
 	T data;
 };
+
 extern template wrapper<int>; // [1]
 
 // source1.cpp
 #include "wrapper.h"
 #include <iostream>
+
 template wrapper<int>; // [2]
 
 void f()
@@ -321,24 +324,24 @@ int main()
 }
 \end{lstlisting}
 
-In this example, we can see the following:
+这个例子中，我们可以看到以下内容:
 
 \begin{itemize}
 \item 
-The wrapper.h header contains a class template called wrapper<T>. On the line marked with [1] there is an explicit instantiation declaration for wrapper<int> that tells the compiler not to generate definitions for this instantiation when a source file (translation unit) including this header is compiled.
+wrapper.h头文件包含一个名为wrapper<T>的类模板。[1]的行中，wrapper<int>有一个显式的实例化声明，它告诉编译器在编译包含此头文件的源文件(翻译单元)时不要为该实例化生成定义。
 
 \item 
-The source1.cpp file includes wrapper.h and on the line marked with [2] contains an explicit instantiation definition for wrapper<int>. This is the only definition for this instantiation within the entire program.
+source1.cpp文件包含wrapper.h，并且在[2]的行中包含wrapper<int>的显式实例化定义。这是整个程序中这个实例化的唯一定义。
 
 \item 
-The source files source2.cpp and main.cpp are both using wrapper<int> but without any explicit instantiation definition or declaration. That is because the explicit declaration from wrapper.h is visible when the header is included in each of these files.
+源文件source2.cpp和main.cpp都使用了wrapper<int>，但是没有显式的实例化定义或声明。因为当头文件包含在每个文件中时，来自wrapper.h的显式声明是可见的。
 \end{itemize}
 
-Alternatively, the explicit instantiation declaration could be taken away from the header file but then it must be added to each source file that includes the header and that is likely to be forgotten.
+或者，可以从头文件中取出显式实例化声明，但随后必须将其添加到包含头文件的每个源文件中，而这很可能被遗忘。
 
-When you do explicit template declarations, keep in mind that a class member function that is defined within the body of the class is always considered inline and therefore it will always be instantiated. Therefore, you can only use the extern keyword for member functions that are defined outside of the class body.
+进行显式模板声明时，类主体中定义的类成员函数总是视为内联的，因此它总是会实例化。因此，只能对在类体之外定义的成员函数使用extern关键字。
 
-Now that we have looked at what template instantiation is, we will continue with another important topic, template specialization, which is the term used for the definition created from a template instantiation to handle a specific set of template arguments.
+现在已经了解了什么是模板实例化，我们将继续讨论另一个重要的主题：模板特化。这个术语用于从模板实例化创建的定义，以处理一组特定的模板参数。
 
 
 

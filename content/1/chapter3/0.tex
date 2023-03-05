@@ -1,33 +1,31 @@
-A variadic template is a template with a variable number of arguments. This is a feature that was introduced in C++11. It combines generic code with functions with variable numbers of arguments, a feature that was inherited from the C language. Although the syntax and some details could be seen as cumbersome, variadic templates help us write function templates with a variable number of arguments or class templates with a variable number of data members in a way that was not possible before with compile time evaluation and type safety.
+可变参数模板是具有可变数量参数的模板，是C++11中引入的一个特性。将泛型代码与参数数量可变的函数结合在一起，这是继承自C语言的特性。尽管语法和一些细节看起来很麻烦，但可变参数模板可编写带有可变数量参数的函数模板或带有可变数量数据成员的类模板，这在以前的编译时计算和类型安全方面是不可能实现的。
 
-In this chapter, we will learn about the following topics:.
+在本章中，我们将了解以下主题:
 
 \begin{itemize}
 \item
-Understanding the need for variadic templates
+可变参数模板的需求
 
 \item
-Variadic function templates
+可变参数函数模板
 
 \item
-Parameter packs
+参数包
 
 \item
-Variadic class templates
+可变参数类模板
 
 \item
-Fold expressions
+折叠表达式
 
 \item
-Variadic alias templates
+可变参数别名模板
 
 \item
-Variadic variable templates
+可变参数变量模板
 \end{itemize}
 
-By the end of the chapter, you will have a good understanding of how to write variadic templates and how they work.
-
-We will start, however, by trying to understand why templates with variable numbers of arguments are helpful.
+本章结束时，读者们将很好地理解如何编写可变参数模板。
 
 
 

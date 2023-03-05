@@ -1,4 +1,4 @@
-Lambdas, which are formally called lambda expressions, are a simplified way to define function objects in the place where they are needed. This typically includes predicates or comparison functions passed to algorithms. Although we will not discuss lambda expressions in general, let's take a look at the following examples:
+Lambda在形式上称为Lambda表达式，是在需要函数对象的地方定义函数对象的一种简化方法，通常包括传递给算法的谓词或比较函数。我们不会讨论Lambda表达式，但先来看看下面的例子:
 
 \begin{lstlisting}[style=styleCXX]
 int arr[] = { 1,6,3,8,4,2,9 };
@@ -12,7 +12,7 @@ auto count = std::count_if(
 	[pivot](int const a) {return a > pivot; });
 \end{lstlisting}
 
-Lambda expressions are syntactic sugar, a simplified way of defining anonymous function objects. When encountering a lambda expression, the compiler generates a class with a function-call operator. For the previous example, these could look as follows:
+Lambda表达式是语法糖，是定义匿名函数对象的一种简化方式。遇到Lambda表达式时，编译器会生成一个带有函数调用操作符的类。对于前面的例子，如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 struct __lambda_1
@@ -37,19 +37,19 @@ private:
 };
 \end{lstlisting}
 
-The names chosen here are arbitrary and each compiler will generate different names. Also, the implementation details may differ and the ones seen here are the bare minimum a compiler is supposed to generate. Notice that the difference between the first lambda and the second is that the latter contains state that it captures by value.
+这里选择的名称很随意，每个编译器将生成不同的名称。另外，实现细节可能有所不同，这里看到的是编译器应该生成的最小值。请注意，第一个Lambda和第二个Lambda的区别在于，后者包含通过值捕获的状态。
 
-Lambda expressions, which were introduced in C++11, have received several updates in later versions of the standard. There are notably two, which will be discussed in this chapter:
+Lambda表达式是在C++11中引入的，该标准的后续版本中进行了多次更新。值得注意的是，本章将讨论两个问题:
 
 \begin{itemize}
 \item 
-Generic lambdas, introduced in C++14, allow us to use the auto specifier instead of explicitly specifying types. This transforms the generated function object into one with a template function-call operator.
+泛型Lambda：在C++14中引入，其允许我们使用auto，而不是显式地指定类型。这将生成的函数对象转换为，具有模板函数调用操作符的函数对象。
 
 \item 
-Template lambdas, introduced in C++20, allow us to use the template syntax to explicitly specify the shape of the templatized function-call operator.
+模板Lambda：在C++20中引入，模板Lambda可以使用模板语法显式指定模板化的函数调用操作符。
 \end{itemize}
 
-To understand the difference between these and how generic and template lambdas are helpful, let's explore the following examples:
+为了理解它们之间的区别，以及泛型Lambda和模板Lambda的作用，来看看以下示例:
 
 \begin{lstlisting}[style=styleCXX]
 auto l1 = [](int a) {return a + a; }; // C++11, regular
@@ -73,9 +73,9 @@ auto v9 = l3(42.0); // OK
 auto v10 = l3(std::string{ "42" }); // OK
 \end{lstlisting}
 
-Here, we have three different lambdas: l1 is a regular lambda, l2 is a generic lambda, as at least one of the parameters is defined with the auto specifier, and l3 is a template lambda, defined with the template syntax but without the use of the template keyword.
+这里有三个不同的Lambda表达式: l1是一个常规Lambda, l2是一个泛型Lambda，因为至少有一个参数用auto定义，l3是一个模板Lambda，用模板语法定义，但没有使用template关键字。
 
-We can invoke l1 with an integer; we can also invoke it with a double, but this time the compiler will produce a warning about the possible loss of data. However, trying to invoke it with a string argument will produce a compile error, because std::string cannot be converted to int. On the other hand, l2 is a generic lambda. The compiler proceeds to instantiate specializations of it for all the types of the arguments it's invoked with, in this example int, double, and std::string. The following snippet shows how the generated function object may look, at least conceptually:
+可以用一个整数调用l1，也可以使用double类型调用，但这一次编译器将产生一个关于可能丢失数据的警告。尝试用字符串参数调用会产生编译错误，因为std::string不能转换为int。另一方面，l2是泛型。编译器继续为它调用的所有参数类型实例化其特化版本，在本例中是int、double和std::string。下面的代码片段显示了生成的函数的外观(至少在概念上是这样的):
 
 \begin{lstlisting}[style=styleCXX]
 struct __lambda_3
@@ -106,7 +106,7 @@ struct __lambda_3
 };
 \end{lstlisting}
 
-You can see here the primary template for the function-call operator, as well as the three specializations that we mentioned. Not surprisingly, the compiler will generate the same code for the third lambda expression, l3, which is a template lambda, only available in C++20. The question that arises from this is how are generic lambdas and lambda templates different? To answer this question, let's modify the previous example a bit:
+可以在这里看到函数调用操作符的主要模板，以及提到的三个专门化。毫不奇怪，编译器将为第三个Lambda表达式l3生成相同的代码，这是一个模板Lambda，仅在C++20中可用。由此产生的问题是，通用Lambda和Lambda模板有什么不同?为了回答这个问题，稍微修改一下前面的例子:
 
 \begin{lstlisting}[style=styleCXX]
 auto l1 = [](int a, int b) {return a + b; };
@@ -129,7 +129,7 @@ auto v10 = l3(std::string{ "42" }, '1'); // OK
 auto v11 = l3(std::string{ "42" }, std::string{ "42" }); // OK
 \end{lstlisting}
 
-The new lambda expressions take two parameters. Again, we can call l1 with two integers or an int and a double (although this again generates a warning) but we can't call it with a string and char. However, we can do all these with the generic lambda l2 and the lambda template l3. The code the compiler generates is identical for l2 and l3 and looks, semantically, as follows:
+新Lambda表达式有两个参数，可以用两个整数或一个int和一个double(尽管这同样会产生警告)调用l1，但不能用字符串和char调用。但可以用泛型Lambda l2和模板lambda l3来完成所有这些。编译器生成的代码对于l2和l3是相同的，从语义上看，如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 struct __lambda_4
@@ -168,7 +168,7 @@ struct __lambda_4
 };
 \end{lstlisting}
 
-We see, in this snippet, the primary template for the function-call operator, and several full explicit specializations: for two int values, for a double and an int, for a string and a char, and for two string objects. But what if we want to restrict the use of the generic lambda l2 to arguments of the same type? This is not possible. The compiler cannot deduce our intention and, therefore, it would generate a different type template parameter for each occurrence of the auto specifier in the parameter list. However, the lambda templates from C++20 do allow us to specify the form of the function-call operator. Take a look at the following example:
+这段代码中，我们看到了函数调用操作符的主要模板，以及几个完全显式的特化:两个int值，一个double和一个int，一个字符串和一个char，以及两个字符串对象。但是若想将泛型Lambda l2的使用限制为相同类型的参数呢?这是不可能的。编译器无法推断我们的意图，所以将为参数列表中出现的auto，生成不同类型的模板参数。然而，C++20的Lambda模板允许指定函数调用操作符的形式。来看看下面的例子:
 
 \begin{lstlisting}[style=styleCXX]
 auto l5 = []<typename T>(T a, T b) { return a + b; };
@@ -184,15 +184,15 @@ auto v6 = l5(std::string{ "42" }, std::string{ "1" }); // OK
 auto v6 = l5(std::string{ "42" }, '1'); // error
 \end{lstlisting}
 
-Invoking the lambda template with any two arguments of different types, even if they are implicitly convertible such as from int to double, is not possible. The compiler will generate an error. It's not possible to explicitly provide the template arguments when invoking the template lambda, such as in l5<double>(42, 1.0). This also generates a compiler error.
+使用任意两个不同类型的参数调用Lambda模板是不可能的，即使可以隐式转换，例如从int转换为double。编译器将生成一个错误。在调用模板Lambda时，不可能显式地提供模板参数，例如：l5<double>(42,1.0)会产生一个编译错误。
 
-The decltype type specifier allows us to tell the compiler to deduce the type from an expression. This topic is covered in detail in Chapter 4, Advanced Template Concepts. However, in C++14, we can use this in a generic lambda to declare the second parameter in the previous generic lambda expression to have the same type as the first parameter. More precisely, this would look as follows:
+decltype类型说明符允许告知编译器从表达式推导出类型。这个主题将在第4章中再进行讨论。C++14中，可以在泛型Lambda中使用它，来说明前面泛型Lambda表达式中的第二个参数具有与第一个参数相同的类型。看起来如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 auto l4 = [](auto a, decltype(a) b) {return a + b; };
 \end{lstlisting}
 
-However, this implies that the type of the second parameter, b, must be convertible to the type of the first parameter, a. This allows us to write the following calls:
+然而，这意味着第二个参数b的类型必须转换为第一个参数a的类型。所以可以进行以下方式的调用:
 
 \begin{lstlisting}[style=styleCXX]
 auto v1 = l4(42.0, 1); // OK
@@ -200,9 +200,9 @@ auto v2 = l4(42, 1.0); // warning
 auto v3 = l4(std::string{ "42" }, '1'); // error
 \end{lstlisting}
 
-The first call is compiled without any problems because int is implicitly convertible to double. The second call compiles with a warning, because converting from double to int may incur a loss of data. The third call, however, generates an error, because char cannot be implicitly convertible to std::string. Although the l4 lambda is an improvement over the generic lambda l2 seen previously, it still does not help restrict calls completely if the arguments are of different types. This is only possible with lambda templates as shown earlier.
+第一次调用编译时没有问题，因为int可以隐式转换为double。第二个调用编译时发出警告，因为从double转换为int可能会导致数据丢失。但第三个调用会产生一个错误，因为char不能隐式转换为std::string。l4 Lambda比前面看到的泛型Lambda l2有所改进，但若参数类型不同，仍然不能帮助完全限制调用。这仅适用于前面所示的Lambda模板。
 
-Another example of a lambda template is shown in the next snippet. This lambda has a single argument, a std::array. However, the type of the elements of the array and the size of the array are specified as template parameters of the lambda template:
+下一段代码中显示了Lambda模板的另一个示例。这个Lambda只有一个参数std::array，但数组元素的类型和数组的大小指定为Lambda模板的模板参数:
 
 \begin{lstlisting}[style=styleCXX]
 auto l = []<typename T, size_t N>(
@@ -216,7 +216,7 @@ auto v1 = l(1); // error
 auto v2 = l(std::array<int, 3>{1, 2, 3}); // OK
 \end{lstlisting}
 
-Attempting to call this lambda with anything other than an std::array object produces a compiler error. The compiler-generated function object may look as follows:
+试图用std::array对象以外的对象调用这个Lambda会产生编译器错误。编译器生成的函数对象可能如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 struct __lambda_5
@@ -239,7 +239,7 @@ struct __lambda_5
 };
 \end{lstlisting}
 
-An interesting benefit of generic lambdas over regular lambdas concerns recursive lambdas. Lambdas do not have names; they are anonymous, therefore, you cannot recursively call them directly. Instead, you have to define a std::function object, assign the lambda expression to it, and also capture it by reference in the capture list. The following is an example of a recursive lambda that computes the factorial of a number:
+泛型Lambda相对于常规Lambda的好处是递归Lambda。Lambda没有名字，是匿名的，因此不能直接递归调用它们。必须定义一个std::function对象，将Lambda表达式赋给它，并在捕获列表中通过引用捕获它。下面是一个递归Lambda的例子，用来计算一个数字的阶乘:
 
 \begin{lstlisting}[style=styleCXX]
 std::function<int(int)> factorial;
@@ -251,7 +251,7 @@ factorial = [&factorial](int const n) {
 factorial(5);
 \end{lstlisting}
 
-This can be simplified with the use of generic lambdas. They don't require a std::function and its capture. A recursive generic lambda can be implemented as follows:
+这可以通过使用泛型Lambdas来简化，不需要std::function及其捕获。递归泛型Lambda的实现如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 auto factorial = [](auto f, int const n) {
@@ -262,7 +262,7 @@ auto factorial = [](auto f, int const n) {
 factorial(factorial, 5);
 \end{lstlisting}
 
-If understanding how this works is hard, the compiler-generated code should help you figure it out:
+若理解起来很难，编译器生成的代码应该能帮助搞清楚这是如何进行工作的:
 
 \begin{lstlisting}[style=styleCXX]
 struct __lambda_6
@@ -286,8 +286,8 @@ __lambda_6 factorial = __lambda_6{};
 factorial(factorial, 5);
 \end{lstlisting}
 
-A generic lambda is a function object with a template function-call operator. The first argument, specified with auto, can be anything, including the lambda itself. Therefore, the compiler will provide a full explicit specialization of the call operator for the type of the generated class.
+泛型Lambda是一个带有模板函数调用操作符的函数对象。用auto指定的第一个参数可以是任何东西，包括Lambda本身。因此，编译器将为生成的类型，提供完全显式特化的调用操作符。
 
-Lambda expressions help us avoid writing explicit code when we need to pass function objects as arguments to other functions. The compiler, instead, generates that code for us. Generic lambdas, introduced in C++14, help us avoid writing the same lambdas for different types. The lambda templates for C++20 allow us to specify the form of the generated call operator with the help of template syntax and semantics.
+当需要将函数对象作为参数传递给其他函数时，Lambda表达式可以避免编写显式代码。相反，编译器可以生成代码。泛型Lambdas，在C++14中引入，避免为不同类型编写相同的Lambda。C++20的Lambda模板允许在模板语法和语义的帮助下，指定生成的调用操作符的形式。
 
 

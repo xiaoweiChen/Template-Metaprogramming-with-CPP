@@ -1,63 +1,63 @@
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Question 1}
+\textbf{习题 1}
 
-What category of types can be used for non-type template parameters?
-
-\hspace*{\fill} \\ %插入空行
-\noindent
-\textbf{Answer}
-
-Non-type template parameters can only have structural types. Structure types are integral types, floating-point types (as of C++20), enumeration types, pointer types (either to objects or functions), pointer to member types (either to member objects or member functions), lvalue reference types (either to objects or functions), and literal class types that meet several requirements: all base classes are public and non-mutable, all non-static data members are public and non-mutable, and the types of all the base classes and the non-static data members are also structural types or arrays thereof. const and volatile qualified versions of these types are also allowed.
-
+什么类型可以用于非类型模板参数?
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Question 2}
+\textbf{参考答案}
 
-Where are default template arguments not allowed?
+非类型模板参数只能有结构类型。结构类型包括整型、浮点型(截至C++20)、枚举类型、指针类型(指向对象或函数)、指向成员类型的指针(指向成员对象或成员函数)、左值引用类型(指向对象或函数)以及满足以下要求的文字类类型:所有基类都是公共的和不可变的，所有非静态数据成员都是公共的和不可变的，所有基类和非静态数据成员的类型也是结构类型或其数组。这些类型的const和volatile限定版本也允许。
 
-\hspace*{\fill} \\ %插入空行
-\noindent
-\textbf{Answer}
-
-Default template arguments cannot be used for parameter packs, in declarations of friend class templates, and in the declaration or definition of an explicit specialization of a function template or member function template.
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Question 3}
+\textbf{习题 2}
 
-What is explicit instantiation declaration and how does it differ syntactically from explicit instantiation definition?
-
-\hspace*{\fill} \\ %插入空行
-\noindent
-\textbf{Answer}
-
-Explicit instantiation declaration is the way you can tell the compiler that the definition of a template instantiation is found in a different translation unit and that a new definition should not be generated. The syntax is the same as for explicit instantiation definitions, except that the extern keyword is used in front of the declaration.
+默认模板参数在哪里不允许使用?
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Question 4}
+\textbf{参考答案}
 
-What is an alias template?
-
-\hspace*{\fill} \\ %插入空行
-\noindent
-\textbf{Answer}
-
-An alias template is a name that, unlike type aliases, which refer to another type, refers to a template or, in other words, a family of types. Alias templates are introduced with using declarations. They cannot be introduced with typedef declarations.
+默认模板实参不能用于形参包、友类模板的声明以及函数模板或成员函数模板的显式特化的声明或定义中。
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Question 5}
+\textbf{习题 3}
 
-What are template lambdas?
+什么是显式实例化声明，在语法上与显式实例化定义有何不同?
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Answer}
+\textbf{参考答案}
 
-Template lambdas are an improved form of generic lambdas, introduced in C++20. They allow us to use the template syntax to explicitly specify the shape of the templatized function-call operator of the function object that the compiler is generating for a lambda expression.
+显式实例化声明是告诉编译器模板实例化的定义在不同的翻译单元中，并且不应该生成新的定义的一种方式。其语法与显式实例化定义相同，只是在声明前使用了extern关键字。
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{习题 4}
+
+什么是别名模板?
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{参考答案}
+
+别名模板是一个名称，与引用另一种类型的类型别名不同，它引用一个模板。换句话说，引用一组类型。使用using声明引入别名模板，不能用typedef声明引入。
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{习题 5}
+
+什么是模板Lambda?
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{参考答案}
+
+模板Lambda是泛型Lambda的进阶形式，在C++20中引入。允许使用模板语法显式地指定编译器，为Lambda表达式生成函数对象模板化函数调用操作符的形式。
 
 
 
