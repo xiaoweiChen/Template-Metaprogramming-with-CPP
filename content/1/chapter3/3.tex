@@ -1,17 +1,17 @@
 
-A template or function parameter pack can accept zero, one, or more arguments. The standard does not specify any upper limit for the number of arguments, but in practice, compilers may have some. What the standard does is recommend minimum values for these limits but it does not require any compliance on them. These limits are as follows:
+模板或函数形参包可以接受零个、一个或多个参数。该标准没有指定参数数量的上限，但编译器可能会有一些。该标准所做的是为这些限制推荐最小值，但不要求遵守这些限定值。这些限制如下:
 
 \begin{itemize}
 \item
-For a function parameter pack, the maximum number of arguments depends on the limit of arguments for a function call, which is recommended to be at least 256.
+对于函数形参包，参数的最大数量取决于函数调用的参数的限制，建议至少为256个。
 
 \item
-For a template parameter pack, the maximum number of arguments depends on the limit of template parameters, which is recommended to be at least 1,024.
+对于模板形参包，参数的最大数量取决于模板形参的限制，建议至少为1024个。
 \end{itemize}
 
-The number of arguments in a parameter pack can be retrieved at compile time with the sizeof… operator. This operator returns a constexpr value of the std::size\_t type. Let's see this at work in a couple of examples.
+参数包中的参数数量，可以在编译时使用sizeof…操作符检索。该操作符返回std::size\_t类型的constexpr值。通过几个例子来看看其是如何工作的。
 
-In the first example, the sizeof… operator is used to implement the end of the recursion pattern of the variadic function template sum with the help of a constexpr if statement. If the number of the arguments in the parameter pack is zero (meaning there is a single argument to the function) then we are processing the last argument, so we just return the value. Otherwise, we add the first argument to the sum of the remaining ones. The implementation looks as follows:
+第一个示例中，sizeof…操作符用于借助constexpr if语句实现可变参数函数模板sum的递归模式的结束。若形参包中的参数数量为零(函数只有一个参数)，则处理的是最后一个参数，因此只返回值。否则，将第一个参数与其余参数进行加和。实现如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T, typename... Args>
@@ -24,7 +24,7 @@ T sum(T a, Args... args)
 }
 \end{lstlisting}
 
-This is semantically equivalent, but on the other hand more concise, than the following classical approach for the variadic function template implementation:
+这在语义上是等价的，比下面的可变参数函数模板实现的方法更简洁:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -40,7 +40,7 @@ T sum(T a, Args... args)
 }
 \end{lstlisting}
 
-Notice that sizeof…(args) (the function parameter pack) and sizeof…(Args) (the template parameter pack) return the same value. On the other hand, sizeof…(args) and sizeof(args)... are not the same thing. The former is the sizeof operator used on the parameter pack args. The latter is an expansion of the parameter pack args on the sizeof operator. These are both shown in the following example:
+注意sizeof…(args)(函数形参包)和sizeof…(Args)(模板形参包)返回相同的值。另一方面，sizeof…(args)和sizeof(args)…不是一回事。前者是用于参数包args的sizeof操作符。后者是sizeof操作符上参数包args的扩展。在下面的例子中都进行了展示:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename... Ts>
@@ -53,7 +53,7 @@ constexpr auto get_type_sizes()
 auto sizes = get_type_sizes<short, int, long, long long>();
 \end{lstlisting}
 
-In this snippet, sizeof…(Ts) evaluates to 4 at compile-time, while sizeof(Ts)... is expanded to the following comma-separated pack of arguments: sizeof(short), sizeof(int), sizeof(long), sizeof(long long). Conceptually, the preceding function template, get\_type\_sizes, is equivalent to the following function template with four template parameters:
+在这段代码中，sizeof…(Ts)在编译时计算为4，而sizeof(Ts)…展开为以下以逗号分隔的参数包:sizeof(short)、sizeof(int)、sizeof(long)、sizeof(long long)。所以，前面的函数模板get\_type\_sizes相当于下面的函数模板，其有四个模板形参:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename T1, typename T2,
@@ -66,7 +66,7 @@ constexpr auto get_type_sizes()
 }
 \end{lstlisting}
 
-Typically, the parameter pack is the trailing parameter of a function or template. However, if the compiler can deduce the arguments, then a parameter pack can be followed by other parameters including more parameter packs. Let's consider the following example:
+通常，形参包是函数或模板的尾形参。但若编译器可以推断实参，则一个形参包后面可以跟其他形参包，其中包括更多形参包。看看下面的例子:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename... Ts, typename... Us>
@@ -77,7 +77,7 @@ constexpr auto multipacks(Ts... args1, Us... args2)
 }
 \end{lstlisting}
 
-This function is supposed to take two sets of elements of possibly different types and do something with them. It can be invoked such as in the following examples:
+这个函数应该取两组可能类型不同的元素，并对它们做一些事情。可以在以下示例中调用:
 
 \begin{lstlisting}[style=styleCXX]
 multipacks<int>(1, 2, 3, 4, 5, 6);
@@ -90,16 +90,16 @@ multipacks<int, int, int, int, int, int>(1, 2, 3, 4, 5, 6);
                 // 6,0
 \end{lstlisting}
 
-For the first call, the args1 pack is specified at the function call (as in multipacks<int>) and contains 1, and args2 is deduced to be 2, 3, 4, 5, 6 from the function arguments. Similarly, for the second call, the two packs will have an equal number of arguments, more precisely 1, 2, 3 and 3, 4, 6. For the last call, the first pack contains all the elements, and the second pack is empty. In all these examples, all the elements are of the int type. However, in the following examples, the two packs contain elements of different types:
+对于第一次调用，args1包在函数调用时指定(就像在multipacks<int>中一样)并包含1，而args2则从函数参数推断为2,3,4,5,6。类似地，对于第二次调用，两个包将拥有相同数量的参数，更准确地说是1,2,3和3,4,6。对于最后一次调用，第一个包包含所有元素，第二个包为空。所有这些示例中，元素都是int类型。但在下面的例子中，这两个包包含有不同类型的元素:
 
 \begin{lstlisting}[style=styleCXX]
 multipacks<int, int>(1, 2, 4.0, 5.0, 6.0); // 2,3
 multipacks<int, int, int>(1, 2, 3, 4.0, 5.0, 6.0); // 3,3
 \end{lstlisting}
 
-For the first call, the args1 pack will contain the integers 1, 2 and the args2 pack will be deduced to contain the double values 4.0, 5.0, 6.0. Similarly, for the second call, the args1 pack will be 1, 2, 3 and the args2 pack will contain 4.0, 5.0, 6.0.
+对于第一次调用，args1包将包含整数1、2，而args2包将推导为包含双精度值4.0、5.0、6.0。类似地，对于第二次调用，args1包将是1,2,3，而args2包将包含4.0,5.0,6.0。
 
-However, if we change the function template multipacks a bit by requiring that the packs be of equal size, then only some of the calls shown earlier would still be possible. This is shown in the following example:
+若稍微改变一下函数模板的多重包，要求这些包具有相同的大小，那么只有前面显示的一些调用仍然可行。如下例所示:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename... Ts, typename... Us>
@@ -119,25 +119,25 @@ multipacks<int, int>(1, 2, 4.0, 5.0, 6.0); // error
 multipacks<int, int, int>(1, 2, 3, 4.0, 5.0, 6.0); // OK
 \end{lstlisting}
 
-In this snippet, only the second and the sixth calls are valid. In these two cases, the two deduced packs have three elements each. In all the other cases, as resulting from the prior example, the packs have different sizes and the static\_assert statement will generate an error at compile-time.
+这个代码片段中，只有第2个和第6个调用是有效的。这两种情况下，两个推导的包各有三个元素。其他情况下，就像前面的例子一样，包的大小不同，static\_assert语句将在编译时生成错误。
 
-Multiple parameter packs are not specific to variadic function templates. They can also be used for variadic class templates in partial specialization, provided that the compiler can deduce the template arguments. To exemplify this, we'll consider the case of a class template that represents a pair of function pointers. The implementation should allow for storing pointers to any function. To implement this, we define a primary template, called here func\_pair, and a partial specialization with four template parameters:
+多参数包并不特定于可变参数函数模板，也可以用于偏特化中的可变类模板，前提是编译器可以推断模板参数。为了举例说明这一点，我们将考虑表示一对函数指针的类模板的情况，实现应该允许存储指向任何函数的指针。所以，我们定义了一个主模板，称为func\_pair，以及一个带有四个模板参数的偏特化:
 
 \begin{itemize}
 \item
-A type template parameter for the return type of the first function
+第一个函数的返回类型的类型模板参数
 
 \item
-A template parameter pack for the parameter types of the first function
+用于第一个函数的参数类型的模板参数包
 
 \item
-A second type template parameter for the return type of the second function
+第二个函数的返回类型的第二个类型模板参数
 
 \item
-A second template parameter pack for the parameter types of the second function
+第二个模板形参包，用于第二个函数的形参类型
 \end{itemize}
 
-The func\_pair class template is shown in the next listing:
+func\_pair类模板如下面的代码所示:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename, typename>
@@ -152,7 +152,7 @@ struct func_pair<R1(A1...), R2(A2...)>
 };
 \end{lstlisting}
 
-To demonstrate the use of this class template, let's also consider the following two functions:
+为了演示这个类模板的使用，考虑以下两个函数:
 
 \begin{lstlisting}[style=styleCXX]
 bool twice_as(int a, int b)
@@ -166,7 +166,7 @@ double sum_and_div(int a, int b, double c)
 }
 \end{lstlisting}
 
-We can instantiate the func\_pair class template and use it to call these two functions as shown in the following snippet:
+可以实例化func\_pair类模板，并使用它来使用这两个函数，如下面的代码所示:
 
 \begin{lstlisting}[style=styleCXX]
 func_pair<bool(int, int), double(int, int, double)> funcs{
@@ -176,15 +176,15 @@ funcs.f(42, 12);
 funcs.g(42, 12, 10.0);
 \end{lstlisting}
 
-Parameter packs can be expanded in a variety of contexts and this will make the topic of the next section.
+参数包可以在不同的上下文中展开，这将成为下一节的主题。
 
-\subsubsubsection{3.3.1\hspace{0.2cm}Understanding parameter packs expansion}
+\subsubsubsection{3.3.1\hspace{0.2cm}参数包扩展}
 
-Parameter packs can appear in a multitude of contexts. The form of their expansion may depend on this context. These possible contexts are listed ahead along with examples:
+参数包可以出现在不同的上下文中，扩展形式可能取决于这一背景。前面列出了这些可能的上下文和示例:
 
 \begin{itemize}
 \item
-Template parameter list: This is for when you specify parameters for a template:
+模板参数(parameter)列表:当为模板指定参数时:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename... T>
@@ -198,7 +198,7 @@ outer<int, double, char[5]> a;
 \end{lstlisting}
 
 \item
-Template argument list: This is when you specify arguments for a template:
+模板参数(argument)列表:当为模板指定参数时:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename... T>
@@ -215,7 +215,7 @@ void tagger()
 \end{lstlisting}
 
 \item
-Function parameter list: This is for when you specify parameters for a function template:
+函数参数(parameter)列表:当为函数模板指定参数时:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename... Args>
@@ -226,7 +226,7 @@ make_it(42, 'a');
 \end{lstlisting}
 
 \item
-Function argument list: When the expansion pack appears inside the parenthesis of a function call, the largest expression or brace initialization list to the left of the ellipsis is the pattern that is expanded:
+函数参数(argument)列表:当展开包出现在函数调用的圆括号内时，省略号左侧表达式或大括号初始化列表就是展开的模式:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -258,7 +258,7 @@ do_sums(1, 2, 3, 4);
 \end{lstlisting}
 
 \item
-Parenthesized initializers: When the expansion pack appears inside the parenthesis of a direct initializer, function-style cast, member initializer, new expression, and other similar contexts, the rules are the same as for the context of function argument lists:
+圆括号初始化式:当扩展包出现在直接初始化式、函数样式强制转换、成员初始化式、new表达式和其他类似上下文的圆括号内时，规则与函数实参列表的上下文相同:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename... T>
@@ -289,7 +289,7 @@ parenthesized(1, 2, 3, 4);
 \end{lstlisting}
 
 \item
-Brace-enclosed initializers: This is when you perform initialization using the brace notation:
+大括号初始化式:当使用大括号符号进行初始化时:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename... T>
@@ -306,7 +306,7 @@ brace_enclosed(1, 2, 3, 4);
 \end{lstlisting}
 
 \item
-Base specifiers and member initializer lists: A pack expansion may specify the list of base classes in a class declaration. In addition, it may also appear in the member initializer list, as this may be necessary to call the constructors of the base classes:
+基类说明符和成员初始化程序列表:包扩展可以在类声明中指定基类的列表。此外，也可能出现在成员初始化器列表中，因为调用基类的构造函数可能需要这样做:
 
 \begin{lstlisting}[style=styleCXX]
 struct A {};
@@ -327,7 +327,7 @@ X x(a, b, c);
 \end{lstlisting}
 
 \item
-Using declarations: In the context of deriving from a pack of base classes, it may also be useful to be able to introduce names from the base classes into the definition of the derived class. Therefore, a pack expansion may also appear in a using declaration. This is demonstrated based on the previous example:
+使用声明:从一组基类派生的上下文中，能够将基类中的名称引入派生类的定义中也是有用的，所以包展开也可能出现在using声明中:
 
 \begin{lstlisting}[style=styleCXX]
 struct A
@@ -365,7 +365,7 @@ x.C::execute();
 \end{lstlisting}
 
 \item
-Lambda captures: The capture clause of a lambda expression may contain a pack expansion, as shown in the following example:
+Lambda捕获:Lambda表达式的捕获子句可能包含包扩展:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename... T>
@@ -380,7 +380,7 @@ captures(1, 2, 3, 4);
 \end{lstlisting}
 
 \item
-Fold expressions: These will be discussed in detail in the following section in this chapter:
+折叠表达式:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename... T>
@@ -391,7 +391,7 @@ int sum(T... args)
 \end{lstlisting}
 
 \item
-The sizeof… operator: Examples have already been shown earlier in this section. Here is one again:
+sizeof…操作符:本节前面已经展示了示例。这里还有一个例子:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename... T>
@@ -405,7 +405,7 @@ auto arr = make_array(1, 2, 3, 4);
 \end{lstlisting}
 
 \item
-Alignment specifier: A pack expansion in an alignment specifier has the same effect as having multiple alignas specifiers applied to the same declaration. The parameter pack can be either a type or non-type pack. Examples for both cases are listed here:
+对齐说明符:对齐说明符中的包展开与将多个对齐说明符应用于同一声明具有相同的效果。参数包可以是类型包，也可以是非类型包。下面列出了这两种情况的示例:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename... T>
@@ -425,10 +425,10 @@ alignment2<1, 4, 8> al2;
 \end{lstlisting}
 
 \item
-Attribute list: This is not supported by any compiler yet.
+属性列表:目前还没有任何编译器支持。
 \end{itemize}
 
-Now that we have learned more about parameter packs and their expansion we can move forward and explore variadic class templates.
+现在，我们已经了解了更多关于参数包及其扩展的知识，可以继续探索可变参数类模板。
 
 
 

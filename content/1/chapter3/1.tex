@@ -1,4 +1,4 @@
-One of the most famous C and C++ functions is printf, which writes formatted output to the stdout standard output stream. There is actually a family of functions in the I/O library for writing formatted output, which also includes fprintf (which writes to a file stream), sprint, and snprintf (which write to a character buffer). These functions are similar because they take a string defining the output format and a variable number of arguments. The language, however, provides us with the means to write our own functions with variable numbers of arguments. Here is an example of a function that takes one or more arguments and returns the minimum value:
+最著名的C/C++函数之一是printf，将格式化输出写入标准输出流。实际上，I/O库中有一系列用于写入格式化输出的函数，其中还包括fprintf(写入文件流)、sprint和snprintf(写入字符缓冲区)。这些函数很相似，接受一个定义输出格式的字符串和可变数量的参数。现在C++语言为我们提供了一种方法，可以用可变数量的参数来编写自己的函数。下面是一个函数的例子，接受一个或多个参数，并返回最小值:
 
 \begin{lstlisting}[style=styleCXX]
 #include<stdarg.h>
@@ -30,7 +30,7 @@ int main()
 }
 \end{lstlisting}
 
-This implementation is specific for values of the int type. However, it is possible to write a similar function that is a function template. The transformation requires minimal changes and the result is as follows:
+这个实现是特定于int类型，也可以编写一个类似的函数，即函数模板。转换所需的更改最小:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -61,27 +61,27 @@ int main()
 }
 \end{lstlisting}
 
-Writing code like this, whether generic or not, has several important drawbacks:
+这样的代码，无论是否通用，都有几个缺点:
 
 \begin{itemize}
 \item
-It requires the use of several macros: va\_list (which provides access to the information needed by the others), va\_start (starts the iterating of the arguments), va\_arg (provides access to the next argument), and va\_end (stops the iterating of the arguments).
+它需要使用几个宏:va\_list(提供对其他宏的信息)、va\_start(启动参数的迭代)、va\_arg(提供下一个参数)和va\_end(停止参数的迭代)。
 
 \item
-Evaluation happens at runtime, even though the number and the type of the arguments passed to the function are known at compile-time.
+即使传递给函数的参数的数量和类型在编译时已知，求值部分也发生在运行时。
 
 \item
-Variadic functions implemented in this manner are not type-safe. The va\_macros perform low-memory manipulation and type-casts are done in va\_arg at runtime. These could lead to runtime exceptions.
+以这种方式实现的可变函数类型不安全。va\_macros执行低内存操作，类型转换在运行时的va\_arg中完成。这可能导会致运行时异常。
 
 \item
-These variadic functions require specifying in some way the number of variable arguments. In the implementation of the earlier min function, there is a first parameter that indicates the number of arguments. The printf-like functions take a formatting string from which the number of expected arguments is determined. The printf function, for example, evaluates and then ignores additional arguments (if more are supplied than the number specified in the formatting string) but has undefined behavior if fewer arguments are supplied.
+可变参函数需要以某种方式指定变量参数的数量。min函数的实现中，有一个第一个参数表示参数的数量。类似printf的函数接受一个格式化字符串，从中确定预期参数的数量。例如，printf函数计算并忽略额外的参数(若提供的参数多于格式化字符串中指定的数量)，但若提供的参数较少，则为未定义行为。
 \end{itemize}
 
-In addition to all these things, only functions could be variadic, prior to C++11. However, there are classes that could also benefit from being able to have a variable number of data members. Typical examples are the tuple class, which represents a fixed-size collection of heterogeneous values, and variant, which is a type-safe union.
+此外，C++11之前，只有函数可以是可变参的，但有些类也可以从拥有可变参数数量的数据成员中受益。典型的例子是tuple类和variant类，前者表示固定大小的异构值集合，后者是类型安全的联合。
 
-Variadic templates help address all these issues. They are evaluated at compile-time, are type-safe, do not require macros, do not require explicitly specifying the number of arguments, and we can write both variadic function templates and variadic class templates. Moreover, we also have variadic variable templates and variadic alias templates.
+可变参数模板有助于解决所有这些问题，在编译时求值类型安全，不需要宏，不需要显式指定参数的数量，我们可以编写可变参数函数模板和可变参数类模板。此外，也有可变参数变量模板和可变参数别名模板。
 
-In the next section, we will start looking into variadic function templates.
+下一节，我们开始研究可变参数函数模板。
 
 
 
