@@ -1,6 +1,6 @@
-Class templates may also have a variable number of template arguments. This is key to building some categories of types, such as tuple and variant, that are available in the standard library. In this section, we will see how we could write a simple implementation for a tuple class. A tuple is a type that represents a fixed-size collection of heterogeneous values.
+类模板也可以有数量可变的模板参数，这是构建标准库中某些类型类别(如tuple和variant)的关键。本节中，将了解如何为tuple类编写一个简单的实现。tuple是一种表示固定大小的异构值集合的类型。
 
-When implementing variadic function templates we used a recursion pattern with two overloads, one for the general case and one for ending the recursion. The same approach has to be taken with variadic class templates, except that we need to use specialization for this purpose. Next, you can see a minimal implementation for a tuple:
+实现可变函数模板时，使用了带有两个重载的递归模式，一个用于一般情况，另一个用于结束递归。除了为此目的需要使用特化外，可变参数类模板也必须采用相同的方法。下面，可以看到一个tuple类的最小实现:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T, typename... Ts>
@@ -31,9 +31,9 @@ struct tuple<T>
 };
 \end{lstlisting}
 
-The first class is the primary template. It has two template parameters: a type template and a parameter pack. This means, at the minimum, there must be one type specified for instantiating this template. The primary template tuple has two member variables: value, of the T type, and rest, of type tuple<Ts…>. This is an expansion of the rest of the template arguments. This means a tuple of N elements will contain the first element and another tuple; this second tuple, in turn, contains the second element and yet another tuple; this third nested tuple contains the rest. And this pattern continues until we end up with a tuple with a single element. This is defined by the partial specialization tuple<T>. Unlike the primary template, this specialization does not aggregate another tuple object.
+第一个类是主模板，有两个模板参数:一个类型模板和一个参数包。所以，至少必须为实例化该模板指定一种类型。主模板元组有两个成员变量:value，类型为T, rest的类型为tuple<Ts…>。这是模板其余参数的扩展。说明包含N个元素的元组将包含第一个元素和另一个tuple;这第二个tuple，依次包含第二个元素和另一个tuple;这第三个嵌套tuple包含其余内容。这种模式一直持续下去，直到得到只有一个元素的tuple，这是由偏特化tuple<T>定义。与主模板不同，此特化不聚合另一个tuple对象。
 
-We can use this simple implementation to write code like the following:
+可以使用这个简单的实现来编写如下代码:
 
 \begin{lstlisting}[style=styleCXX]
 tuple<int> one(42);
@@ -48,7 +48,7 @@ std::cout << three.value << ','
           << three.rest.rest.value << '\n';
 \end{lstlisting}
 
-Although this works, accessing elements through the rest member, such as in three.rest.rest.value, is very cumbersome. And the more elements a tuple has the more difficult it is to write code in this way. Therefore, we'd like to use some helper function to simplify accessing the elements of a tuple. The following is a snippet of how the previous could be transformed:
+虽然这是可行的，但通过rest成员访问元素，例如three.rest.rest.value，还是很繁琐的。而且tuple的元素越多，用这种方式写代码就越难。因此，我们希望使用一些辅助函数来简化tuple元素的访问。以下是如何转换之前的代码片段:
 
 \begin{lstlisting}[style=styleCXX]
 std::cout << get<0>(one) << '\n';
@@ -59,14 +59,14 @@ std::cout << get<0>(three) << ','
           << get<2>(three) << '\n';
 \end{lstlisting}
 
-Here, get<N> is a variadic function template that takes a tuple as an argument and returns a reference to the element at the N index in the tuple. Its prototype could look like the following:
+get<N>是一个可变参函数模板，接受一个tuple作为参数，并返回对元组中第N个索引处元素的引用。其原型可能如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template <size_t N, typename... Ts>
 typename nth_type<N, Ts...>::value_type & get(tuple<Ts...>& t);
 \end{lstlisting}
 
-The template arguments are the index and a parameter pack of the tuple types. Its implementation, however, requires some helper types. First, we need to know what the type of the element is at the N index in the tuple. This can be retrieved with the help of the following nth\_type variadic class template:
+模板参数是元组类型的索引和形参包，但其实现需要一些帮助器类型。首先，需要了解tuple中第N个下标处元素的类型。这可以在以下nth\_type可变类型模板的帮助下进行检索:
 
 \begin{lstlisting}[style=styleCXX]
 template <size_t N, typename T, typename... Ts>
@@ -83,7 +83,7 @@ struct nth_type<0, T, Ts...>
 };
 \end{lstlisting}
 
-Again, we have a primary template that uses recursive inheritance, and the specialization for the index 0. The specialization defines an alias called value\_type for the first type template (which is the head of the list of template arguments). This type is only used as a mechanism for determining the type of a tuple element. We need another variadic class template for retrieving the value. This is shown in the following listing:
+同样，有一个主模板，使用递归继承和索引0的特化。特化为第一个类型模板定义了一个名为value\_type的别名(是模板参数列表的头)，此类型仅用作确定tuple元素类型的机制，需要另一个可变类模板来检索值:
 
 \begin{lstlisting}[style=styleCXX]
 template <size_t N>
@@ -108,9 +108,9 @@ struct getter<0>
 };
 \end{lstlisting}
 
-We can see here the same recursive pattern, with a primary template and an explicit specialization. The class template is called getter and has a single template parameter, which is a non-type template parameter. This represents the index of the tuple element we want to access. This class template has a static member function called get. This is a variadic function template. The implementation in the primary template calls the get function with the rest member of the tuple as an argument. On the other hand, the implementation of the explicit specialization returns the reference to the member value of the tuple.
+可以看到相同的递归模式，有一个主模板和一个显式特化。类模板称为getter，只有一个模板参数，这是非类型模板参数。这个参数表示要访问的tuple元素的索引。这个类模板有一个名为get的静态成员函数，是一个可变参数函数模板。主模板中的实现以tuple的其余成员作为参数调用get函数，并且显式特化的实现会返回对元组成员值的引用。
 
-With all these defined, we can now provide an actual implementation for the helper variadic function template get. This implementation relies on the getter class template and calls its get variadic function template:
+定义了这些之后，现在可以为辅助可变参数函数模板get提供一个实现。这个实现依赖于getter类模板，并调用其get可变参数函数模板:
 
 \begin{lstlisting}[style=styleCXX]
 template <size_t N, typename... Ts>
@@ -121,14 +121,14 @@ get(tuple<Ts...>& t)
 }
 \end{lstlisting}
 
-If this example seems a little bit complicated, perhaps analyzing it step by step will help you better understand how it all works. Therefore, let's start with the following snippet:
+若这个例子看起来有点复杂，那么一步步地分析它可能会帮助您更好地理解其工作原理。让我们从以下片段开始:
 
 \begin{lstlisting}[style=styleCXX]
 tuple<int, double, char> three(42, 42.0, 'a');
 get<2>(three);
 \end{lstlisting}
 
-We will use the cppinsights.io web tools to check the template instantiations that occur from this snippet. The first to look at is the class template tuple. We have a primary template and several specializations, as follows:
+我们将使用cppinsights.io Web工具来检查，这个代码段中发生的模板实例化。首先要查看的是类模板元组，有一个主模板和几个特化:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T, typename... Ts>
@@ -193,14 +193,14 @@ struct tuple<T>
 };
 \end{lstlisting}
 
-The tuple<int, double, char> structure contains an int and a tuple<double, char>, which contains a double and a tuple<char>, which, in turn, contains a char value. This last class represents the end of the recursive definition of the tuple. This can be conceptually represented graphically as follows:
+tuple<int, double, char>结构包含一个int和一个tuple<double, char>；tuple<double, char>包含一个double和一个tuple<char>；tuple<char>又包含一个char值。最后一个类表示元组的递归定义的结束。在概念上可以用以下图形表示:
 
 \begin{center}
 \includegraphics[width=0.4\textwidth]{content/1/chapter3/images/1.png}\\
-Figure 3.1 – An example tuple
+图3.1 - 元组的示例
 \end{center}
 
-Next, we have the nth\_type class template, for which, again, we have a primary template and several specializations, as follows:
+接下来，是nth\_type类模板，有一个主模板和几个特化:
 
 \begin{lstlisting}[style=styleCXX]
 template <size_t N, typename T, typename... Ts>
@@ -232,9 +232,9 @@ struct nth_type<0, T, Ts...>
 };
 \end{lstlisting}
 
-The nth\_type<2, int, double, char> specialization is derived from nth\_type<1, double, char>, which in turn is derived from nth\_type<0, char>, which is the last base class in the hierarchy (the end of the recursive hierarchy).
+nth\_type<2, int, double, char>特化派生自nth\_type<1, double, char>，而nth\_type<1, double, char>又派生自nth\_type<0, char>，nth\_type<0, char>是层次结构中的最后一个基类(递归层次结构的末尾)。
 
-The nth\_type structure is used as the return type in the getter helper class template, which is instantiated as follows:
+nth\_type结构体用作getter辅助类模板中的返回类型，其实例化如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template <size_t N>
@@ -288,7 +288,7 @@ struct getter<0>
 };
 \end{lstlisting}
 
-Lastly, the get function template that we use to retrieve the value of an element of a tuple is defined as follows:
+最后，我们用来检索tuple元素值的get函数模板定义如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template <size_t N, typename... Ts>
@@ -306,7 +306,7 @@ get<2, int, double, char>(tuple<int, double, char> & t)
 }
 \end{lstlisting}
 
-Should there be more calls to the get function more specializations of get would exist. For instance, for get<1>(three), the following specialization would be added:
+若有更多对get函数的调用，get的特化就会更多。例如，对于get<1>(3)，将添加以下特化:
 
 \begin{lstlisting}[style=styleCXX]
 template<>
@@ -317,10 +317,10 @@ get<1, int, double, char>(tuple<int, double, char> & t)
 }
 \end{lstlisting}
 
-This example helped us demonstrate how to implement variadic class templates with a primary template for the general case and a specialization for the end case of the variadic recursion.
+这个例子演示了如何使用用于一般情况的主模板，和一个用于可变参数递归的结束情况的特化来实现可变参数类模板。
 
-You have probably noticed the use of the keyword typename to prefix the nth\_type<N, Ts...>::value\_type type, which is a dependent type. In C++20, this is no longer necessary. However, this topic will be addressed in detail in Chapter 4, Advanced Template Concepts.
+这里使用关键字typename作为nth\_type<N, Ts...>::value\_type类型的前缀，是一个依赖类型。C++20中，这个不再是必要的，这个主题将在第4章中详细讨论。
 
-Because implementing variadic templates is often verbose and can be cumbersome, the C++17 standard added fold expressions to ease this task. We will explore this topic in the next section.
+由于实现可变参数模板通常是冗长且繁琐的，C++17标准添加了折叠表达式来进行简化。我们将在下一节中来探讨折叠表达式。
 
 

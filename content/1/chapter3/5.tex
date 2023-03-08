@@ -1,4 +1,4 @@
-A fold expression is an expression involving a parameter pack that folds (or reduces) the elements of the parameter pack over a binary operator. To understand how this works, we will look at several examples. Earlier in this chapter, we implemented a variable function template called sum that returned the sum of all its supplied arguments. For convenience, we will show it again here:
+折叠表达式是一种包含参数包的表达式，它将参数包中的元素折叠(或减少)到二进制运算符上。为了了解其工作原理，我们可以来看几个例子。之前，我们实现了一个名为sum的变量函数模板，返回所有提供参数的和。方便起见，我们将在这里再次展示:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -14,7 +14,7 @@ T sum(T a, Args... args)
 }
 \end{lstlisting}
 
-With fold expressions, this implementation that requires two overloads can be reduced to the following form:
+使用折叠表达式，需要两次重载的实现可以简化为以下形式:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename... T>
@@ -24,7 +24,7 @@ int sum(T... args)
 }
 \end{lstlisting}
 
-There is no need for overloaded functions anymore. The expression (... + args) represents the fold expression, which upon evaluation becomes ((((arg0 + arg1) + arg2) + … ) + argN). The enclosing parentheses are part of the fold expression. We can use this new implementation, just as we would use the initial one, as follows:
+不再需要重载函数了。表达(…+ args)表示折叠表达式，计算后变为((((arg0 + arg1) + arg2) +…)+ argN)。括号是折叠表达式的一部分，可以使用这个新的实现，就像使用最初的实现一样:
 
 \begin{lstlisting}[style=styleCXX]
 int main()
@@ -35,44 +35,45 @@ int main()
 }
 \end{lstlisting}
 
-There are four different types of folds, which are listed as follows:
+折叠方式有四种:
 
 \begin{table}[H]
 \centering
 	\begin{tabular}{|l|l|l|}
 		\hline
-		\textbf{Fold}    & \textbf{Syntax} & \textbf{Expansion}                  \\ \hline
-		Unary right fold & (pack op ...)   & (arg1 op (... op (argN-1 op argN))) \\ \hline
-		Unary left fold  & (... op pack)   & (((arg1 op arg2) op ...) op argN)   \\ \hline
-		Binary right fold &
+		\textbf{折叠方式}    & \textbf{语法} & \textbf{展开方式}                  \\ \hline
+		一元右折叠 & (pack op ...)   & (arg1 op (... op (argN-1 op argN))) \\ \hline
+		一元左折叠  & (... op pack)   & (((arg1 op arg2) op ...) op argN)   \\ \hline
+		二元右折叠 &
 		\begin{tabular}[c]{@{}l@{}}(pack op ... op\\ init)\end{tabular} &
 		\begin{tabular}[c]{@{}l@{}}(arg1 op (... op (argN-1 op (argN\\ op init))))\end{tabular} \\ \hline
-		Binary left fold &
+		二元左折叠 &
 		\begin{tabular}[c]{@{}l@{}}(init op ... op\\ pack)\end{tabular} &
 		\begin{tabular}[c]{@{}l@{}}((((init op arg1) op arg2) op ...)\\ op argN)\end{tabular} \\ \hline
 	\end{tabular}
 \end{table}
 
 \begin{center}
-Table 3.1
+表 3.1
 \end{center}
 
-In this table, the following names are used:
+在该表中，使用了以下名词:
 
 \begin{itemize}
 \item
-pack is an expression that contains an unexpanded parameter pack, and arg1, arg2, argN-1, and argN are the arguments contained in this pack.
+pack是一个包含未展开形参包的表达式，arg1、arg2、argN-1和argN是这个包中包含的参数。
 
 \item
-op is one of the following binary operators: + - * / \% \^ \& | = < > << >> += -= *= /= \%= \^= \&= |= <<= >>= == != <= >= \&\& || , .* ->*.
+op下面是一个二元操作符 : +, -, *, /, \%, \^, \&, |, =, <, >, <{}<, >{}>, +=, -=, *=, /=, \%=, \^=, \&=, |=, <{}<=, >{}>=, ==, !=, <=, >=, \&\&, ||, ,(逗号表达式), .*, ->*.
 
 \item
-init is an expression that does not contain an unexpanded parameter pack.
+init不包含未展开参数包的表达式。
 \end{itemize}
 
 In a unary fold, if the pack does not contain any elements, only some operators are allowed. These are listed in the following table, along with the value of the empty pack:
 
-\begin{table}[]
+\begin{table}[H]
+\centering
 	\begin{tabular}{|l|l|}
 		\hline
 		\textbf{Operator}  & \textbf{Value of the empty pack} \\ \hline
