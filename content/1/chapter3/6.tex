@@ -1,4 +1,4 @@
-Everything that can be templatized can also be made variadic. An alias template is an alias (another name) for a family of types. A variadic alias template is a name for a family of types with a variable number of template parameters. With the knowledge accumulated so far, it should be fairly trivial to write alias templates. Let's see an example:
+所有可以模板化的东西也可以变参数化，别名模板是一组类型的别名(另一个名称)。可变别名模板是具有可变数量模板参数的类型族的名称。目前为止，编写别名模板会相当简单的，先来看一个例子:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T, typename... Args>
@@ -10,7 +10,7 @@ template <typename... Args>
 using int_foo = foo<int, Args...>;
 \end{lstlisting}
 
-The class template foo is variadic and takes at least one type template argument. int\_foo, on the other hand, is only a different name for a family of types instantiated from the foo type with int as the first type template arguments. These could be used as follows:
+类模板foo是可变的，并且至少接受一个类型模板参数。另外，int\_foo只是一个名称，用于从foo类型实例化的类型，并且int作为第一个类型模板参数的模板:
 
 \begin{lstlisting}[style=styleCXX]
 foo<double, char, int> f1;
@@ -19,9 +19,9 @@ int_foo<char, double> f3;
 static_assert(std::is_same_v<decltype(f2), decltype(f3)>);
 \end{lstlisting}
 
-In this snippet, f1 on one hand and f2 and f3 on the other are instances of different foo types, as they are instantiated from different sets of template arguments for foo. However, f2 and f3 are instances of the same type, foo<int, char, double>, since int\_foo<char, double> is just an alias for this type.
+这段代码中，f1和f2和f3是不同foo类型的实例，它们是从foo的不同模板参数集实例化的。然而，f2和f3是同一类型的实例，所以int\_foo<char, double>是foo<int, char, double>类型的别名。
 
-A similar example, although a bit more complex, is presented ahead. The standard library contains a class template called std::integer\_sequence, which represents a compile-time sequence of integers, along with a bunch of alias templates to help create various kinds of such integer sequences. Although the code shown here is a simplified snippet, their implementation can, at least conceptually, be as follows:
+前面介绍了一个类似的例子，尽管有点复杂。标准库包含一个名为std::integer\_sequence的类模板，表示一个编译时的整数序列，以及一堆别名模板，从而帮助创建各种类型的此类整数序列。虽然这里显示的是一个简化的代码段，但至少在概念上，其实现如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename T, T... Ints>
@@ -51,20 +51,20 @@ using index_sequence_for =
 	make_index_sequence<sizeof...(T)>;
 \end{lstlisting}
 
-There are three alias templates here:
+这里有三个别名模板:
 
 \begin{itemize}
 \item
-index\_sequence, which creates an integer\_sequence for the size\_t type; this is a variadic alias template.
+index\_sequence, 为size\_t类型创建integer\_sequence;这是一个可变别名模板。
 
 \item
-index\_sequence\_for, which creates an integer\_sequence from a parameter pack; this is also a variadic alias template.
+index\_sequence\_for, 从参数包中创建integer\_sequence;这也是一个可变别名模板。
 
 \item
-make\_index\_sequence, which creates an integer\_sequence for the size\_t type with the values 0, 1, 2, …, N-1. Unlike the previous ones, this is not an alias for a variadic template.
+make\_index\_sequence, 为size\_t类型创建了integer\_sequence，值为0,1,2，…，N-1。与前面的模板不同，这不是可变参数模板的别名。
 \end{itemize}
 
-The last subject to address in this chapter is variadic variable templates.
+本章要讨论的最后一个主题是可变变量模板。
 
 
 

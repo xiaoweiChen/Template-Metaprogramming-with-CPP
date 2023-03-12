@@ -70,24 +70,24 @@ op下面是一个二元操作符 : +, -, *, /, \%, \^, \&, |, =, <, >, <{}<, >{}
 init不包含未展开参数包的表达式。
 \end{itemize}
 
-In a unary fold, if the pack does not contain any elements, only some operators are allowed. These are listed in the following table, along with the value of the empty pack:
+一元折叠中，若参数包不包含任何元素，则只允许使用某些操作符。下表列出了这些值，以及空参数包的值:
 
 \begin{table}[H]
 \centering
 	\begin{tabular}{|l|l|}
 		\hline
-		\textbf{Operator}  & \textbf{Value of the empty pack} \\ \hline
-		\&\& (logical AND) & true                             \\ \hline
-		|| (logical OR)    & false                            \\ \hline
-		, (comma operator) & void()                           \\ \hline
+		\textbf{操作符}  & \textbf{空参数包的值} \\ \hline
+		\&\& (逻辑 AND) & true                             \\ \hline
+		|| (逻辑 OR)    & false                            \\ \hline
+		, (逗号操作符) & void()                           \\ \hline
 	\end{tabular}
 \end{table}
 
 \begin{center}
-Table 3.2
+表 3.2
 \end{center}
 
-Unary and binary folds differ in the use of an initialization value, that is present only for binary folds. Binary folds have the binary operator repeated twice (it must be the same operator). We can transform the variadic function template sum from using a unary right fold expression into one using a binary right fold by including an initialization value. Here is an example:
+一元折叠和二元折叠的不同之处在于初始化值的使用，初始化值只适用于二元折叠。二元折叠将二元操作符重复两次(必须是同一个操作符)。通过包含初始化值，可以将可变函数模板和从使用一元右折叠表达式转换为使用二元右折叠表达式。这里有一个例子:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename... T>
@@ -97,16 +97,16 @@ int sum_from_zero(T... args)
 }
 \end{lstlisting}
 
-One could say there is no difference between the sum and sum\_from\_zero function templates. That is not actually true. Let's consider the following invocations:
+感觉sum和sum\_from\_zero的函数模板没有区别，但事实并非如此。让我们考虑以下情况:
 
 \begin{lstlisting}[style=styleCXX]
 int s1 = sum(); // error
 int s2 = sum_from_zero(); // OK
 \end{lstlisting}
 
-Calling sum without arguments will produce a compiler error, because unary fold expressions (over the operator + in this case) must have non-empty expansions. However, binary fold expressions do not have this problem, so calling sum\_from\_zero without arguments works and the function will return 0.
+调用不带参数的sum将产生编译器错误，因为一元折叠表达式(加法运算符)必须有非空展开。然而，二进制折叠表达式没有这个问题，因此调用sum\_from\_zero而不带参数可以工作，函数将返回0。
 
-In these two examples with sum and sum\_from\_zero, the parameter pack args appears directly within the fold expression. However, it can be part of an expression, as long as it is not expanded. This is shown in the following example:
+这两个使用sum和sum\_from\_zero的例子中，参数包args直接出现在折叠表达式中。但它可以是表达式的一部分，只要没有展开。如下例所示:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename... T>
@@ -122,16 +122,16 @@ void printr(T... args)
 }
 \end{lstlisting}
 
-Here, the parameter pack args is part of the (std::cout << args) expression. This is not a fold expression. A fold expression is ((std::cout << args), ...). This is a unary left fold over the comma operator. The printl and printr functions can be used as in the following snippet:
+这里，参数包args是(std::cout <{}< args)表达式的一部分。这不是一个折叠表达式。折叠表达式是((std::cout <{}< args)，…)。这是逗号运算符上的一元左折叠。printl和printr函数可以像下面这样使用:
 
 \begin{lstlisting}[style=styleCXX]
 printl('d', 'o', 'g'); // dog
 printr('d', 'o', 'g'); // dog
 \end{lstlisting}
 
-In both these cases, the text printed to the console is dog. This is because the unary left fold expands to (((std::cout << 'd'), std::cout << 'o'), << std::cout << 'g') and the unary right fold expands to (std::cout << 'd', (std::cout << 'o', (std::cout << 'g'))) and these two are evaluated in the same way. This is because a pair of expressions separated by a comma is evaluated left to right. This is true for the built-in comma operator. For types that overload the comma operator, the behavior depends on how the operator is overloaded. However, there are very few corner cases for overloading the comma operator (such as simplifying indexing multi-dimensional arrays). Libraries such as Boost.Assign and SOCI overload the comma operator, but, in general, this is an operator you should avoid overloading.
+这两种情况下，输出到控制台的文本都是dog。这是因为一元左折叠扩展为(((std::cout <{}< 'd')， std::cout <{}< 'o')， << std::cout <{}< 'g')，一元右折叠扩展为(std::cout <{}< 'd'， (std::cout <{}< 'o'， (std::cout <{}< 'g'))，因为由逗号分隔的一对表达式从左到右求值，所以这两种计算方式相同，内置逗号操作符就是这样。对于重载逗号操作符的类型，其行为取决于如何重载该操作符。然而，重载逗号操作符的情况非常少(例如简化多维数组索引)，如Boost库。赋值和SOCI会重载逗号运算符，但通常情况下，最好不要去重载逗号操作符。
 
-Let's consider another example for using the parameter pack in an expression inside a fold expression. The following variadic function template inserts multiple values to the end of a std::vector:
+来看一下在折叠表达式中的表达式中使用参数包的另一个示例。下面的可变参数函数模板，会将多个值插入到std::vector的末尾:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename T, typename... Args>
@@ -143,22 +143,22 @@ void push_back_many(std::vector<T>& v, Args&&... args)
 push_back_many(v, 1, 2, 3, 4, 5); // v = {1, 2, 3, 4, 5}
 \end{lstlisting}
 
-The parameter pack args is used with the v.push\_back(args) expression that is folded over the comma operator. The unary left fold expression is (v.push\_back(args), ...).
+参数包args与v.push\_back(args)表达式一起使用，该表达式折叠在逗号操作符上。所以，一元左折叠表达式为(v.push\_back(args)，…)。
 
-Fold expressions have several benefits over the use of recursion to implement variadic templates. These benefits are as follows:
+与使用递归实现可变参数模板相比，折叠表达式有几个优点:
 
 \begin{itemize}
 \item
-Less and simpler code to write.
+代码更少、更简单。
 
 \item
-Fewer template instantiations, which leads to faster compile times.
+更快的编译时间，更少的模板实例化。
 
 \item
-Potentially faster code since multiple function calls are replaced with a single expression. However, this point may not be true in practice, at least not when optimizations are enabled. We have already seen that the compilers optimize code by removing these function calls.
+可能更快的代码，因为多个函数调用替换为单个表达式。然而，这一点在实践中有待验证，至少在启用优化时不是。我们已经看到编译器通过删除这些函数来调用优化代码。
 \end{itemize}
 
-Now that we have seen how to create variadic function templates, variadic class templates, and how to use fold expressions, we are left to discuss the other kinds of templates that can be variadic: alias templates and variable templates. We will start with the former.
+现在我们已经了解了如何创建可变参数函数模板、可变参数类模板，以及如何使用折叠表达式，接下来将讨论其他类型的可变参数模板:别名模板和变量模板。
 
 
 

@@ -1,6 +1,6 @@
-As mentioned before, variable templates may also be variadic. However, variables cannot be defined recursively, nor can they be specialized like class templates. Fold expressions, which simplify generating expressions from a variable number of arguments, are very handy for creating variadic variable templates.
+如前所述，变量模板也有可变参数。但变量不能递归定义，也不能像类模板那样特化。折叠表达式简化了从可变数量的参数生成表达式的过程，对于创建可变参数的变量模板非常方便。
 
-In the following example, we define a variadic variable template called Sum that is initialized at compile-time with the sum of all integers supplied as non-type template arguments:
+下面的例子中，定义了一个名为Sum的可变变量模板，在编译时初始化为所有作为非类型模板参数提供的整数的和:
 
 \begin{lstlisting}[style=styleCXX]
 template <int... R>
@@ -13,9 +13,9 @@ int main()
 }
 \end{lstlisting}
 
-This is similar to the sum function written with the help of fold expressions. However, in that case, the numbers to add were provided as function arguments. Here, they are provided as template arguments to the variable template. The difference is mostly syntactic; with optimizations enabled, the end result is likely the same in terms of generated assembly code, and therefore performance.
+这类似于用折叠表达式写的和函数，在这种情况下，要添加的数字是作为函数参数提供的。这里，作为模板参数提供给变量template。区别主要是句法上的;启用优化后，最终结果在生成的汇编代码和性能方面可能是相同的。
 
-Variadic variable templates follow the same patterns as all the other kinds of templates although they are not used as much as the others. However, by concluding this topic we have now completed the learning of variadic templates in C++.
+可变参数变量模板与所有其他类型的模板遵循相同的模式，尽管不像其他模板那么常用。然而，通过结束这个主题，目前已经完成了C++中可变参数模板的了解。
 
 
 

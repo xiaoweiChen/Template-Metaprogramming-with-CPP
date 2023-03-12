@@ -1,63 +1,63 @@
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Question 1}
+\textbf{习题 1}
 
-What are variadic templates and why are they useful?
-
-\hspace*{\fill} \\ %插入空行
-\noindent
-\textbf{Answer}
-
-Variadic templates are templates with a variable number of arguments. They allow us to write not only functions with variable number of arguments but also class templates, variable templates, and alias templates. Unlike other approaches, such as the use of the va\_ macros, they are type-safe, do not require macros, and do not require us to explicitly specify the number of arguments.
-
+什么是可变参数模板，这个模板有什么用?
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Question 2}
+\textbf{参考答案}
 
-What is a parameter pack?
+可变参数模板是具有可变数量参数的模板，不仅允许我们编写参数数量可变的函数，还允许我们编写类模板、变量模板和别名模板。与其他方法(如使用va\_宏)不同，它们是类型安全的，不需要宏，也不需要显式地指定参数的数量。
 
-\hspace*{\fill} \\ %插入空行
-\noindent
-\textbf{Answer}
-
-There are two kinds of parameter packs: template parameter packs and function parameter packs. The former are template parameters that accept zero, one, or more template arguments. The latter are function parameters that accept zero, one, or more function arguments.
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Question 3}
+\textbf{习题 2}
 
-What are the contexts where parameter packs can be expanded?
-
-\hspace*{\fill} \\ %插入空行
-\noindent
-\textbf{Answer}
-
-Parameter packs can be expanded in a multitude of contexts, as follows: template parameter lists, template argument lists, function parameter lists, function argument lists, parenthesized initializers, brace-enclosed initializers, base specifiers and member initializer lists, fold expressions, using declarations, lambda captures, the sizeof… operator, alignment specifiers, and attribute lists.
+什么是参数包?
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Question 4}
+\textbf{参考答案}
 
-What are fold expressions?
-
-\hspace*{\fill} \\ %插入空行
-\noindent
-\textbf{Answer}
-
-A fold expression is an expression involving a parameter pack that folds (or reduces) the elements of the parameter pack over a binary operator.
+有两种参数包:模板参数包和函数参数包。前者是接受零个、一个或多个模板实参的模板形参。后者是接受零个、一个或多个函数参数的函数参数。
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Question 5}
+\textbf{习题 3}
 
-What are the benefits of using fold expressions?
+什么是可以展开参数包的上下文?
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Answer}
+\textbf{参考答案}
 
-The benefits of using fold expressions include having less and simpler code to write, fewer template instantiations, which lead to faster compile times, and potentially faster code, since multiple function calls are replaced with a single expression.
+参数包可以在多种上下文中展开，如下所示:模板形参列表、模板实参列表、函数形参列表、圆括号括起来的初始化式、大括号括起来的初始化式、基形说明符和成员初始化式列表、折叠表达式、using声明、lambda捕获、sizeof…操作符、对齐说明符和属性列表。
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{习题 4}
+
+什么是折叠表达式?
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{参考答案}
+
+折叠表达式是一种包含参数包的表达式，将参数包中的元素折叠(或减少)到二进制运算符上。
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{习题 5}
+
+使用折叠表达式有什么好处?
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{参考答案}
+
+折叠表达式的好处包括编写的代码更少、更简单，模板实例化更少，具有更快的编译时间和潜在的更快的代码，因为多个函数只调用一个表达式。
 
 
 
