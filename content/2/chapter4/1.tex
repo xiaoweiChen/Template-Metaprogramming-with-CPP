@@ -89,7 +89,7 @@ At the point mark with [1] in the comments, we have the definition of a class te
 
 Now that we’ve seen how name binding occurs, let’s learn how this relates to template instantiation.
 
-\subsubsubsection{4.1.1\hspace{0.2cm}Two-phase name lookup}
+\subsubsubsection{4.1.1\hspace{0.2cm}两阶段的名称查找}
 
 The key takeaway from the previous section is that name lookup happens differently for dependent names (those that depend on a template parameter) and non-dependent names (those that do not depend on a template parameter, plus the template name and names defined in the current template instantiation). When the compiler passes through the definition of a template it needs to figure out whether a name is dependent or non-dependent. Further name lookup depends on this categorization and happens either at the template definition point (for non-dependent names) or the template instantiation point (for dependent names). Therefore, instantiation of a template happens in two phases:
 
@@ -184,7 +184,7 @@ The reason for this behavior is that p1 is an instance of parser<int> and there 
 
 The next subject of this broader topic is using dependent names that are types. Let’s learn how that works.
 
-\subsubsubsection{4.1.2\hspace{0.2cm}Dependent type names}
+\subsubsubsection{4.1.2\hspace{0.2cm}依赖类型的名称}
 
 In the examples seen so far, the dependent name was a function or a member function. However, there are cases when a dependent name is a type. This is demonstrated with the following example:
 
@@ -309,7 +309,7 @@ a similar purpose, cannot be substituted with the keyword class.
 
 Not only types can be dependent names but other templates too. We look at this topic in the next subsection.
 
-\subsubsubsection{4.1.3\hspace{0.2cm}Dependent template names}
+\subsubsubsection{4.1.3\hspace{0.2cm}依赖模板的名称}
 
 There are cases when the dependent name is a template, such as a function template or a class template. However, the default behavior of the compiler is to interpret the dependent name as a non-type, which leads to errors concerning the usage of the comparison operator <. Let’s demonstrate this with an example:
 
@@ -370,7 +370,7 @@ The token class is an inner class template of the base\_parser class template. I
 
 The use of the typename and template keywords is not required in some contexts of the current template instantiation being observed. This will be the topic of the next subsection.
 
-\subsubsubsection{4.1.4\hspace{0.2cm}Current instantiation}
+\subsubsubsection{4.1.4\hspace{0.2cm}实例化}
 
 The requirement to use the typename and template keywords to disambiguate dependent names may be avoided in the context of a class template definition where the compiler is able to deduce some dependent names (such as the name of a nested class) to refer to the current instantiation. This means some errors can be identified sooner, at the point of definition instead of the point of instantiation.
 
