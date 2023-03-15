@@ -307,7 +307,7 @@ struct dictionary : T::map_type
 
 \subsubsubsection{4.1.3\hspace{0.2cm}依赖模板的名称}
 
-There are cases when the dependent name is a template, such as a function template or a class template. However, the default behavior of the compiler is to interpret the dependent name as a non-type, which leads to errors concerning the usage of the comparison operator <. Let’s demonstrate this with an example:
+某些情况下，依赖名称是模板，例如函数模板或类模板。但编译器的默认行为是将依赖项名称解释为非类型，这会导致使用小于比较操作符时出现错误:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -332,11 +332,11 @@ struct parser : base_parser<T>
 };
 \end{lstlisting}
 
-This is similar to the previous snippets, but the init function in base\_parser is also a template. The attempt to call it using the base\_parser<T>::init<int>() syntax, as seen at point [1], results in a compiler error. Therefore, we must use the template keyword to tell the compiler the dependent name is a template. This is done as shown at point [2].
+这类似于前面的代码片段，base\_parser中的init函数也是一个模板。尝试使用base\_parser<T>::init<int>()，如[1]所示，将导会致编译器错误。因此，必须使用template关键字告诉编译器依赖名称是模板，如[2]所示。
 
-Keep in mind that the template keyword can only follow the scope resolution operator (::), member access through pointer (->), and the member access (.). Examples of correct usage are X::template foo<T>(), this->template foo<T>(), and obj.template foo<T>().
+template关键字只能跟随作用域解析操作符(::)、通过指针(->)进行成员访问和成员访问(.)。正确用法的例子为X::template foo<T>()，this->template foo<T>()和obj.template foo()。
 
-The dependent name does not have to be a function template. It can also be a class template, shown as follows:
+依赖名称不一定是函数模板，也可以是一个类模板:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -362,55 +362,55 @@ struct parser : base_parser<T>
 };
 \end{lstlisting}
 
-The token class is an inner class template of the base\_parser class template. It can be either used as in the line marked with [1], where a type alias is defined (which is then used to instantiate an object) or as at line [2], where it is used directly to declare a variable. Notice that the typename keyword is not necessary at [1], where the using declaration indicates we are dealing with a type, but is required at [2] because the compiler would otherwise assume it’s a non-type name.
+令牌类是base\_parser类模板的内部类模板，既可以在[1]行中使用，定义了类型别名(然后用于实例化对象)；也可以在[2]行中使用，直接用于声明变量。typename关键字在[1]中是不必要的，其中using声明表示正在处理类型，但在[2]中是必需的，因为编译器会假定其为非类型名称。
 
-The use of the typename and template keywords is not required in some contexts of the current template instantiation being observed. This will be the topic of the next subsection.
+观察当前模板实例化的某些上下文中，其实并不需要使用typename和template关键字。
 
 \subsubsubsection{4.1.4\hspace{0.2cm}实例化}
 
-The requirement to use the typename and template keywords to disambiguate dependent names may be avoided in the context of a class template definition where the compiler is able to deduce some dependent names (such as the name of a nested class) to refer to the current instantiation. This means some errors can be identified sooner, at the point of definition instead of the point of instantiation.
+类模板定义的上下文中，可以避免使用typename和template关键字来消除依赖名称的歧义。在类模板定义的上下文中，编译器能够推导出一些依赖名称(例如嵌套类的名称)来引用当前实例化，所以一些错误可以在定义时(而不是实例化时)就可以找出来。
 
-The complete list of names that can refer to the current instantiation, according to the C++ Standard, §13.8.2.1 - Dependent Types, is presented in the following table:
+根据C++标准§13.8.2.1-依赖类型，可以引用当前实例化名称的完整列表如下表所示:
 
 \begin{table}[H]
 \centering
 	\begin{tabular}{|l|l|}
 		\hline
-		\textbf{Context} &
-		\textbf{Names} \\ \hline
-		Class template definition &
-		\begin{tabular}[c]{@{}l@{}}Nested class\\ Member of class template\\ Member of a nested class\\ Injected class-name of the template\\ Injected class-name of a nested class\end{tabular} \\ \hline
-		\begin{tabular}[c]{@{}l@{}}Primary class template definition\\ or\\ Definition of members of a \\ primary class template\end{tabular} &
-		\begin{tabular}[c]{@{}l@{}}Name of the class template followed by a template\\ argument list for the primary template where\\ each argument is equivalent to its corresponding\\ parameter\end{tabular} \\ \hline
-		\begin{tabular}[c]{@{}l@{}}Definition of a nested class or\\ class template\end{tabular} &
-		\begin{tabular}[c]{@{}l@{}}Name of a nested class used as a member of the\\ current instantiation\end{tabular} \\ \hline
-		\begin{tabular}[c]{@{}l@{}}Definition of a partial\\ specialization\\ or\\ Definition of a member of a\\ partial specialization\end{tabular} &
-		\begin{tabular}[c]{@{}l@{}}Name of the class template followed by a template\\ argument list for the partial specialization, where\\ each argument is equivalent to its corresponding\\ parameter\end{tabular} \\ \hline
+		\textbf{内容} &
+		\textbf{名称} \\ \hline
+		类模板定义 &
+		\begin{tabular}[c]{@{}l@{}}嵌套类\\ 类模板的成员\\ 嵌套类的成员\\ 注入模板的类名\\ 注入的嵌套类的类名\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}主类模板定义\\ 或\\ 定义主类模板的成员 \end{tabular} &
+		\begin{tabular}[c]{@{}l@{}}类模板的名称，后面跟着主模板\\ 的模板实参列表，其中每个实参都\\ 等效于其对应的形参\end{tabular} \\ \hline
+		嵌套类或类模板的定义 &
+		用作当前实例化成员的嵌套类的名称 \\ \hline
+		\begin{tabular}[c]{@{}l@{}}偏特化的定义\\或\\偏特化成员的定义\end{tabular} &
+		\begin{tabular}[c]{@{}l@{}}类模板的名称，后面跟着偏特化\\ 的模板参数列表，其中每个参数\\ 等效于其相应的形参\end{tabular} \\ \hline
 	\end{tabular}
 \end{table}
 
 \begin{center}
-Table 4.1
+表 4.1
 \end{center}
 
-The following are the rules for considering a name as part of the current instantiation:
+以下是将名称作为当前实例化的部分规则:
 
 \begin{itemize}
 \item
-An unqualified name (that does not appear on the right side of the scope resolution operator ::) found in the current instantiation or its non-dependent base
+当前实例化或其非依赖基类中找到的非限定名称(不在作用域解析操作符::)的右侧
 
 \item
-A qualified name (that appears on the right side of the scope resolution operator ::) if its qualifier (the part that appears on the left side of the scope resolution operator) names the current instantiation and is found in the current instantiation or its non-dependent base
+限定名(出现在范围解析操作符的右侧::)，若其限定符(出现在范围解析操作符左侧的部分)命名当前实例化，并且在当前实例化或其非依赖基类中找到
 
 \item
-A name used in a class member access expression where the object expression is the current instantiation and the name is found in the current instantiation or its non-dependent base
+类成员访问表达式中使用的名称，其中对象表达式是当前实例化，且名称在当前实例化或其非依赖基类中找到
 \end{itemize}
 
 \begin{tcolorbox}[breakable,enhanced jigsaw,colback=blue!5!white,colframe=blue!75!black,title={Note}]
-It is said that a base class is a dependent class if it is a dependent type (depends on a template parameter) and is not in the current instantiation. Otherwise, a base class is said to be a non-dependent class.
+若基类是依赖类型(依赖于模板形参)并且不在当前实例化中，那么基类就是依赖类。否则，基类为非依赖类。
 \end{tcolorbox}
 
-These rules may sound a bit harder to comprehend; therefore, let’s try to understand them with the help of several examples, as follows:
+这些规则听起来可能有点难以理解，通过以下几个例子来尝试进行理解:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -438,11 +438,11 @@ struct parser<T*>
 };
 \end{lstlisting}
 
-In the primary template parser, the names parser, parser<T>, and ::parser<T> all refer to the current instantiation. However, parser<T*> does not. The class token is a nested class of the primary template parser. In the scope of this class, token and parser<T>::token are both denoting the current instantiation. The same is not true for parser<T*>::token. This snippet also contains a partial specialization of the primary template for the pointer type T*. In the context of this partial specialization, parser<T*> is the current instantiation, but parser<T> is not.
+主模板parser中，名称parser、parser<T>和::parser<T>都指向当前实例化，但parser<T*>没有。token类是主模板parser的嵌套类。在该类的范围内，token和parser<T>::token都表示当前实例化，但对于parser<T*>::token则不是这样。该代码段还包含指针类型T*的主模板的部分特化。在这个偏特化的上下文中，parser<T*>是当前实例化，而parser<T>不是。
 
-Dependent names are an important aspect of template programming. The key takeaway from this section is that names are categorized as dependent (those that depend on a template parameter) and non-dependent (those that don’t depend on a template parameter). Name binding happens at the point of definition for non-dependent types and at the point of instantiation for dependent types. In some cases, the keywords typename and template are required to disambiguate the use of names and tell the compiler that a name refers to a type or a template. In the context of a class template definition, the compiler is, however, able to figure out that some dependent names refer to the current instantiation, which enables it to identify errors sooner.
+依赖名称对于模板编程很重要。本节的关键内容是将名称分为依赖名称(依赖于模板参数的名称)和非依赖名称(不依赖于模板参数的名称)。名称绑定发生在非依赖类型的定义点和依赖类型的实例化点。某些情况下，需要关键字typename和template来消除名称使用的歧义，并告诉编译器名称指的是类型或模板。然而，在类模板定义的上下文中，编译器能够找出一些依赖名称指向当前实例化，这使它能够更快地找到错误。
 
-In the next section, we move our attention to a topic that we briefly touched already, which is template recursion.
+下一节中，我们将把注意力转移到模板递归上。
 
 
 
