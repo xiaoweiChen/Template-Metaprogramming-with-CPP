@@ -1,29 +1,29 @@
-One of the most important features that were added to the language in C++11 is move semantics, which helps improve performance by avoiding making unnecessary copies. Move semantics are supported by another C++11 feature called rvalue references. Before discussing these, it is worth mentioning that, in C++, we have two kinds of values:
+C++11中添加到该语言的最重要的特性之一是移动语义，通过避免不必要的复制来帮助提高性能。移动语义由C++11的另一个特性支持，称为右值引用。在讨论这些之前，值得一提的是，在C++中有两种值:
 
 \begin{itemize}
 \item
-lvalues are values that refer to a memory location and, therefore, we can take their address with the \& operator. lvalues can appear both on the left and right sides of an assignment expression.
+左值是指向内存位置的值，因此，可以用\&操作符获取它们的地址。左值可以出现在赋值表达式的左边和右边。
 
 \item
-rvalues are values that are not lvalues. They are defined by exclusion. rvalues do not refer to a memory location and you can’t take their address with the \& operator. rvalues are literals and temporary objects and can only appear on the right side of an assignment expression.
+右值是非左值的值，它们的定义是互斥的。右值不指向内存位置，并且不能使用\&操作符获取它们的地址。右值是字面量和临时对象，只能出现在赋值表达式的右侧。
 
 \begin{tcolorbox}[breakable,enhanced jigsaw,colback=blue!5!white,colframe=blue!75!black,title={Note}]
-In C++11, there are a few other value categories, glvalue, prvalue, and xvalue. Discussing them here would not benefit the current topic. However, you can read more about them at \url{https://en.cppreference.com/w/cpp/ language/value_category}.
+C++11中，还有一些其他的值类别，glvalue, prvalue和xvalue。在这里讨论它们会让我们的精力过于分散，可以在\url{https://en.cppreference.com/w/cpp/ language/value_category}上阅读更多关于它们的信息。
 \end{tcolorbox}
 
 \end{itemize}
 
-References are aliases to already existing objects or functions. Just as we have two kinds of values, in C++11 we have two kinds of references:
+引用是已经存在的对象或函数的别名。就像我们有两种值一样，C++11中有两种引用:
 
 \begin{itemize}
 \item
-lvalue references, denoted with a \&, such as in \&x, are references to lvalues.
+用\&表示的左值引用，例如\&x，是对左值的引用。
 
 \item
-rvalue references, denoted with \&\&, such as in \&\&x, are references to rvalues.
+用\&\&表示的右值引用，例如在\&\&x中，是对右值的引用。
 \end{itemize}
 
-Let’s look at some examples to understand these concepts better:
+来看一些例子，可以更好地理解这些概念:
 
 \begin{lstlisting}[style=styleCXX]
 struct foo
@@ -47,7 +47,7 @@ foo x = { 42 }; // x is lvalue
 foo& rx = x; // rx is lvalue
 \end{lstlisting}
 
-We have three functions here: f, which takes an lvalue reference (that is, int\&); g, which has two overloads, one for an lvalue reference, and one for an rvalue reference (that is, int\&\&); and h, which takes an rvalue reference. We also have two variables, x and rx. Here, x is an lvalue, whose type is foo. We can take its address with \&x. An lvalue is also rx, which is an lvalue reference, whose type is foo\&. Now, let’s see how we can call each of the f, g, and h functions:
+这里有三个函数:f，它接受一个左值引用(即int\&);g，它有两个重载，一个用于左值引用，另一个用于右值引用(即int\&\&);h，取一个右值引用。还有两个变量，x和rx。x是一个左值，类型为foo，可以用\&x看到它的地址。左值也是rx，它是一个左值引用，类型是foo\&。现在，来看看如何调用f、g和h函数:
 
 \begin{lstlisting}[style=styleCXX]
 f(x); // f(foo&)
@@ -56,7 +56,7 @@ f(foo{42}); // error: a non-const reference
             // may only be bound to an lvalue
 \end{lstlisting}
 
-Because x and rx are both lvalues, passing them to f is OK since this function takes an lvalue reference. However, foo\{42\} is a temporary object, as it does not exist outside the context of the call to f. That means, it is an rvalue, and passing it to f will result in a compiler error, because the parameter of the function is of the type foo\& and non-constant references may only be bound to lvalues. This would work if the signature of the function f was changed to f(int const \&v). Next, let’s discuss the g function:
+因为x和rx都是左值，所以将它们传递给f没问题，因为这个函数接受一个左值引用。然而，foo\{42\}是一个临时对象，并且因为它不存在于调用f的上下文之外，所以它是一个右值，将它传递给f将导致编译器错误，因为函数的形参是foo\&类型的，非常量引用只能绑定到左值。若函数f的签名更改为f(int const \&v)，就没问题了。接下来，讨论g函数:
 
 \begin{lstlisting}[style=styleCXX]
 g(x); // g(foo&)
@@ -64,7 +64,7 @@ g(rx); // g(foo&)
 g(foo{ 42 }); // g(foo&&)
 \end{lstlisting}
 
-In the preceding snippet, calling g with either x or rx will resolve to the first overload, which takes an lvalue reference. However, calling it with foo\{42\}, which is a temporary object, therefore an rvalue, will resolve to the second overload, which takes an rvalue reference. Let’s see what happens when we want to make the same calls to the h function:
+前面的代码段中，使用x或rx调用g将解析为第一个重载，该重载接受左值引用。但使用foo\{42\}(foo\{42\}是一个临时对象，因此是一个右值)将解析为第二个重载，将接受一个右值引用。看当我们想对h函数进行相同的调用时会发生什么:
 
 \begin{lstlisting}[style=styleCXX]
 h(x); // error, cannot bind an lvalue to an rvalue ref
@@ -73,7 +73,7 @@ h(foo{ 42 }); // h(foo&&)
 h(std::move(x)); // h(foo&&)
 \end{lstlisting}
 
-This function takes an rvalue reference. The attempts to pass either x or rx to it result in compiler errors because lvalues cannot be bound to rvalue references. The expression foo\{42\}, being an rvalue, can be passed as an argument. We can also pass the lvalue x to the function h if we change its semantic from an lvalue to an rvalue. That is done with the help of std::move. This function does not really move anything; it only makes a sort of a cast from an lvalue to an rvalue.
+该函数可以接受一个右值引用，但将x或rx传递给它会导致编译器错误，因为左值不能绑定到右值引用。表达式foo\{42\}是一个右值，可以作为参数传递。若把其语义从左值改为右值(可在std::move的帮助下完成)，也可以把左值x传递给函数h。std::move并不真正移动任何东西，只是做了一种从左值到右值的转换而已。
 
 However, it is important to understand that passing rvalues to a function has two purposes: either the object is temporary and does not exist outside the call and the function can do anything with it, or the function is supposed to take ownership of the object that is received. This is the purpose of the move constructor and the move assignment operator and it’s rare that you will see other functions taking rvalue references. In our last example, within the function h, the parameter v is an lvalue but it is bound to an rvalue. The variable x existed outside the call to h but passing it to std::move transformed it into an rvalue. It still exists as an lvalue after the call to h returns but you should assume the function h did something with it and its state can be anything.
 
