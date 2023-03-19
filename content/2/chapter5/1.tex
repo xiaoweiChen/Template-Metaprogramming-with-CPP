@@ -1,6 +1,6 @@
-In a nutshell, type traits are small class templates that contain a constant value whose value represents the answer to a question we ask about a type. An example of such a question is: is this type a floating-point type? The technique for building type traits that provide such information about types relies on template specialization: we define a primary template as well as one or more specializations.
+简而言之，类型特征是包含常量值的小型类模板，该常量值表示所询问的关于类型问题的答案。此类问题的一个例子是:该类型是浮点类型吗?构建提供此类类型信息的类型特征的技术依赖于模板特化:定义一个主模板以及一个或多个特化。
 
-Let’s see how we can build a type trait that tells us, at compile-time, whether a type is a floating-point type:
+来看看如何构建一个类型特征，在编译时表明一个类型是否是浮点类型:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -28,17 +28,17 @@ struct is_floating_point<long double>
 };
 \end{lstlisting}
 
-There are two things to notice here:
+这里有两件事需要注意:
 
 \begin{itemize}
 \item
-We have defined a primary template as well as several full specializations, one for each type that is a floating-point type.
+我们已经定义了一个主模板以及几个完整的特化，每个类型对应一个浮点类型。
 
 \item
-The primary template has a static const Boolean member initialized with the false value; the full specializations set the value of this member to true.
+主模板有一个用false值初始化的静态const布尔成员，全特化将该成员的值设置为true。
 \end{itemize}
 
-There is nothing more to building a type trait than this. is\_floating\_point<T> is a type trait that tells us whether a type is a floating-point type or not. We can use it as follows:
+没有比构建一种类型特质更重要的了。is\_float \_point<T>是一种类型特征，它告诉我们一种类型是否是浮点类型。可以这样使用:
 
 \begin{lstlisting}[style=styleCXX]
 int main()
@@ -51,9 +51,9 @@ int main()
 }
 \end{lstlisting}
 
-This proves that we have built the type trait correctly. But it does not show a real use-case scenario. For this type trait to be really useful, we need to use it at compile-time to do something with the information it provides. 
+这证明我们构建了正确的类型特征，但这并不是一个真实的用例场景。为了使这个类型特征真正有用，需要在编译时使用它来处理信息。
 
-Let’s suppose we want to build a function that does something with a floating-point value. There are multiple floating-point types, such as float, double, and long double. For us to avoid writing multiple implementations, we would build this as a template function. However, that means we could actually pass other types as template arguments, so we need a way to prevent that. A simple solution is to use the static\_assert() statement we saw earlier and produce an error should the user supply a value that is not a floating-point value. This can look as follows:
+我们假设想要构建一个函数，需要对浮点值做一些事情。有多种浮点类型，例如：浮点数、双精度浮点数和长双精度浮点数。为了避免编写多个实现，将其构建为模板函数。然而，这可以将其他类型作为模板参数传递，因此需要一种方法来避免这种情况。一个简单的解决方案是使用前面看到的static\_assert()，若用户提供的值不是浮点值，就会产生错误:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -71,9 +71,9 @@ int main()
 }
 \end{lstlisting}
 
-This is a really simple example but it demonstrates the use of type traits to do conditional compilation. There are other approaches than using static\_assert() and we will explore them throughout this chapter. For the time being, let’s look at a second example.
+这是一个非常简单的示例，演示了使用类型特征进行条件编译。除了使用static\_assert()，还有其他方法，我们将在本章中探索它们。现在，来看看第二个例子。
 
-Suppose we have classes that define operations for writing to an output stream. This is basically a form of serialization. However, some support this with an overloaded operator<{}<, others with the help of a member function called write. The following listing shows two such classes:
+假设有定义写入输出流的操作的类，这基本上是序列化的一种形式。但有些方法使用重载操作符<{}<来支持这一点，其他方法则使用名为write的成员函数:
 
 \begin{lstlisting}[style=styleCXX]
 struct widget
@@ -105,7 +105,7 @@ gadget const& o)
 }
 \end{lstlisting}
 
-In this example, the widget class contains a member function, write. However, for the gadget class, the stream operator, <{}<, is overloaded for the same purpose. We can write the following code using these classes:
+本例中，widget类包含一个成员函数write。但对于gadget类，流操作符<{}<出于同样的目的进行重载。所以可以使用这些类编写以下代码:
 
 \begin{lstlisting}[style=styleCXX]
 widget w{ 1, "one" };
@@ -115,14 +115,14 @@ gadget g{ 2, "two" };
 std::cout << g;
 \end{lstlisting}
 
-However, our goal would be to define a function template that enables us to treat them the same way. In other words, instead of using either write or the << operator, we should be able to write the following:
+然而，我们的目标是定义一个函数模板，并且能够以相同的方式对待它们。换句话说，不使用write或<{}<操作符:
 
 \begin{lstlisting}[style=styleCXX]
 serialize(std::cout, w);
 serialize(std::cout, g);
 \end{lstlisting}
 
-This brings up some questions. First, how would such a function template look, and second, how can we know whether a type provides a write method or has the << operator overloaded? The answer to the second question is type traits. We can build a type trait to help us answer this latter question at compile-time. This is how such a type trait may look:
+这就带来了一些问题。首先，这样的函数模板是什么样的?其次，如何知道类型是否提供了写入方法或<{}<操作符重载?第二个问题的答案是类型特征。可以构建一个类型特征，来帮助我们在编译时回答后一个问题。所以需要这样的类型特征:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -138,16 +138,16 @@ struct uses_write<widget>
 };
 \end{lstlisting}
 
-This is very similar to the type trait we defined previously. uses\_write tells us whether a type defines the write member function. The primary template sets the data member called value to false, but the full specialization for the widget class sets it to true. In order to avoid the verbose syntax uses\_write<T>::value, we can also define a variable template, reducing the syntax to the form uses\_write\_v<T>. This variable template will look as follows:
+这与我们之前定义的类型特征非常相似。uses\_write说明一个类型是否定义了写成员函数。主模板将名为value的数据成员设置为false，但widget类的全特化将其设置为true。为了避免uses\_write<T>::value的冗长语法，我们还可以定义一个变量模板，将语法简化为uses\_write\_v<T>的形式。这个变量模板如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
 inline constexpr bool uses_write_v = uses_write<T>::value;
 \end{lstlisting}
 
-To make the exercise simple, we’ll assume that the types that don’t provide a write member function overload the output stream operator. In practice, this is would not be the case, but for the sake of simplicity, we will build on this assumption.
+为了使例子更简单，假设不提供写成员函数的类型会重载输出流操作符。实践中，情况并非如此，但简单起见，我们将基于此假设进行构建。
 
-The next step in defining the function template serialize that provides a uniform API for serializing all classes is to define more class templates. However, these would follow the same path – a primary template that provides one form of serialization and a full specialization that provides a different form. Here is the code for it:
+定义为序列化所有类提供统一API的函数模板serialize的下一步是定义更多的类模板。它们将遵循相同的路径——提供一种形式的序列化的主模板和提供另一种形式的全特化:
 
 \begin{lstlisting}[style=styleCXX]
 template <bool>
@@ -171,12 +171,9 @@ struct serializer<true>
 };
 \end{lstlisting}
 
-The serializer class template has a single template parameter, which is a non-type template parameter. It is also an anonymous template parameter because we don’t use it anywhere in the implementation. This class template contains a single member function.
-It is actually a member function template with a single type template parameter. This parameter defines the type of value we would serialize. The primary template uses the << operator to output the value to the provided stream. On the other hand, the full specialization of the serializer class template uses the member function write to do the same. Notice that we fully specialize the serializer class template and not the serialize member function template.
+serializer类模板有一个模板参数，是非类型模板参数，也是一个匿名模板参数(因为不会在实现的任何地方使用)。这个类模板包含一个成员函数，实际上是一个具有单一类型模板参数的成员函数模板，这个参数定义了要序列化的值的类型。主模板使用<{}<操作符将值输出到提供的流。另一方面，serializer类模板的全特化使用成员函数write来完成同样的工作。这里，我们全特化了序列化器类模板，而不是serialize成员函数模板。
 
-The only thing left now is to implement the desired free function serialize.
-Its implementation will be based on the serializer<T>::serialize function.
-Let’s see how:
+现在只剩下实现所需的自由函数serialize了，其实现将基于serializer<T>::serialize函数:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -186,9 +183,9 @@ void serialize(std::ostream& os, T const& value)
 }
 \end{lstlisting}
 
-The signature of this function template is the same as the one of the serialize member function from the serializer class template. The selection between the primary template and the full specialization is done with the help of the variable template uses\_write\_v, which provides a convenient way to access the value data member of the uses\_write type trait.
+函数模板的签名与serializer类模板中的serialize成员函数的签名相同，主模板和全特化之间的选择是在变量模板uses\_write\_v的协助下完成的，它提供了一种方便的方式来访问uses\_write类型特征的数据成员。
 
-In these examples, we have seen how to implement type traits and use the information they provide at compile-time to either impose restrictions on types or select between one implementation or the other. A similar purpose has another metaprogramming technique called SFINAE, which we will cover next.
+这些示例中，我们已经了解了如何实现类型特征，并使用它们在编译时提供的信息来对类型施加限制，或者在一个实现或另一个实现之间进行选择。类似的目的还有另一种称为SFINAE的元编程技术，我们将在下面的小节中介绍它。
 
 
 

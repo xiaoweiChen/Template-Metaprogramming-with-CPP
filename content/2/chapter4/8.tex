@@ -1,4 +1,4 @@
-When you define a class, you can restrict access to its member data and member functions with the protected and private access specifiers. If a member is private, it can only be accessed within the class. If a member is protected, it can be accessed from derived classes with public or protected access. However, a class can grant access to its private or protected members to other functions or classes with the help of the friend keyword. These functions or classes, to which special access has been granted, are called friends. Let’s take a look at a simple example:
+定义类时，可以使用protected和private访问说明符限制对其成员数据和成员函数的访问。若成员是private，则只能在类中访问它。若成员是protected，则可以从具有public访问权限或protected访问权限的派生类访问。但类可以通过friend关键字将其private成员或protected成员的访问权授予其他函数或类。这些授予特殊访问权限的函数或类称为友元函数或友元类。先来看一个简单的例子:
 
 \begin{lstlisting}[style=styleCXX]
 struct wrapper
@@ -17,9 +17,9 @@ wrapper w{ 42 };
 print(w);
 \end{lstlisting}
 
-The wrapper class has a private data member called value. There is a free function called print that takes an argument of the type wrapper and prints the wrapped value to the console. However, in order to be able to access it, the function is declared a friend of the wrapper class.
+wrapper类有一个名为value的private数据成员。有一个名为print的独立函数，接受类型wrapper的参数，并将包装的值输出到控制台。但，为了能够访问它，该函数声明为wrapper类的友元。
 
-We will not focus on the way friendship works for non-templates. You should be familiar with this feature to proceed to discuss it in the context of templates. When it comes to templates, things get a bit complicated. We will look into this with the help of several examples. Let’s start with the following:
+我们将不关注友谊对非模板的作用。读者需要熟悉该特性，我们才能继续在模板上下文中对其进行讨论。当涉及到模板时，事情变得有点复杂。我们将通过几个例子来研究这个问题:
 
 \begin{lstlisting}[style=styleCXX]
 struct wrapper
@@ -53,9 +53,9 @@ printer<int>()(w);
 printer<double>()(w);
 \end{lstlisting}
 
-The print function is now a function template. It has a type template parameter, but that’s not really used anywhere. That may look a bit odd, but it’s a valid code, and we need to invoke it by specifying the template argument. However, it helps us make a point: any template instantiation of print, regardless of the template argument, can access the private members of the wrapper class. Notice the syntax used to declare it as a friend of the wrapper class: it uses the template syntax. The same applies to the class template printer. It’s declared as a friend of the wrapper class and any template instantiation, regardless of the template argument, can access its private parts.
+print函数现在是一个函数模板，有一个类型模板参数，但实际上并没有使用。这看起来可能有点奇怪，但这是一个有效的代码，需要通过指定模板参数来使用。但它指出，不管模板参数如何，print的模板实例化都可以访问wrapper类的私有成员。注意用于将其声明为wrapper类的友元的语法:使用模板语法。这同样适用于类模板printer，可声明为wrapper类的友元，任何模板实例化，无论模板参数如何，都可以访问其私有部分。
 
-What if we wanted to restrict access to only some instances of these templates? Such as only the specializations for the int type? Then, we can declare these specializations as friends, as shown here:
+若想限制对这些模板的某些实例的访问呢?比如只有int类型的特化?然后，可以将这些特殊化声明为友元:
 
 \begin{lstlisting}[style=styleCXX]
 struct wrapper;
@@ -94,8 +94,8 @@ struct printer
 template <>
 struct printer<int>
 {
-void operator()(wrapper const& w)
-{ std::cout << w.value << '\n'; }
+	void operator()(wrapper const& w)
+	{ std::cout << w.value << '\n'; }
 };
 
 wrapper w{ 43 };
@@ -105,9 +105,9 @@ printer<int>()(w);
 printer<double>()(w);
 \end{lstlisting}
 
-In this snippet, the wrapper class is the same as previously. For both the print function template and the printer class template, we have a primary template and a full specialization for the int type. Only the int instantiations are declared friends of the wrapper class. Attempting to access the private parts of the wrapper class in the primary templates generates compiler errors.
+这个代码段中，wrapper类与前面相同。对于print函数模板和printer类模板，都有一个主模板和int类型的完整特化。只有int实例化声明为wrapper类的友元。所以其他的特化，想试图访问主模板中wrapper类的私有部分时，会产生编译器错误。
 
-In these examples, the class that granted friendship to its private parts was a non-template class. But class templates can also declare friends. Let’s see how it works in this case. We will start with the case of a class template and a non-template function:
+这些例子中，将友情授予私有部分的类是非模板类。但类模板也可以声明友元。先从类模板和非模板函数的情况开始:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -127,7 +127,7 @@ void print(wrapper<char> const& w)
 { std::cout << w.value << '\n'; /* error */ }
 \end{lstlisting}
 
-In this implementation, the wrapper class template declares the overload of print that takes a wrapper<int> as a parameter as being a friend. Therefore, in this overloaded function, we can access the private data member value, but not in any other overload. A similar case occurs when the friend function or class is a template and we want only one specialization to access the private parts. Let’s see the following snippet:
+此实现中，wrapper类模板声明以wrapper<int>作为参数的print重载作为友元。这个重载函数中，可以访问私有数据成员，但不能在任何其他重载中访问。当友元函数或类是模板，而只想用一个特化来访问私有部分时，也会发生类似的情况:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -167,41 +167,41 @@ struct printer<int>
 };
 \end{lstlisting}
 
-This implementation of the wrapper class template grants friendship to the int specializations of the print function template and printer class template. The attempt to access the private data member value in the primary templates (or any other specialization) would generate a compiler error.
+wrapper类模板的这种实现，使print函数模板和printer类模板的int特化成为友元。试图访问主模板(或任何其他特化)中的私有数据成员值时，编译器将报错。
 
-If the intention is that the wrapper class template gives friend access to any instantiation of the print function template or printer class template, then the syntax to do so is as follows:
+若是wrapper类模板允许友元访问print函数模板或printer类模板的实例化，代码可以这样写:
 
 \begin{lstlisting}[style=styleCXX]
-	template <typename T>
-	struct printer;
+template <typename T>
+struct printer;
+
+template <typename T>
+struct wrapper
+{
+	wrapper(T const v) :value(v) {}
+private:
+	T value;
 	
-	template <typename T>
-	struct wrapper
-	{
-		wrapper(T const v) :value(v) {}
-		private:
-		T value;
-		
-		template <typename U>
-		friend void print(wrapper<U> const&);
-		
-		template <typename U>
-		friend struct printer;
-	};
+	template <typename U>
+	friend void print(wrapper<U> const&);
 	
-	template <typename T>
-	void print(wrapper<T> const& w)
+	template <typename U>
+	friend struct printer;
+};
+
+template <typename T>
+void print(wrapper<T> const& w)
+{ std::cout << w.value << '\n'; }
+
+template <typename T>
+struct printer
+{
+	void operator()(wrapper<T> const& w)
 	{ std::cout << w.value << '\n'; }
-	
-	template <typename T>
-	struct printer
-	{
-		void operator()(wrapper<T> const& w)
-		{ std::cout << w.value << '\n'; }
-	};
+};
 \end{lstlisting}
 
-Notice that in declaring the friends, the syntax is template <typename U> and not template <typename T>. The name of the template parameter, U, can be anything except for T. That would shadow the name of the template parameter of the wrapper class template and that is an error. Keep in mind though that with this syntax, any specialization of print or printer has access to the private members of any specialization of the wrapper class template. If you want that only the specializations of the friends that meet the template argument of the wrapper class have access to its private parts, then you must use the following syntax:
+注意声明友元时，语法是template<typename U>，而不是template<typename T>。模板参数的名称U可以是除T名称之外的任何名称，这将掩盖wrapper类模板的模板参数名称，这是一个错误。请记住，使用这种语法，print或printer的特化都可以访问wrapper类模板特化的私有成员。若希望只有满足包装器类template参数的友元特化才可以访问私有部分，那么必须使用以下语法:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -216,9 +216,9 @@ private:
 };
 \end{lstlisting}
 
-This is similar to what we have seen previously when access was granted only to the int specializations, except that now it’s for any specialization that matches T.
+这类似于之前只授予int特化访问权限时看到的情况，只不过现在适用于匹配T的特化。
 
-Apart from these cases, it’s also possible for a class template to grant friendship to a type template parameter. This is demonstrated with the following example:
+除了这些情况外，类模板还可以将友元访问权授予类型模板参数:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -242,8 +242,8 @@ struct executor
 };
 \end{lstlisting}
 
-The connection class template has a private data member called ConnectionString. The type template parameter T is a friend of the class. The executor class uses the instantiation connection<executor>, which means the executor type is the template argument and benefits from the friendship with the connection class so that it can access the private data member ConnectionString.
+connection类模板有一个名为ConnectionString的私有数据成员，类型模板参数T是类的友元。executor类使用实例化connection<executor>，所以executor类型是模板参数，并受益于与connection类的友元权限，因此它可以访问私有数据成员ConnectionString。
  
-As can be seen from all these examples, friendship with templates is slightly different than friendship among non-template entities. Remember that friends have access to all the non-public members of a class. Therefore, friendship should be granted with care. On the other hand, if you need to grant access to some private members but not all, this is possible with the help of the client-attorney pattern. This pattern allows you to control the granularity of access to the private parts of a class. You can learn more about this pattern at this URL: \url{https://en.wikibooks.org/wiki/ More_C%2B%2B_Idioms/Friendship_and_the_Attorney-Client}.
+从所有这些示例中可以看出，与模板之间的友谊与非模板实体之间的友谊略有不同。请记住，朋友可以访问类的所有非公共成员。因此，交朋友需要小心。另一方面，若需要将访问权限授予一些私有成员，而不是全部成员，则可以借助“客户-律师”模式。此模式允许控制对类的私有部分的访问粒度。可以在这里了解关于这个模式的信息: \url{https://en.wikibooks.org/wiki/ More_C%2B%2B_Idioms/Friendship_and_the_Attorney-Client}。
 
 

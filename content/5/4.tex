@@ -1,63 +1,63 @@
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Question 1}
+\textbf{习题 1}
 
-When is name lookup performed?
-
-\hspace*{\fill} \\ %插入空行
-\noindent
-\textbf{Answer}
-
-Name lookup is performed at the point of template instantiation for dependent names (those that depend on the type or value of a template parameter) and at the point of template definition for non-dependent names (those that don’t depend on template parameters).
-
+什么时候执行名称查找?
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Question 2}
+\textbf{参考答案}
 
-What are deduction guides?
+模板实例化依赖名称(依赖模板形参的类型或值)时执行名称查找，在模板定义非依赖名称(不依赖模板形参的名称)时执行名称查找。
 
-\hspace*{\fill} \\ %插入空行
-\noindent
-\textbf{Answer}
-
-Deduction guides are a mechanism that tells the compiler how to perform class template argument deduction. Deduction guides are fictional function templates representing constructor signatures of a fictional class type. If overload resolution fails on the constructed set of fictional function templates, then the program is ill-formed and an error is generated. Otherwise, the return type of the selected function template specialization becomes the deduced class template specialization.
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Question 3}
+\textbf{习题 2}
 
-What are forwarding references?
-
-\hspace*{\fill} \\ %插入空行
-\noindent
-\textbf{Answer}
-
-A forward reference (also known as universal reference) is a reference in a template that behaves as an rvalue reference if an rvalue was passed as an argument or an lvalue reference if an lvalue was passed as an argument. A forwarding reference must have the T\&\& form such as in template <typename T> void f(T\&\&). Forms such as T const \&\& or std::vector<T>\&\& do not represent forwarding references but normal rvalue references.
+什么是推导指南?
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Question 4}
+\textbf{参考答案}
 
-What does decltype do?
-
-\hspace*{\fill} \\ %插入空行
-\noindent
-\textbf{Answer}
-
-The decltype specifier is a type specifier. It returns the type of an expression. It is usually used in templates together with the auto specifier in order to declare the return type of a function template that depends on its template arguments, or the return type of a function that wraps another function and returns the result from executing the wrapped function.
+推导指南是一种告诉编译器如何执行类模板参数推导的机制。推导指南是表示虚构类类型的构造函数签名的虚构函数模板。若重载解析在构造的虚拟函数模板集上失败，则程序是格式错误的，并生成一个错误。否则，所选函数模板特化的返回类型，将成为推导类模板的特化。
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Question 5}
+\textbf{习题 3}
 
-What does std::declval do?
+什么是转发引用?
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Answer}
+\textbf{参考答案}
 
-std::declval is a utility function template from the <utility> header that adds an rvalue reference to its type template argument. It can only be used in unevaluated contexts (compile-time-only contexts that are not evaluated during runtime), and its purpose is to help with dependent type evaluation for types that do not have a default constructor or one that cannot be accessed because it’s private or protected.
+转发引用(也称为通用引用)是模板中的一种引用，若右值作为参数传递，则表现为右值引用;若左值作为参数传递，则表现为左值引用。转发引用必须具有T\&\&形式，例如template <typename T> void f(T\&\&)。像T const \&\&或std::vector<T>\&\&这样的格式并不表示转发引用，而是正常的右值引用。
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{习题 4}
+
+decltype是用来做什么的?
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{参考答案}
+
+decltype说明符是一个类型说明符，返回表达式的类型，通常在模板中与auto说明符一起使用，以声明依赖于模板参数的函数模板的返回类型，或者包装另一个函数并返回执行包装函数中结果函数的返回类型。
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{习题 5}
+
+std::declval是用来做什么的?
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{参考答案}
+
+std::declval是<utility>头文件中的工具函数模板，可将右值引用添加到其类型模板参数中。期只能用于未求值的上下文中(仅编译时上下文中，在运行时不求值)，目的是帮助对没有默认构造函数，或由于私有或受保护而不能访问的类型进行依赖类型求值。
 
 
 

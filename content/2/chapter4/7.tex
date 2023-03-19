@@ -1,14 +1,13 @@
-The std::declval is a utility type operation function, available in the <utility> header. It’s in the same category as functions such as std::move and std::forward that we have already seen. What it does is very simple: it adds an rvalue reference to its type template argument. The declaration of this function looks as follows:
+在<utility>中文件中，std::declval是一个工具类型的操作函数。与已经了解的std::move和std::forward等函数属于同一类别，其功能非常简单:将右值引用添加到类型模板参数中。这个函数的声明如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template<class T>
 typename std::add_rvalue_reference<T>::type declval() noexcept;
 \end{lstlisting}
 
-This function has no definition and therefore it cannot be called directly. It can only be used in unevaluated contexts – decltype, sizeof, typeid, and noexcept. These are compile-time-only contexts that are not evaluated during runtime. The purpose of std::declval is to aid with dependent type evaluation for types that do not have a default constructor or have one but it cannot be accessed because it’s private or protected.
+这个函数没有定义，因此不能直接调用，只能在未求值的上下文中使用——decltype、sizeof、typeid和noexcept。这些是仅在编译时执行的上下文，在运行时不会进行计算。std::declval的目的是帮助对没有默认构造函数或有默认构造函数，但由于是private或protected而不能访问的类型，进行依赖类型求值。
 
-To understand how this works, let’s consider a class template that does the composition of two values of different types, and we want to create a type alias for the result of applying the plus operator to two values of these types. How could such a type alias be defined?
-Let’s start with the following form:
+为了理解这是如何工作的，来看一个类模板，它将两个不同类型的值组合在一起，我们希望为这两个类型的值使用加号操作符的结果，创建一个类型别名。如何定义这样的类型别名?看看下面的代码:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T, typename U>
@@ -18,7 +17,7 @@ struct composition
 };
 \end{lstlisting}
 
-We can use the decltype specifier but we need to provide an expression. We cannot say decltype(T + U) because these are types, not values. We could invoke the default constructor and, therefore, use the expression decltype(T\{\} + U\{\}). This can work fine for built-in types such as int and double, as shown in the following snippet:
+可以使用decltype说明符，但需要提供一个表达式。不能是decltype(T + U)，因为它们是类型，而不是值。可以调用默认构造函数，因此可以使用表达式decltype(T\{\} + U\{\})。这可以很好地用于内置类型，如int和double，如下面的代码段所示:
 
 \begin{lstlisting}[style=styleCXX]
 static_assert(
@@ -26,7 +25,7 @@ static_assert(
 		composition<int, double>::result_type>);
 \end{lstlisting}
 
-It can also work for types that have an (accessible) default constructor. But it cannot work for types that don’t have a default constructor. The following type wrapper is such an example:
+也适用于具有(可访问的)默认构造函数的类型，但不能用于没有默认构造函数的类型。以下的wrapper就是这样一个例子:
 
 \begin{lstlisting}[style=styleCXX]
 struct wrapper
@@ -51,7 +50,7 @@ static_assert(
 		composition<int,wrapper>::result_type>);
 \end{lstlisting}
 
-The solution here is to use std::declval(). The implementation of the class template composition would change as follows:
+这里的解决方案是使用std::declval()。类模板组合的实现将进行如下修改:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T, typename U>
@@ -62,9 +61,9 @@ struct composition
 };
 \end{lstlisting}
 
-With this change, both the static asserts previously shown compile without any error. This function avoids the need to use particular values to determine the type of an expression. It produces a value of a type T without involving a default constructor. The reason it returns an rvalue reference is to enable us to work with types that cannot be returned from a function, such as arrays and abstract types.
+修改之后，前面显示的两个静态断言都可以编译，没有任何错误。这个函数避免需要使用特定的值来确定表达式的类型。它生成一个类型为T的值，而不涉及默认构造函数。返回右值引用的原因是，能够处理函数不能返回的类型，例如：数组和抽象类型。
 
-The definition of the wrapper class earlier contained two friend operators. Friendship, when templates are involved, has some particularities. We will discuss this in the next section.
+前面wrapper类的定义包含两个友元操作符。当涉及到模板时，“友情”有一定的特殊性。我们将在下一节讨论这个问题。
 
 
 

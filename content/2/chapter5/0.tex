@@ -1,30 +1,29 @@
-Type traits are an important metaprogramming technique that enables us to inspect properties of types or to perform transformations of types at compile-time. Type traits are themselves templates and you can see them as meta-types. Knowing information such as the nature of a type, its supported operations, and its various properties is key for performing conditional compilation of templated code. It is also very useful when writing a library of templates.
+类型特征是一种重要的元编程技术，它使我们能够在编译时检查类型的属性或执行类型的转换。类型特征本身就是模板，可以把它们看作元类型。了解类型的性质、受支持的操作及其各种属性等信息是对模板代码进行条件编译的关键。在编写模板库时，也非常有用。
 
-In this chapter, you will learn the following:
+本章中，你将了解到以下内容:
 
 \begin{itemize}
 \item
-Understanding and defining type traits
+定义类型特征
 
 \item
-Understanding SFINAE and its purpose
+了解SFINAE
 
 \item
-Enabling SFINAE with the enable\_if type trait
+使用enable\_if类型特性启用SFINAE
 
 \item
-Using constexpr if
+constexpr if
 
 \item
-Exploring the standard type traits
+探索标准的类型特征
 
 \item
-Seeing real-world examples of using type traits
+实际使用中使用类型特征的例子
 \end{itemize}
 
-By the end of the chapter, you will have a good understanding of what type traits are, how they are useful, and what type traits are available in the C++ standard library.
+本章结束时，读者们将很好地理解类型特征是什么，如何有用的，以及C++标准库中有哪些类型特征可用。
 
-We will start the chapter by looking at what type traits are and how they help us.
 
 
 

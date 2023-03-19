@@ -75,9 +75,9 @@ h(std::move(x)); // h(foo&&)
 
 该函数可以接受一个右值引用，但将x或rx传递给它会导致编译器错误，因为左值不能绑定到右值引用。表达式foo\{42\}是一个右值，可以作为参数传递。若把其语义从左值改为右值(可在std::move的帮助下完成)，也可以把左值x传递给函数h。std::move并不真正移动任何东西，只是做了一种从左值到右值的转换而已。
 
-However, it is important to understand that passing rvalues to a function has two purposes: either the object is temporary and does not exist outside the call and the function can do anything with it, or the function is supposed to take ownership of the object that is received. This is the purpose of the move constructor and the move assignment operator and it’s rare that you will see other functions taking rvalue references. In our last example, within the function h, the parameter v is an lvalue but it is bound to an rvalue. The variable x existed outside the call to h but passing it to std::move transformed it into an rvalue. It still exists as an lvalue after the call to h returns but you should assume the function h did something with it and its state can be anything.
+理解将右值传递给函数有两个目的:要么对象是临时的，函数可以对它做任何事情，要么函数应该拥有接收对象。这就是移动构造函数和移动赋值操作符的目的，其实很少会看到其他函数接受右值引用。在最后一个例子的函数h中，参数v是一个左值，但绑定为右值。变量x存在于对h之外，将其传递给std::move可转换为右值。在调用h返回，其仍然作为左值存在，但需要假设函数h对它做了一些事情，它的并状态不确定。
 
-One purpose of rvalue references is, therefore, to enable move semantics. But it has yet another one and that is to enable perfect forwarding. To understand this, let’s consider the following modified scenario of the previous functions g and h:
+因此，右值引用的目的是启用移动语义。它还有另一个功能，那就是实现完美转发。为了理解这一点，来看看以下对前面函数g和h的修改:
 
 \begin{lstlisting}[style=styleCXX]
 void g(foo& v) { std::cout << "g(foo&)\n"; }
@@ -87,7 +87,7 @@ void h(foo& v) { g(v); }
 void h(foo&& v) { g(v); }
 \end{lstlisting}
 
-In this snippet, the implementation of g is identical to the one seen earlier. However, h also has two overloads, one that takes an lvalue reference and calls g and another one that takes an rvalue reference and also calls g. In other words, the function h is just forwarding the argument to g. Now, let’s consider the following calls:
+这个代码片段中，g的实现与前面看到的相同。h也有两个重载，一个接受左值引用并调用g，另一个接受右值引用并调用g。换句话说，函数h只是将参数转发给g。现在，看看以下调用方式:
 
 \begin{lstlisting}[style=styleCXX]
 foo x{ 42 };
@@ -95,28 +95,28 @@ h(x); // g(foo&)
 h(foo{ 42 }); // g(foo&)
 \end{lstlisting}
 
-From this, you would expect that the call h(x) will result in a call to the g overload taking an lvalue reference and the call to h(foo\{42\}) will result in a call to the g overload taking an rvalue reference. However, in fact, both of them will call the first overload of g, therefore printing g(foo\&) to the console. The explanation is actually simple once you understand how references work: in the context h(foo\&\& v), the parameter v is actually an lvalue (it has a name and you can take its address) so calling g with it invokes the overload that takes an lvalue reference. To make it work as intended, we need to change the implementation of the h functions as follows:
+由此，可以期望调用h(x)将使g的重载使用左值引用，而对h(foo\{42\})的调用将使g的重载的使用右值引用。但事实上，它们都会调用g的第一个重载，因此将g(foo\&)打印到控制台。当理解了引用的工作原理，解释就很简单了:在上下文中h(foo\&\& v)，参数v实际上是一个左值(有名字，可以取它的地址)，所以用它调用g会调用接受左值引用的重载。为了使其如预期那样工作，需要改变h函数的实现:
 
 \begin{lstlisting}[style=styleCXX]
 void h(foo& v) { g(std::forward<foo&>(v)); }
 void h(foo&& v) { g(std::forward<foo&&>(v)); }
 \end{lstlisting}
 
-The std::forward is a function that enables the correct forwarding of values. What the function does is as follows:
+std::forward是一个允许正确转发值的函数。函数的作用为:
 
 \begin{itemize}
 \item
-If the argument is an lvalue reference, then the function behaves just as a call to std::move (changing the semantics from an lvalue to an rvalue).
+若参数是一个左值引用，那么函数的行为就像调用std::move(将语义从左值更改为右值)。
 
 \item
-If the argument is an rvalue reference, then it does nothing.
+若实参是右值引用，那么它什么也不做。
 \end{itemize}
 
-Everything that we discussed so far is unrelated to templates, which are the subject of this book. However, function templates can also be used to take lvalue and rvalue references and it’s important to understand first how these work in non-templates scenarios. This is because, in templates, rvalue references work slightly differently, and sometimes they are rvalue references, but other times they are actually lvalue references.
+目前为止，我们讨论的所有内容都与模板无关，而模板才是本书的主题，而函数模板也可以用于接收左值和右值引用，了解在非模板场景中的工作原理非常重要。在模板中，右值引用的工作方式略有不同，有时右值引用，但实际上有时是左值引用。
 
-References that exhibit this behavior are called forwarding references. However, they are often referred to as universal references. This was a term coined by Scott Meyers shortly after C++11 when there was no term in the standard for this type of reference. In order to address this shortcoming, and because it didn’t feel the term universal references properly described their semantics, the C++ standard committee called these forwarding references in C++14. Yet, both terms are equally present in literature. For the sake of being true to the standard terminology, we’ll call them forwarding references in this book.
+表现出这种行为的引用称为转发引用，通常也称为通用引用。在C++11之后不久由Scott Meyers创造的一个术语，当时标准中还没有这种类型的引用术语。因为通用引用这个术语不能很好地描述它们的语义，为了解决这个问题，C++标准委员会在C++14中将这些引用称为转发引用。为了忠实于标准术语，我们在本书中称其为转发引用。
 
-To begin the discussion on forwarding references, let’s consider the following overloaded function templates and class templates:
+开始讨论转发引用之前，我们考虑以下重载函数模板和类模板:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -139,7 +139,7 @@ struct S
 };
 \end{lstlisting}
 
-We can make calls to these functions as follows:
+可以像下面这样调用这些函数:
 
 \begin{lstlisting}[style=styleCXX]
 int x = 42;
@@ -159,27 +159,27 @@ s.f(x); // [7] error
 s.f(42); // [8] S.f(T&&)
 \end{lstlisting}
 
-From this snippet, we can notice that:
+从这个代码段中，可以注意到:
 
 \begin{itemize}
 \item
-Calling f with an lvalue or rvalue at [1] and [2] resolves to the first overload, f(T\&\&).
+{}[1]和[2]处用左值或右值使用f时，将解析为第一个重载：f(T\&\&)。
 
 \item
-Calling f with a constant lvalue at [3] also resolves to the first overload, but calling f with a constant rvalue at [4] resolves to the second overload, f(T const\&\&), because it’s a better match.
+{}[3]处调用左值为常数的f也会解析为第一个重载，但[4]处调用右值为常数的f会解析为第二个重载f(T const\&\&)，因为这个匹配度更高。
 
 \item
-Calling f with an lvalue std::vector object at [5] resolves to the first overload, but calling f with an rvalue std::vector object at [6] resolves to the third overload, f(vector<T>\&\&), because it’s a better match.
+{}[5]处用左值std::vector对象调用f会解析为第一个重载，但[6]处用右值std::vector对象调用f会解析为第三个重载，f(vector<T>\&\&)。
 
 \item
-Calling S::f with an lvalue at [7] is an error because lvalues cannot be bound to rvalue references, but calling it with an rvalue at [8] is correct.
+{}[7]处用左值调用S::f是错误的，因为左值不能绑定到右值引用，但在[8]处用右值调用是正确的。
 \end{itemize}
 
-All the f function overloads in this example take an rvalue reference. However, the \&\& in the first overload does not necessarily mean an rvalue reference. It means an rvalue reference if an rvalue was passed or an lvalue reference if an lvalue was passed. Such a reference is called a forwarding reference. However, forwarding references are only present in the context of an rvalue reference to a template parameter. It has to have the form T\&\& and nothing else. T const\&\& or std::vector<T>\&\& are not forwarding references, but normal rvalue references. Similarly, the T\&\& in the f function member of the class template S is also an rvalue reference because f is not a template but a non-template member function of a class template, so this rule for forwarding references does not apply.
+本例中的所有f函数重载都采用右值引用。第一次重载中的\&\&并不一定意味着右值引用。若传递的是右值，则表示右值引用;若传递的是左值，则表示左值引用。这样的引用称为转发引用，但转发引用只出现在模板形参右值引用的上下文中，必须是T\&\&形式。T const\&\&或std::vector<T>\&\&不是转发引用，而是正常的右值引用。类似地，类模板S的f函数成员中的T\&\&也是右值引用，因为f不是模板，而是类模板的非模板成员函数，所以转发引用的规则不适用于这里。
 
-Forwarding references are a special case of function template argument deduction, a topic that we previously discussed in this chapter. Their purpose is to enable perfect forwarding with templates and they are made possible by a new C++11 feature called reference collapsing. Let’s look at this first, before showing how they solve the perfect forwarding problem.
+转发引用是函数模板参数推断的一种特殊情况，这是之前在本章中讨论过的主题。其目的是实现模板的完美转发，这是C++11的新特性，引用折叠实现的。在展示是如何解决完美转发问题之前，让我们先看看个例子。
 
-Prior to C++11, it was not possible to take a reference to a reference. However, that is now possible in C++11 for typedefs and templates. Here is an example:
+C++11之前，不可能将一个引用引用于另一个引用。现在C++11中，对于 typedef和模板来说，这是可能的:
 
 \begin{lstlisting}[style=styleCXX]
 using lrefint = int&;
@@ -191,13 +191,13 @@ rrefint& r3 = x; // type of r3 is int&
 rrefint&& r4 = 1; // type of r4 is int&&
 \end{lstlisting}
 
-The rule is pretty simple: an rvalue reference to an rvalue reference collapses to an rvalue reference; all other combinations collapse to an lvalue reference. This can be put in a tabular form as follows:
+规则非常简单:对右值引用的右值引用折叠为右值引用，其他组合都折算为左值引用。可以用表格形式表示如下:
 
 \begin{table}[H]
 \centering
 	\begin{tabular}{|l|l|l|}
 		\hline
-		\textbf{Type} & \textbf{Type of reference} & \textbf{Type of variable} \\ \hline
+		\textbf{类型} & \textbf{引用类型} & \textbf{变量类型} \\ \hline
 		T\&           & T\&                        & T\&                       \\ \hline
 		T\&           & T\&\&                      & T\&                       \\ \hline
 		T\&\&         & T\&                        & T\&                       \\ \hline
@@ -206,16 +206,16 @@ The rule is pretty simple: an rvalue reference to an rvalue reference collapses 
 \end{table}
 
 \begin{center}
-Table 4.2
+表 4.2
 \end{center}
 
-Any other combinations, shown in the following table, do not involve reference collapsing rules. These only apply when both types are references:
+下表所示的其他组合都不涉及引用折叠规则。只有当这两种类型都是引用时才适用:
 
 \begin{table}[H]
 \centering
 	\begin{tabular}{|l|l|l|}
 		\hline
-		\textbf{Type} & \textbf{Type of reference} & \textbf{Type of variable} \\ \hline
+		\textbf{类型} & \textbf{引用类型} & \textbf{变量类型} \\ \hline
 		T             & T                          & T                         \\ \hline
 		T             & T\&                        & T\&                       \\ \hline
 		T             & T\&\&                      & T\&\&                     \\ \hline
@@ -225,10 +225,10 @@ Any other combinations, shown in the following table, do not involve reference c
 \end{table}
 
 \begin{center}
-	Table 4.3
+表 4.3
 \end{center}
 
-Forwarding references work not only for templates but also with auto deduction rules. When auto\&\& is found, it means a forwarding reference. The same does not apply for anything else, such as cv-qualified forms like auto const\&\&. Here are some examples:
+转发引用不仅适用于模板，也适用于自动推导规则。当使用auto\&\&时，其意味着转发引用。这同样不适用于其他任何方式，比如auto const\&\&这样的cv限定方式。下面是一些例子:
 
 \begin{lstlisting}[style=styleCXX]
 int x = 42;
@@ -240,9 +240,9 @@ std::vector<int> v{ 42 };
 auto&& rv = v[0]; // [4] int&
 \end{lstlisting}
 
-In the first two examples, rx and rc are both forwarding references and are bound to an lvalue and an rvalue respectively. However, rcx is an rvalue reference because auto const\&\& does not denote a forwarding reference. Therefore, trying to bind it to an lvalue is an error. Similarly, rv is a forwarding reference and is bound to an lvalue.
+前两个例子中，rx和rc都是转发引用，分别绑定到左值和右值。然而，rcx是一个右值引用，因为auto const\&\&并不表示转发引用。因此，尝试将其绑定为左值是错误的。类似地，rv是一个转发引用，并绑定为左值。
 
-As previously mentioned, the purpose of forwarding references is to enable perfect forwarding. We have seen the concept of perfect forwarding earlier but in a non-template context. It works, however, in a similar manner with templates. To demonstrate this, let’s redefine the function h as a template function. It would look as follows:
+如前所述，转发引用的目的是实现完美转发。我们已经在前面的非模板上下文中看到了完美转发的概念，其工作方式与模板类似。为了演示这一点，我们将函数h重新定义为模板函数:
 
 \begin{lstlisting}[style=styleCXX]
 void g(foo& v) { std::cout << "g(foo&)\n"; }
@@ -256,9 +256,9 @@ h(x); // g(foo&)
 h(foo{ 42 }); // g(foo&)
 \end{lstlisting}
 
-The implementation of the g overloads is the same, but the h overloads are now function templates. However, calling h with an lvalue and an rvalue actually resolves to the same call to g, the first overload taking an lvalue. This is because in the context of the function h, v is an lvalue so passing it to g will call the overload taking an lvalue.
+g重载的实现是相同的，但h重载现在是函数模板。用一个左值和一个右值调用h实际上解析为对g的相同调用，第一个重载取一个左值。因为在函数h的上下文中，所以v是一个左值，因此将它传递给g将调用取左值的重载。
 
-The solution to this problem is the same as what we already saw before discussing templates. However, there is a difference: we no longer need two overloads, but a single one taking a forwarding reference:
+这个问题的解决方案与讨论模板之前已经看到的解决方案相同。然而，有一个区别:不再需要两个重载，而是需要一个转发引用:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -268,7 +268,7 @@ void h(T&& v)
 }
 \end{lstlisting}
 
-This implementation is using std::forward to pass lvalues as lvalues and rvalues as rvalues. It works similarly for variadic function templates. The following is a conceptual implementation of the std::make\_unique function that creates a std::unique\_ptr object:
+这个实现使用std::forward将左值作为左值传递，将右值作为右值传递。同样适用于可变函数模板。下面是std::make\_unique函数的概念实现，其创建了一个std::unique\_ptr对象:
 
 \begin{lstlisting}[style=styleCXX]
 	void g(foo& v) { std::cout << "g(foo&)\n"; }
@@ -282,9 +282,9 @@ This implementation is using std::forward to pass lvalues as lvalues and rvalues
 	h(foo{ 42 }); // g(foo&)
 \end{lstlisting}
 
-To summarize this section, remember that forwarding references (also known as universal references) are basically a special deduction rule for function template arguments. They work based on the rules of reference collapsing and their purpose is to enable perfect forwarding. That is passing forward to another function a reference by preserving its valueness semantics: rvalues should be passed as rvalues and lvalues as lvalues.
+总结本节，请记住转发引用(也称为通用引用)基本上是针对函数模板参数的特殊演绎规则。基于引用折叠规则工作，目的是实现完全转发。这是通过保留值语义将引用传递给另一个函数:右值应作为右值传递，左值应作为左值传递。
 
-The next topic that we will address in this chapter is the decltype specifier.
+本章中我们将讨论的下一个主题是decltype说明符。
 
 
 

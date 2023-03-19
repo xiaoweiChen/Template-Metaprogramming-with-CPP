@@ -1,22 +1,22 @@
-This specifier, introduced in C++11, returns the type of an expression. It is usually used in templates together with the auto specifier. Together, they can be used to declare the return type of a function template that depends on its template arguments, or the return type of a function that wraps another function and returns the result from executing the wrapped function.
+此说明符在C++11中引入，用于返回表达式的类型。通常在模板中与auto说明符一起使用。它们可以一起用于声明依赖于模板参数的函数模板的返回类型，或者包装另一个函数，并返回执行包装函数结果的返回类型。
 
-The decltype specifier is not restricted for use in template code. It can be used with different expressions, and it yields different results based on the expression. The rules are as follows:
+decltype说明符不限制在模板代码中使用。可以用于不同的表达式，并且根据表达式产生不同的结果。规则如下:
 
 \begin{enumerate}
 \item
-If the expression is an identifier or a class member access, then the result is the type of the entity that is named by the expression. If the entity does not exist, or it is a function that has an overload set (more than one function with the same name exists), then the compiler will generate an error.
+若表达式是标识符或类成员访问，则结果是由表达式命名的实体类型。若实体不存在，或者是一个具有重载集的函数(存在多个同名函数)，则编译器将生成一个错误。
 
 \item
-If the expression is a function call or an overloaded operator function, then the result is the return type of the function. If the overloaded operator is wrapped in parentheses, these are ignored.
+若表达式是函数调用或重载操作符函数，则结果为函数的返回类型。若重载的操作符括在括号中，则忽略这些操作符。
 
 \item
-If the expression is an lvalue, then the result type is an lvalue reference to the type of expression.
+若表达式是左值，则结果类型是对表达式类型的左值引用。
 
 \item
-If the expression is something else, then the result type is the type of the expression.
+若表达式为其他类型，则结果类型为表达式的类型。
 \end{enumerate}
 
-To understand these rules better, we’ll look at a set of examples. For these, we will consider the following functions and variables that we will use in decltype expressions:
+为了更好地理解这些规则，我们将看一组示例。考虑在decltype表达式中使用的以下函数和变量:
 
 \begin{lstlisting}[style=styleCXX]
 int f() { return 42; }
@@ -40,7 +40,7 @@ wrapper w1{ 1 };
 wrapper* w2 = new wrapper{ 2 };
 \end{lstlisting}
 
-The following listing shows multiple uses of the decltype specifier. The rule that applies in each case, as well as the deduced type, is specified on each line in a comment:
+下面的清单显示了decltype说明符的多种用法。适用于每种情况的规则，以及推导出的类型，都在注释中的每行指定:
 
 \begin{lstlisting}[style=styleCXX]
 decltype(a) e1; // R1, int
@@ -66,23 +66,23 @@ decltype(*p) e20 = c; // R3, char&
 decltype(p[0]) e21 = c; // R3, char&
 \end{lstlisting}
 
-We will not elaborate on all these declarations. Most of these are relatively easy to follow based on the specified rules. A few notes, however, are worth considering for clarifying some of the deduced types:
+我们将不详细说明所有这些声明。根据指定的规则，其中大多数都相对容易遵循。不过，为了说明一些推导出的类型，有几点注意事项值得考虑:
 
 \begin{itemize}
 \item
-decltype(f) only names a function with an overloaded set, so rule 1 applies. decltype(g) also names a function but it has an overloaded set. Therefore, rule 1 applies and the compiler generates an error.
+decltype(f)只使用重载集命名函数，因此适用规则1。decltype(g)也命名一个函数，但它有一个重载集。因此，应用规则1，编译器生成一个错误。
 
 \item
-decltype(f()) and decltype(g(1)) are both using function calls for the expression, so the second rule applies, and even if g has an overload set, the declaration is correct.
+decltype(f())和decltype(g(1))都对表达式使用函数调用，因此适用第二条规则，即使g有重载集，声明也是正确的。
 
 \item
-decltype(\&f) uses the address of the function f, so the fourth rule applies, yielding int(*)().
+decltype(\&f)使用函数f的地址，因此应用第四个规则，生成int(*)()。
 
 \item
-decltype(1+2) and decltype(a+1) use the overloaded operator + that returns an rvalue, so the fourth rule applies. The result is int. However, decltype(a = 1) uses the assignment operator that returns an lvalue, so the third rule applies, yielding the lvalue reference int\&.
+decltype(1+2)和decltype(a+1)使用重载加法操作符返回右值，因此适用第四个规则，结果是int。然而，decltype(a = 1)使用返回左值的赋值操作符，因此应用第三条规则，生成左值引用int\&。
 \end{itemize}
 
-The decltype specifier defines an unevaluated context. This means the expression used with the specifier is not evaluated since this specifier is only querying the properties of its operand. You can see this in the following snippet, where the assignment a=1 is used with the decltype specifier to declare the variable e, but after the declaration, the value of a is the one with which it was initialized:
+decltype说明符定义了一个未求值的上下文。所以与该说明符一起使用的表达式不会进行计算，因为该说明符只查询其操作数的属性。可以在下面的代码片段中看到这一点，其中赋值a=1与decltype说明符一起使用来声明变量e，但在声明之后，a是它初始化时的值:
 
 \begin{lstlisting}[style=styleCXX]
 int a = 42;
@@ -90,7 +90,7 @@ decltype(a = 1) e = a;
 std::cout << a << '\n'; // prints 42
 \end{lstlisting}
 
-There is an exception to this rule concerning template instantiation. When the expression used with the decltype specifier contains a template, the template is instantiated before the expression is evaluated at compile time:
+关于模板实例化的规则有一个例外。当与decltype说明符一起使用的表达式包含模板时，需要在编译时计算表达式之前实例化模板:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -105,22 +105,22 @@ int a = 42;
 decltype(wrapper<char>::data, a) e2; // int&
 \end{lstlisting}
 
-The type of e1 is double, and wrapper<double> is instantiated for this to be deduced. On the other hand, the type of e2 is int\& (as the variable a is an lvalue). However, wrapper<char> is instantiated here even if the type is only deduced from the variable a (due to the use of the comma operator).
+e1的类型是double，并且实例化了wrapper<double>来推导这个类型。另一方面，e2的类型是int\&(a是左值)。即使该类型仅从变量a推导出来(使用了逗号操作符)，wrapper<char>依旧会在这里进行实例化。
 
-The preceding rules mentioned are not the only ones used for determining the type. There are several more for data member access. These are as follows:
+上述规则并不是唯一用于确定类型的规则，还有几个用于数据成员访问的方法。具体如下:
 
 \begin{itemize}
 \item
-The const or volatile specifiers of the object used in the decltype expression do not contribute to the deduced type.
+decltype表达式中使用的对象的const或volatile说明符不构成推导的类型。
 
 \item
-Whether the object or pointer expression is an lvalue or an rvalue does not affect the deduced type.
+对象或指针表达式是左值还是右值并不影响推导的类型。
 
 \item
-If the data member access expression is parenthesized, such as decltype((expression)), then the previous two rules do not apply. The const or volatile qualifier of the object does affect the deduced type, including the valueness of the object.
+若数据成员访问表达式括号括起来，例如decltype((expression))，则前两条规则不适用。对象的const或volatile限定符确实会影响推导的类型，包括对象的值。
 \end{itemize}
 
-The first two rules from this list are demonstrated with the following snippet:
+下面的代码片段演示了列表中的前两条规则:
 
 \begin{lstlisting}[style=styleCXX]
 struct foo
@@ -151,7 +151,7 @@ decltype(foo{}.b) e11 = 0; // int volatile
 decltype(foo{}.c) e12 = 0; // int const
 \end{lstlisting}
 
-The deduced type for each case is mentioned on the right side in a comment. When the expression is parenthesized, these two rules are reversed. Let’s take a look at the following snippet:
+在注释的右边提到了每种情况的推导类型。当表达式加圆括号时，这两个规则会颠倒过来。让我们来看看下面的代码段:
 
 \begin{lstlisting}[style=styleCXX]
 foo f;
@@ -179,9 +179,9 @@ decltype((foo{}.b)) e11 = 0; // int volatile&&
 decltype((foo{}.c)) e12 = 0; // int const&&
 \end{lstlisting}
 
-Here, all the expressions used with decltype for declaring variables e1 to e9 are lvalues, so the deduced type is an lvalue reference. On the other hand, the expression used to declare the variables e10, e11, and e12 is an rvalue; therefore, the deduced type is an rvalue reference. Furthermore, cf is a constant object and foo::a has the type int. Therefore, the result type is const int\&. Similarly, foo::b has the type volatile int; therefore, the result type is const volatile int\&. These are just a few examples from this snippet, but the others follow the same rules for deduction.
+decltype用于声明变量e1到e9的所有表达式都是左值，因此推导出的类型是一个左值引用。用于声明变量e10、e11和e12的表达式是右值，因此推导的类型是一个右值引用。此外，cf是一个常量对象，foo::a的类型是int，结果类型是const int\&。类似地，foo::b的类型为volatile int，结果类型是const volatile int\&。这些只是本片段中的几个示例，但其他示例遵循相同的推导规则。
 
-Because decltype is a type specifier, the redundant const and volatile qualifiers and reference specifiers are ignored. This is demonstrated with the following example:
+因为decltype是一个类型说明符，所以多余的const和volatile限定符以及引用说明符将忽略:
 
 \begin{lstlisting}[style=styleCXX]
 int a = 0;
@@ -194,7 +194,7 @@ decltype(c) const e2 = 1; // int const
 decltype(d) volatile e3 = 1; // int volatile
 \end{lstlisting}
 
-So far in this section, we have learned how the decltype specifier works. However, its real purpose is to be used in templates, where the return value of a function depends on its template arguments and is not known before instantiation. To understand this scenario, let’s start with the following example of a function template that returns the minimum of two values:
+到目前为止，我们已经学习了decltype说明符的工作方式。然而，其真正目的是在模板中使用，其中函数的返回值取决于它的模板参数，并且在实例化之前是不知道的。为了理解这个场景，先从下面的函数模板示例开始，该函数模板返回两个值中的最小值:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -204,7 +204,7 @@ T minimum(T&& a, T&& b)
 }
 \end{lstlisting}
 
-We can use this as follows:
+可以这样使用:
 
 \begin{lstlisting}[style=styleCXX]
 auto m1 = minimum(1, 5); // OK
@@ -213,7 +213,7 @@ auto m3 = minimum(1, 9.99);
                     // error, arguments of different type
 \end{lstlisting}
 
-The first two calls are both correct, as the supplied arguments are of the same type. The third call, however, will produce a compiler error, because the arguments have different types. For this to work, we need to cast the integer value to a double. However, there is an alternative: we could write a function template that takes two arguments of potentially different types and returns the minimum of the two. This can look as follows:
+因为提供的参数是相同类型的，所以前两次调用都是正确的。然而，第三次调用将产生编译器错误，因为参数具有不同的类型。所以，需要将整数值强制转换为double类型。当然，还有另一种选择:可以编写一个函数模板，可以接受两个可能不同类型的参数，并返回这两个参数中的最小值。如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T, typename U>
@@ -223,9 +223,9 @@ template <typename T, typename U>
 }
 \end{lstlisting}
 
-The question is, what is the return type of this function? This can be implemented differently, depending on the standard version you are using.
+问题是，这个函数的返回类型是什么呢?根据所使用的标准版本，可以以不同的方式实现。
 
-In C++11, we can use the auto specifier with a trailing return type, where we use the decltype specifier to deduce the return type from an expression. This would look as follows:
+C++11中，可以使用带有尾随返回类型的auto说明符，我们使用decltype说明符从表达式推断返回类型:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T, typename U>
@@ -235,7 +235,7 @@ auto minimum(T&& a, U&& b) -> decltype(a < b ? a : b)
 }
 \end{lstlisting}
 
-This syntax can be simplified if you’re using C++14 or a newer version of the standard. The trailing return type is no longer necessary. You can write the same function as follows:
+若使用C++14或标准的更新版本，则可以简化此语法。后面的返回类型不再需要:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T, typename U>
@@ -245,7 +245,7 @@ decltype(auto) minimum(T&& a, U&& b)
 }
 \end{lstlisting}
 
-It is possible to simplify this further and simply use auto for the return type, shown as follows:
+还可以进一步简化，简单地使用auto作为返回类型:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T, typename U>
@@ -255,7 +255,7 @@ auto minimum(T&& a, U&& b)
 }
 \end{lstlisting}
 
-Although decltype(auto) and auto have the same effect in this example, this is not always the case. Let’s consider the following example where we have a function returning a reference, and another function that calls it perfectly forwarding the argument:
+虽然decltype(auto)和auto在本例中具有相同的效果，但情况并非总是如此。看看下面的例子，有一个函数返回一个引用，而另一个函数完美地转发了相关参数:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -275,7 +275,7 @@ decltype(func(a)) r1 = func(a); // int const&
 decltype(func_caller(a)) r2 = func_caller(a); // int
 \end{lstlisting}
 
-The function func returns a reference, and func\_caller is supposed to do a perfect forwarding to this function. By using auto for the return type, it is inferred as int in the preceding snippet (see variable r2). In order to do a perfect forwarding of the return type, we must use decltype(auto) for it, as shown next:
+函数func返回一个引用，而func\_caller应该完全转发到这个函数。使用auto作为返回类型，在前面的代码片段中推断为int(参见变量r2)。为了完美地转发返回类型，必须对其使用decltype(auto):
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -289,9 +289,9 @@ decltype(func(a)) r1 = func(a); // int const&
 decltype(func_caller(a)) r2 = func_caller(a); // int const&
 \end{lstlisting}
 
-This time, the result is as intended, and the type of both r1 and r2 in this snippet is int const\&.
+这一次，结果和预期的一样，并且这个代码片段中的r1和r2的类型都是int const\&。
 
-As we have seen in this section, decltype is a type specifier used to deduce the type of an expression. It can be used in different contexts, but its purpose is for templates to determine the return type of a function and to ensure the perfect forwarding of it. Another feature that comes together with decltype is std::declval, which we will look at in the following section.
+正如在本节中看到的，decltype是一个类型说明符，用于推断表达式的类型。可以在不同的上下文中使用，但其目的是让模板确定函数的返回类型，并确保完美转发。与decltype一起出现的另一个特性是std::declval，我们将在下一节中进行讨论。
 
 
 
