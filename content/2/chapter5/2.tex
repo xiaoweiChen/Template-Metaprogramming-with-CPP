@@ -1,16 +1,16 @@
 编写模板时，有时需要限制模板参数。例如，应该适用于任何数字类型，整型和浮点型，但不适用于任何其他类型。或者可以有一个类模板，只接受普通类型的参数。
 
-There are also cases when we may have overloaded function templates that should each work with some types only. For instance, one overload should work for integral types and the other for floating-point types only. There are different ways to achieve this goal and we will explore them in this chapter and the next.
+还有一些可能有重载函数模板的情况，每个函数模板只适用于某些类型。例如，一种重载适用于整型，另一种重载适用于浮点类型。实现这一目标可以用不同的方法，我们将在本章和下一章中进行探讨。
 
-Type traits, however, are involved in one way or another in all of them. The first one that will be discussed in this chapter is a feature called SFINAE. Another approach, superior to SFINAE, is represented by concepts, which will be discussed in the next chapter.
+然而，类型特征以这样或那样的方式存在于这些类型中。本章将讨论的第一个特性是SFINAE。另一种优于SFINAE的方法由概念表示，将在下一章中讨论。
 
-SFINAE stands for Substitution Failure Is Not An Error. When the compiler encounters the use of a function template, it substitutes the arguments in order to instantiate the template. If an error occurs at this point, it is not regarded as ill-informed code, only as a deduction failure. The function is removed from the overload set instead of causing an error. Only if there is no match in the overload set does an error occur.
+SFINAE表示\textbf{替换失败不是错误}。当编译器遇到函数模板时，会替换实参以实例化模板。若此时发生错误，则不将其视为不知情的代码，只将其视为推导失败。函数从重载集中移除，而不是引起错误。只有在重载集中没有匹配项时，才会产生错误。
 
-It’s difficult to really understand SFINAE without concrete examples. Therefore, we will go through several examples to explain the concept.
+没有具体的例子的情况下，很难真正理解SFINAE。这里，将通过几个例子来解释一下这个概念。
 
-Every standard container, such as std::vector, std::array, and std::map, not only has iterators that enable us to access its elements but also modify the container (such as inserting after the element pointed by an iterator). Therefore, these containers have member functions to return iterators to the first and the one-past-last elements of the container. These methods are called begin and end.
+每个标准容器，比如std::vector、std::array和std::map，不仅有迭代器可以访问容器的元素，还可以修改容器(在迭代器指向的元素之后插入)。因此，这些容器具有成员函数，用于返回容器的第一个元素和最后一个元素的迭代器，这些函数就是begin和end。
 
-There are other methods such as cbegin and cend, rbegin and rend, and crbegin and crend but these are beyond the purpose of this topic. In C++11, there are also free functions, std:begin and std::end, that do the same. However, these work not just with standard containers but also with arrays. One benefit of these is enabling rangebased for loops for arrays. The question is how this non-member function could be implemented to work with both containers and arrays? Certainly, we need two overloads of a function template. A possible implementation is the following:
+还有其他函数，如cbegin和cend, rbegin和rend，以及crbegin和crend，不过这些函数超出了本主题的目的。C++11中，也有独立函数std:begin和std::end，可以完成同样的事情。这些函数不仅适用于标准容器，也适用于数组。这样做的一个好处是为数组启用基于范围的for循环。问题是如何实现这个非成员函数来同时使用容器和数组?当然，我们需要函数模板的两次重载。一个可能的实现如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -20,8 +20,7 @@ template <typename T, size_t N>
 T* begin(T(&arr)[N]) {return arr; } // [2]
 \end{lstlisting}
 
-The first overload calls the member function begin and returns the value. Therefore, this overload is restricted to types that have a member function begin; otherwise, a compiler error would occur. The second overload simply returns a pointer to the first element of the array. This is restricted to array types; anything else would produce a compiler error.
-We can use these overloads as follows:
+第一个重载调用成员函数begin并返回值，这种重载仅限于具有成员函数begin的类型;否则，将发生编译器错误。第二个重载只返回一个指向数组第一个元素的指针。这仅限于数组类型，任何其他操作都会产生编译器错误。我们可以这样使用这些重载:
 
 \begin{lstlisting}[style=styleCXX]
 std::array<int, 5> arr1{ 1,2,3,4,5 };
@@ -31,9 +30,9 @@ int arr2[]{ 5,4,3,2,1 };
 std::cout << *begin(arr2) << '\n'; // [4] prints 5
 \end{lstlisting}
 
-If you compile this piece of code, no error, not even a warning, occurs. The reason for that is SFINAE. When resolving the call to begin(arr1), substituting std::array<int, 5> to the first overload (at [1]) succeeds, but the substitution for the second (at [2]) fails. Instead of issuing an error at this point, the compiler just ignores it, so it builds an overload set with a single instantiation and, therefore, it can successfully find a match for the invocation. Similarly, when resolving the call to begin(arr2), the substitution of int[5] for the first overload fails and is ignored, but it succeeds for the second and is added to the overload set, eventually finding a good match for the invocation. Therefore, both calls can be successfully made. Should one of the two overloads not be present, either begin(arr1) or begin(arr2) would fail to match the function template and a compiler error would occur.
+编译这段代码，因为SFINAE编译过程不会出现错误，甚至不会出现警告。解析begin(arr1)调用时，将std::array<int, 5>替换为第一个重载([1])成功，但替换第二个重载([2])失败。此时，编译器不会发出错误，而是忽略它，因此它用单个实例化构建一个重载集，所以可以成功地为调用找到匹配。类似地，在解析begin(arr2)调用时，对第一个重载替换int[5]失败并被忽略，但对第二个重载替换成功并添加到重载集，最终为调用找到一个良好的匹配。因此，两个调用都可以成功进行。若两个重载中有一个不存在，begin(arr1)或begin(arr2)将无法匹配函数模板，并产生编译器错误。
 
-SFINAE only applies in the so-called immediate context of a function. The immediate context is basically the template declaration (including the template parameter list, the function return type, and the function parameter list). Therefore, it does not apply to the body of a function. Let’s consider the following example:
+SFINAE只适用于函数的直接上下文。直接上下文基本上是模板声明(包括模板参数列表、函数返回类型和函数参数列表)，不适用于函数体。看看下面的例子:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -46,56 +45,57 @@ std::string s{ "42" };
 increment(s); // error
 \end{lstlisting}
 
-There are no restrictions on the type T in the immediate context of the increment function template. However, in the body of the function, the parameter val is incremented with the post-fix operator++. That means, substituting for T any type for which the post-fix operator++ is not implemented is a failure. However, this failure is an error and will not be ignored by the compiler.
+在增量函数模板的直接上下文中，对类型T没有限制。在函数体中，参数val用后修正操作符++加1。所以，将T替换为没有实现后修复操作符++的类型都是失败的。因为这个失败是一个错误，所以编译器不会忽略它。
 
-The C++ standard (license usage link: \url{http://creativecommons.org/licenses/by-sa/3.0/}) defines the list of errors that are considered SFINAE errors (in paragraph §13.10.2, Template argument deduction, the C++20 standard version). These SFINAE errors are the following attempts:
+C++标准(许可证使用链接:\url{http://creativecommons.org/licenses/by-sa/3.0/})定义了是SFINAE错误的错误列表(在§13.10.2，模板参数演绎，
+C++20标准中)。这些SFINAE错误为以下行为:
 
 
 \begin{itemize}
 \item
-Creating an array of void, an array of reference, an array of function, an array of negative size, an array of size zero, and an array of non-integral size
+创建一个void数组、一个引用数组、一个函数数组、一个长度为负的数组、一个长度为0的数组和一个非整型长度的数组
 
 \item
-Using a type that is not a class or enum on the left side of the scope resolution operator :: (such as in T::value\_type with T being a numeric type for instance)
+在作用域解析操作符::左侧使用不是类或枚举的类型(例如：T::value\_type中，T是一个数字类型)
 
 \item
-Creating a pointer to reference
+创建指向引用的指针
 
 \item
-Creating a reference to void
+创建对void的引用
 
 \item
-Creating a pointer to member of T, where T is not a class type
+创建指向T成员的指针，其中T不是类类型
 
 \item
-Using a member of a type when the type does not contain that member
+类型不包含该成员时，使用类型的成员
 
 \item
-Using a member of a type where a type is required but the member is not a type
+使用类型的成员，其中类型是必需的，但该成员不是类型
 
 \item
-Using a member of a type where a template is required but the member is not a template
+使用需要模板，但成员不是模板类型的成员
 
 \item
-Using a member of a type where a non-type is required but the member is not a non-type
+需要非类型，但成员不是非类型的情况下使用类型的成员
 
 \item
-Creating a function type with a parameter of type void
+创建具有void类型参数的函数类型
 
 \item
-Creating a function type that returns an array type or another function type
+创建返回数组类型或其他函数类型的函数类型
 
 \item
-Performing an invalid conversion in a template argument expression or an expression used in a function declaration
+模板参数表达式或函数声明中使用的表达式中执行无效转换
 
 \item
-Supplying an invalid type to a non-type template parameter
+为非类型模板形参提供无效类型
 
 \item
-Instantiating a pack expansion containing multiple packs of different lengths
+实例化包含不同长度的多个包的扩展
 \end{itemize}
 
-The last error in this list was introduced in C++11 together with variadic templates. The others were defined before C++11. We will not go on to exemplify all of these errors, but we can take a look at a couple more examples. The first concerns attempting to create an array of size zero. Let’s say we want to have two function template overloads, one that handles arrays of even sizes and one that handles arrays of odd sizes. A solution to this is the following:
+列表中的最后一个错误是在C++11中与可变参数模板一起引入的，其他的是在C++11之前定义的。我们不会继续举例说明所有这些错误，但需要再看几个例子。第一个问题涉及尝试创建一个长度为0的数组。假设想要有两个函数模板重载，一个处理偶数长度的数组，另一个处理奇数长度的数组。解决方法如下:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T, size_t N>
@@ -117,9 +117,9 @@ int arr2[]{ 1,2,3,4 };
 handle(arr2);
 \end{lstlisting}
 
-The template arguments and the first function parameter are similar to what we saw with the begin overload for arrays. However, these overloads for handle have a second anonymous parameter with the default value 0. The type of this parameter is a pointer to an array of type char and a size specified with the expressions N\%2==0 and N\%2==1. For every possible array, one of these two is true and the other is false. Therefore, the second parameter is either char(*)[1] or char(*)[0], the latter being an SFINAE error (an attempt to create an array of size zero). Therefore, we are able to call either one of the other overloads without generating compiler errors, thanks to SFINAE.
+模板参数和第一个函数参数类似于我们看到的数组的begin，但这些句柄重载有第二个匿名参数，其默认值为0。该参数的类型是一个指向char类型数组的指针，数组长度由表达式N\%2==0和N\%2==1指定。对于每一个可能的数组，这两个中的一个为真，另一个为假。因此，第二个参数是char(*)[1]或char(*)[0]，后者是SFINAE错误(试图创建一个长度为0的数组)，因此才能够调用其他重载，而不会产生编译器错误。
 
-The last example that we will look at in this section will show SFINAE with an attempt to use a member of a class that does not exist. Let’s start with the following snippet:
+本节的最后一个示例将展示SFINAE尝试使用一个不存在的类的成员:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -138,7 +138,7 @@ struct int_foo : foo<int> {};
 struct int_bar : bar<int> {}
 \end{lstlisting}
 
-Here we have two classes, foo, which has a member type called foo\_type, and bar, which has a member type called bar\_type. There are also classes that derive from these two. The goal is to write two function templates, one that handles the foo hierarchy of classes, and one that handles the bar hierarchy of classes. A possible implementation is the following:
+这里我们有两个类，foo的成员类型是foo\_type，而bar的成员类型是bar\_type。还有派生自这两个类。目标是编写两个函数模板，一个处理类的foo层次结构，另一个处理类的bar层次结构。一个可能的实现如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -154,7 +154,7 @@ decltype(typename T::bar_type(), void()) handle(T const& v)
 }
 \end{lstlisting}
 
-Both overloads have a single template parameter and a single function parameter of type T const\&. They also return the same type, and that type is void. The expression decltype(typename T::foo\_type(), void()) may need a little consideration to understand better. We discussed decltype in Chapter 4, Advanced Template Concepts. Remember that this is a type specifier that deduces the type of an expression. We use the comma operator, so the first argument is evaluated but then discarded, so decltype will only deduce the type from void(), and the deduced type is void. However, the arguments typename T::foo\_type() and typename T::bar\_type() do use an inner type, and this only exists either for foo or bar. This is where SFINAE manifests itself, as shown in the following snippet:
+两个重载都有一个模板参数和一个类型为T const\&的函数参数，也返回相同的类型，并且该类型为void。表达式decltype(typename T::foo\_type(), void())可能需要思考一下才能更好地理解。我们在第4章中讨论了decltype，这是一个类型说明符，用于推断表达式的类型。我们使用逗号操作符，因此对第一个参数求值，但随后丢弃，因此decltype将从void()进行类型推导，并且推导出的类型为void。然而，参数typename T::foo\_type()和typename T::bar\_type()确实使用了内部类型，而且这只存在于foo或bar中。这就是使用SFINAE的地方，如下面的代码段所示:
 
 \begin{lstlisting}[style=styleCXX]
 int_foo fi;
@@ -165,9 +165,9 @@ handle(bi); // OK
 handle(x); // error
 \end{lstlisting}
 
-Calling handle with an int\_foo value will match the first overload, while the second is discarded because of a substitution failure. Similarly, calling handle with an int\_bar value will match the second overload, while the first is discarded because of a substitution failure. However, calling handle with an int will cause substitution failure for both overloads so the final overload set for substituting int will be empty, which means there is no match for the call. Therefore, a compiler error occurs.
+调用带有int\_foo值的句柄将匹配第一个重载，而第二个因为替换失败而丢弃。类似地，调用带有int\_bar值的句柄将匹配第二个重载，而第一个因为替换失败而丢弃。然而，使用int类型调用句柄将导致两个重载的替换失败，因此用于替换int类型的最终重载集将为空，从而调用没有匹配项，所以会产生编译错误。
 
-SFINAE is not the best way to achieve conditional compilation. However, in modern C++ it’s probably best used together with a type trait called enable\_if. This is what we will discuss next.
+SFINAE并不是实现条件编译的最佳方式。现代C++中，最好能与enable\_if的类型特征一起使用。这就是我们接下来要讨论的问题。
 
 
 

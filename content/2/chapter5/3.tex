@@ -1,14 +1,14 @@
-The C++ standard library is a family of sub-libraries. One of these is the type support library. This library defines types such as std::size\_t, std::nullptr\_t, and std::byte, run-time type identification support with classes such as std::type\_info, as well as a collection of type traits. There are two categories of type traits:
+C++标准库中，类型支持库是其子库之一。这个库定义了std::size\_t、std::nullptr\_t和std::byte等类型，运行时类型标识支持std::type\_info等类型，以及类型特征的集合。类型特征有两类:
 
 \begin{itemize}
 \item
-Type traits that enable us to query properties of types at compile-time.
+类型特征能够在编译时查询类型的属性。
 
 \item
-Type traits that enable us to perform type transformations at compile-time (such as adding or removing the const qualifier, or adding or removing pointer or reference from a type). These type traits are also called metafunctions.
+能够在编译时执行类型转换的类型特征(添加或删除const限定符，或从类型中添加或删除指针或引用)，这些类型特征也称为元功能。
 \end{itemize}
 
-One type trait from the second category is std::enable\_if. This is used to enable SFINAE and remove candidates from a function’s overload set. A possible implementation is the following:
+来自第二类的一个类型特征是std::enable\_if。这用于启用SFINAE并从函数的重载集中删除候选。一个可能的实现如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template<bool B, typename T = void>
@@ -18,11 +18,11 @@ template<typename T>
 struct enable_if<true, T> { using type = T; };
 \end{lstlisting}
 
-There is a primary template, with two template parameters, a Boolean non-type template, and a type parameter with void as the default argument. This primary template is an empty class. There is also a partial specialization for the true value of the non-type template parameter. This, however, defines a member type simply called type, which is an alias template for the template parameter T.
+有一个主模板，有两个模板参数，一个布尔型非类型模板和一个默认参数为void的类型参数。这个主模板是一个空类，非类型模板参数值也有偏特化。然而，这定义了一个称为type的成员类型，它是模板参数T的别名模板。
 
-The enable\_if metafunction is intended to be used with a Boolean expression. When this Boolean expression is evaluated as true, it defines a member type called type. If the Boolean expression is false, this member type is not defined. Let’s see how it works.
+enable\_if元函数用于布尔表达式，这个布尔表达式求值为true时，定义了一个名为type的成员类型。若布尔表达式为false，则不定义此成员类型。来看看它是如何工作的。
 
-Remember the example from the Understanding and defining type traits section at the beginning of the chapter, where we had classes that provided a write method to write their content to an output stream, and classes for which the operator<{}< was overloaded for the same purpose? In that section, we defined a type trait called uses\_write and wrote a serialize function template that allowed us to serialize, in a uniform manner, both types of objects (widget and gadget). However, the implementation was rather complex. With enable\_if, we can implement that function in a simple manner. A possible implementation is shown in the next snippet:
+还记得本章开头理解和定义类型特征一节中的例子吗?例子中，我们有一些类，提供了一个写入方法，将它们的内容写入输出流，以及为了同样的目的重载了操作符<{}<的类。在那一节中，我们定义了一个名为uses\_write的类型特征，并编写了一个serialize函数模板，该模板允许我们以统一的方式序列化这两种类型的对象(widget和gadget)。然而，实现相当复杂。使用enable\_if，可以以一种简单的方式实现该函数。一个可能的实现如下面的代码段所显示:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T,
@@ -42,22 +42,22 @@ void serialize(std::ostream& os, T const& value)
 }
 \end{lstlisting}
 
-There are two overloaded function templates in this implementation. They both have two template parameters. The first parameter is a type template parameter, called T. The second is an anonymous non-type template parameter of a pointer type that also has the default value nullptr. We use enable\_if to define the member called type only if the uses\_write\_v variable evaluates to true. Therefore, for classes that have the member function write, the substitution succeeds for the first overload but fails for the second overload, because typename * = nullptr is not a valid parameter. For classes for which the operator<{}< is overloaded, we have the opposite situation.
+这个实现中有两个重载函数模板，有两个模板参数。第一个参数是类型模板参数，称为T。第二个参数是指针类型的匿名非类型模板参数，它的默认值是nullptr。只有当uses\_write\_v变量的值为true时，才使用enable\_if定义成为type的成员。因此，对于具有成员函数write的类，第一次重载替换成功，但第二次重载替换失败，因为typename * = nullptr不是有效参数。对于操作符<{}<重载的类，情况则相反。
 
-The enable\_if metafunction can be used in several scenarios:
+enable\_if元函数可以在以下几种情况下使用:
 
 \begin{itemize}
 \item
-To define a template parameter that has a default argument, which we saw earlier
+定义一个具有默认参数的模板参数
 
 \item
-To define a function parameter that has a default argument
+定义具有默认参数的函数参数
 
 \item
-To specify the return type of a function
+指定函数的返回类型
 \end{itemize}
 
-For this reason, I mentioned earlier that the provided implementation of the serialize overloads is just one of the possibilities. A similar one that uses enable\_if to define a function parameter with a default argument is shown next:
+出于这个原因，所以在前面提到的提供serialize重载实现只是一种可能性。类似的一个使用enable\_if来定义一个带有默认参数的函数参数，如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -79,7 +79,7 @@ void serialize(
 }
 \end{lstlisting}
 
-You will notice here that we basically moved the parameter from the template parameter list to the function parameter list. There is no other change, and the usage is the same, such as follows:
+这里，我们基本上把参数从模板参数列表移到了函数参数列表。没有其他变化，用法相同，如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 widget w{ 1, "one" };
@@ -89,7 +89,7 @@ serialize(std::cout, w);
 serialize(std::cout, g);
 \end{lstlisting}
 
-The third alternative is to use enable\_if to wrap the return type of the function. This implementation is only slightly different (the default argument does not make sense for a return type). Here is how it looks:
+第三种选择是使用enable\_if来包装函数的返回类型，实现只是略有不同(默认参数对于返回类型没有意义):
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -107,9 +107,9 @@ typename std::enable_if<!uses_write_v<T>>::type serialize(
 }
 \end{lstlisting}
 
-The return type, in this implementation, is defined if uses\_write\_v<T> is true. Otherwise, a substitution failure occurs and SFINAE takes place.
+这个实现中，若uses\_write\_v<T>为true，则定义返回类型。否则，替换失败，SFINAE。
 
-Although in all these examples, the enable\_if type trait was used to enable SFINAE during the overload resolution for function templates, this type trait can also be used to restrict instantiations of class templates. In the following example, we have a class called integral\_wrapper that is supposed to be instantiated only with integral types, and a class called floating\_wrapper that is supposed to be instantiated only with floating-point types:
+尽管在所有这些示例中，enable\_if类型特征都用于在函数模板的重载解析期间启用SFINAE，但此类型特征也可用于限制类模板的实例化。下面的例子中，有一个叫做integral\_wrapper的类，只被整型类型实例化，还有一个叫做float \_wrapper的类，只被浮点型类型实例化:
 
 \begin{lstlisting}[style=styleCXX]
 template <
@@ -131,13 +131,13 @@ struct floating_wrapper
 };
 \end{lstlisting}
 
-Both these class templates have two type template parameters. The first one is called T, but the second one is anonymous and has a default argument. The value of this argument is defined or not with the help of the enable\_if type trait, based on the value of a Boolean expression.
+这两个类模板都有两个类型模板参数。第一个称为T，但第二个匿名，有一个默认参数。根据布尔表达式的值，这个参数的值是否在enable\_if类型特征的帮助下定义。
 
-In this implementation, we can see:
+这个实现中，可以看到:
 
 \begin{itemize}
 \item
-An alias template called std::enable\_if\_t, which is a convenient way to access the std::enable\_if<B, T>::type member type. This is defined as follows:
+别名模板std::enable\_if\_t，这是访问std::enable\_if<B, T>::type成员类型的方法。其定义如下:
 
 \begin{lstlisting}[style=styleCXX]
 template <bool B, typename T = void>
@@ -145,10 +145,10 @@ using enable_if_t = typename enable_if<B,T>::type;
 \end{lstlisting}
 
 \item
-Two variable templates, std::is\_integral\_v and std::is\_floating\_point\_v, which are convenient ways to access the data members, std::is\_integral<T>::value and std::is\_floating\_point<T>::value. The std::is\_integral and std::is\_floating\_point classes are standard type traits that check whether a type is an integral type or a floating-point type respectively.
+两个变量模板std::is\_integral\_v和std::is\_floating\_point\_v是访问数据成员的方法，std::is\_integral<T>::value和std::is\_floating\_point<T>::value。std::is\_integral和std::is\_float\_point类是标准类型特征，分别检查类型是整型还是浮点型。
 \end{itemize}
 
-The two wrapper class templates shown previously can be used as follows:
+前面展示的两个wrapper类模板可以按如下方式使用:
 
 \begin{lstlisting}[style=styleCXX]
 integral_wrapper w1{ 42 }; // OK
@@ -160,9 +160,9 @@ floating_wrapper w5{ 42.0 }; // OK
 floating_wrapper w6{ "42" }; // error
 \end{lstlisting}
 
-Only two of these instantiations work, w1, because integral\_wrapper is instantiated with the int type, and w5, because floating\_wrapper is instantiated with the double type. All the others generate compiler errors.
+其中只有两个实例化可以工作：w1，integral\_wrapper是用int类型实例化的；w5，float \_wrapper是用double类型实例化的。所有其他选项都会生成编译器错误。
 
-It should be pointed out that this code samples only work with the provided definitions of integral\_wrapper and floating\_wrapper in C++20. For previous versions of the standard, even the definitions of w1 and w5 would generate compiler errors because the compiler wasn’t able to deduce the template arguments. In order to make them work, we’d have to change the class templates to include a constructor, as follows:
+需要指出的是，此代码示例仅适用于C++20中提供的integral\_wrapper和float\_wrapper的定义。对于标准的以前版本，因为编译器无法推导模板参数，即使是w1和w5的定义也会产生编译器错误。为了使它们工作，我们必须更改类模板以包括一个构造函数，如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template <
@@ -188,7 +188,7 @@ struct floating_wrapper
 };
 \end{lstlisting}
 
-Although enable\_if helps achieve SFINAE with simpler and more readable code, it’s still rather complicated. Fortunately, in C++17 there is a better alternative with constexpr if statements. Let’s explore this alternative next.
+虽然enable\_if有助于通过更简单、更可读的代码实现SFINAE，但它仍然相当复杂。幸运的是，C++17中有一个更好的选择，使用constexpr if语句。接下来让我们来探索这个替代方案。
 
 
 
