@@ -1,4 +1,4 @@
-A C++17 feature makes SFINAE much easier. It’s called constexpr if and it’s a compile-time version of the if statement. It helps replace complex template code with simpler versions. Let’s start by looking at a C++17 implementation of the serialize function that can uniformly serialize both widgets and gadgets:
+C++17的constexpr if特性使得SFINAE更加简单，是if语句的编译时版本，有助于用更简单的版本替换复杂的模板代码。先看一下serialize函数的C++17实现，可以统一序列化widget和gadget:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -11,9 +11,9 @@ void serialize(std::ostream& os, T const& value)
 }
 \end{lstlisting}
 
-The syntax for constexpr if is if constexpr(condition). The condition must be a compile-time expression. There is no short-circuit logic performed when evaluating the expression. This means that if the expression has the form a \&\& b or a || b, then both a and b must be well-formed.
+其语法是if constexpr(condition)，条件必须是编译时表达式，求值表达式不执行短路逻辑。若表达式具有形式a \&\& b或a || b，那么a和b都必须是定义好的。
 
-constexpr if enables us to discard a branch, at compile-time, based on the value of the expression. In our example, when the uses\_write\_v variable is true, the else branch is discarded, and the body of the first branch is retained. Otherwise, the opposite occurs. Therefore, we end up with the following specializations for the widget and gadget classes:
+constexpr if能够在编译时根据表达式的值丢弃分支。例子中，当uses\_write\_v为true时，else分支将丢弃，而第一个分支的主体将保留。因此，们最终得到了widget和gadget类的特化:
 
 \begin{lstlisting}[style=styleCXX]
 template<>
@@ -40,7 +40,7 @@ void serialize<gadget>(std::ostream & os,
 }
 \end{lstlisting}
 
-Of course, this code is likely to be further simplified by the compiler. Therefore, eventually, these specializations would simply look like the following:
+当然，编译器可能会进一步简化这段代码。最终，这些特化会像下面这样:
 
 \begin{lstlisting}[style=styleCXX]
 template<>
@@ -58,9 +58,9 @@ void serialize<gadget>(std::ostream & os,
 }
 \end{lstlisting}
 
-The end result is the same as the one we achieved with SFINAE and enable\_if, but the actual code we wrote here was simpler and easier to understand.
+最终结果与使用SFINAE和enable\_if实现的结果相同，但这里编写的实际代码更简单，更容易理解。
 
-constexpr if is a great tool for simplifying code and we actually saw it earlier in Chapter 3, Variadic Templates, in the Parameter packs paragraph, when we implemented a function called sum. This is shown again here:
+constexpr if是一个很好的简化代码的工具，在第3章中看到过，当时实现了一个名为sum的函数:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T, typename... Args>
@@ -73,7 +73,7 @@ T sum(T a, Args... args)
 }
 \end{lstlisting}
 
-In this example, constexpr if helps us to avoid having two overloads, one for the general case and one for ending the recursion. Another example presented already in this book where constexpr if can simplify the implementation is the factorial function template from Chapter 4, Advanced Template Concepts, in the Exploring template recursion section. That function looked as follows:
+本例中，constexpr if协助我们避免出现两个重载，一个用于一般情况，另一个用于结束递归。本书中已经介绍了另一个例子，这个例子中，constexpr if可以简化实现，是第4章中的阶乘函数模板。该函数如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template <unsigned int n>
@@ -89,7 +89,7 @@ template<>
 constexpr unsigned int factorial<0>() { return 1; }
 \end{lstlisting}
 
-With constexpr if, we can replace all this with a single template and let the compiler take care of providing the right specializations. The C++17 version of this function may look as follows:
+使用constexpr if，可以用一个模板替换所有这些，并让编译器负责提供正确的特化。C++17版本的函数实现如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template <unsigned int n>
@@ -102,7 +102,7 @@ constexpr unsigned int factorial()
 }
 \end{lstlisting}
 
-The constexpr if statements can be useful in many situations. The last example presented in this section is a function template called are\_equal, which determines whether the two supplied arguments are equal or not. Typically, you’d think that using operator== should be enough to determine whether two values are equal or not. That is true in most cases, except for floating-point values. Because only some of the floatingpoint numbers can be stored without a precision loss (numbers like 1, 1.25, 1.5, and anything else where the fractional part is an exact sum of inverse powers of 2) we need to take special care when comparing floating-point numbers. Usually, this is solved by ensuring that the difference between two floating-point values is less than some threshold. Therefore, a possible implementation for such a function could be as follows:
+constexpr if在很多情况下都很有用。本节给出的最后一个示例是一个名为are\_equal的函数模板，它决定提供的两个参数是否相等。通常，会认为使用operator==就足以确定两个值是否相等。在大多数情况下是正确的，除了浮点值。因为一些浮点数可以存储而没有精度损失(像1,1.25,1.5这样的数字，以及其他任何小数部分都可以表示为2的逆幂级数)，所以在比较浮点数时需要特别注意。通常，这是通过确保两个浮点值之间的差值小于某个阈值来解决的。因此，函数的实现可能如下所示:
 
 
 \begin{lstlisting}[style=styleCXX]
@@ -116,7 +116,7 @@ bool are_equal(T const& a, T const& b)
 }
 \end{lstlisting}
 
-When the T type is a floating-point type, we compare the absolute value of the difference of the two numbers with the selected threshold. Otherwise, we fall back to using operator==. This enables us to use this function not just with arithmetic types, but also any other type for which the equality operator is overloaded.
+当T类型是浮点类型时，将两个数字之差的绝对值与所选阈值进行比较。否则，退回到使用operator==。这使得不仅可以对算术类型使用此函数，还可以对其他重载了相等操作符的类型使用此函数。
 
 \begin{lstlisting}[style=styleCXX]
 are_equal(1, 1); // OK
@@ -125,9 +125,9 @@ are_equal(std::string{ "1" }, std::string{ "1" }); // OK
 are_equal(widget{ 1, "one" }, widget{ 1, "two" }); // error
 \end{lstlisting}
 
-We are able to call the are\_equal function template with arguments of type int, double, and std::string. However, attempting to do the same with values of the widget type will trigger a compiler error, because the == operator is not overloaded for this type.
+可以使用参数类型为int、double和std::string调用are\_equal函数模板，但尝试对widget类型的值执行相同的操作将触发编译器错误，因为==操作符没有在此类型中进行重载。
 
-So far in this chapter, we have seen what type traits are as well as different ways to perform conditional compilation. We have also seen some of the type traits available in the standard library. In the second part of this chapter, we will explore what the standard has to offer with regard to type traits.
+在本章中，我们已经了解了什么是类型特征，以及执行条件编译的不同方法。还看到了标准库中可用的一些类型特征。在本章的第二部分，我们将探讨标准中关于类型特征的内容。
 
 
 

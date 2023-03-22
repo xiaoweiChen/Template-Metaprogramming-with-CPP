@@ -1,58 +1,56 @@
 
-The standard library features a series of type traits for querying properties of types as well as performing transformations on types. These type traits are available in the <type\_ traits> header as part of the type support library. There are several categories of type traits including the following:
+标准库提供了一系列类型特征，用于查询类型的属性以及对类型执行转换。这些类型特征可以在<type\_ traits>头文件中作为类型支持库使用。类型特征有以下几种:
 
 \begin{itemize}
 \item
-Querying the type category (primary or composite)
+查询类型类别(主或复合类型)
 
 \item
-Querying type properties
+查询类型属性
 
 \item
-Querying supported operations
+查询支持的操作
 
 \item
-Querying type relationships
+查询类型关系
 
 \item
-Modifying cv-specifiers, references, pointers, or a sign
+修改cv说明符、引用、指针或符号
 
 \item
-Miscellaneous transformations
+各种转换
 \end{itemize}
 
-Although looking at every single type trait is beyond the scope of this book, we will explore all these categories to see what they contain. In the following subsections, we will list the type traits (or most of them) that make up each of these categories. These lists as well as detailed information about each type trait can be found in the C++ standard (see the Further reading section at the end of the chapter for a link to a freely available draft version) or on the cppreference.com website at \url{https://en.cppreference.com/w/cpp/header/type_traits} (license usage link:\url{http://creativecommons.org/licenses/by-sa/3.0/}).
+尽管研究每一种类型的特征超出了本书的范畴，但我们将探讨所有这些类别，看看它们包含什么。下面的小节中，将列出构成这些类别的类型特征(或大部分类型特征)。这些列表以及关于每种类型特征的详细信息可以在C++标准中找到(参见本章末尾的扩展阅读，以获得标准草案版本的链接)或cppreference.com网站\url{https://en.cppreference.com/w/cpp/header/type_traits}(许可链接:\url{http://creativecommons.org/licenses/by-sa/3.0/})。
 
-We will start with the type traits for querying the type category
+\subsubsubsection{5.5.1\hspace{0.2cm}查询类型类别}
 
-\subsubsubsection{5.5.1\hspace{0.2cm}Querying the type category}
-
-Throughout this book so far, we have used several type traits, such as std::is\_integral, std::is\_floating\_point, and std::is\_arithmetic. These are just some of the standard type traits used for querying primary and composite type categories. The following table lists the entire set of such type traits:
+之前已经使用了几个类型特征，例如std::is\_integral，std::is\_floating\_point，以及std::is\_arithmetic。这些只是用于查询主类型和复合类型类别的一些标准类型特征。下表列出了所有这些类型的特征:
 
 \begin{table}[H]
 \centering
 	\begin{tabular}{|l|l|}
 		\hline
-		\textbf{Name} &
-		\textbf{Description} \\ \hline
+		\textbf{名称} &
+		\textbf{描述} \\ \hline
 		is\_void &
-		Checks whether a type is the void type. \\ \hline
+		检查类型是否为void类型。 \\ \hline
 		is\_null\_pointer &
-		Checks whether a type is the std::nullptr\_t type. \\ \hline
+		检查一个类型是否为std::nullptr\_t类型。 \\ \hline
 		is\_integral &
-		\begin{tabular}[c]{@{}l@{}}Checks whether a type is an integral type, including signed,\\ unsigned, and cv-qualified variants. The integral types are:\\ ·bool, char, char8\_t(since C++20), char16\_t,\\   char32\_t, wchar\_t, short, int, long, and long long\\ ·Any implementation-defined extended integer type\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}检查类型是否为整型，包括有符号、无符号和cv限定变量。整型类型为:\\ ·bool, char, char8\_t(C++20), char16\_t, char32\_t, wchar\_t, short, \\ int, long和long long\\ ·任何扩展整数类型\end{tabular} \\ \hline
 		is\_floating\_point &
-		\begin{tabular}[c]{@{}l@{}}Checks whether a type is a floating-point type, including\\ cv-qualified variants. The possiable types are float,\\ double, and long double.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}检查类型是否为浮点类型，包括cv限定变量。T可能的类型有\\ float，double和long double.\end{tabular}\\ \hline
 		is\_array &
-		Checks whether a type is an array type. \\ \hline
+		检查类型是否为数组类型。 \\ \hline
 		is\_enum &
-		Checks whether a type is an enumeration type. \\ \hline
+		检查类型是否为枚举类型。 \\ \hline
 		is\_union &
-		Checks whether a type is a union type. \\ \hline
+		检查类型是否为联合类型。 \\ \hline
 		is\_class &
-		Checks whether a type is a class type, but not a union type. \\ \hline
+		检查类型是否是类类型，而不是联合类型。 \\ \hline
 		is\_function &
-		\begin{tabular}[c]{@{}l@{}}Checks whether a type is a function type. This excludes\\ lambdas, classes with overloaded call operator, pointers to \\ functions, but the std::function type.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}检查类型是否为函数类型。除了Lambda，重载调用操作符的类，\\ 指向函数的指针，而std::function类型除外。\end{tabular} \\ \hline
 	\end{tabular}
 \end{table}
 
@@ -60,47 +58,39 @@ Throughout this book so far, we have used several type traits, such as std::is\_
 \centering
 	\begin{tabular}{|l|l|}
 		\hline
-		\textbf{Name} &
-		\textbf{Description} \\ \hline
-		is\_pointer &
-		\begin{tabular}[c]{@{}l@{}}Checks whether a type is a pointer to object or a pointer\\ to function or a cv-qualified variant. This does not include\\ pointer to member object or pointer to member function.\end{tabular} \\ \hline
+		\textbf{名称} &
+		\textbf{描述} \\ \hline	
+		is\_pointer & 
+		\begin{tabular}[c]{@{}l@{}}检查类型是指向对象的指针、指向函数的指针还是cv限定变量。\\ 这不包括指向成员对象的指针或指向成员函数的指针。\end{tabular} \\ \hline
+
 		is\_member\_pointer &
-		\begin{tabular}[c]{@{}l@{}}Checks whether a type is a pointer to a non-static member\\ object or pointer to a non-static member function.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}检查类型是指向非静态成员对象的指针，\\ 还是指向非静态成员函数的指针。\end{tabular} \\ \hline
 		\begin{tabular}[c]{@{}l@{}}is\_member\_object\_\\ pointer\end{tabular} &
-		Checks whether a type is a non-static member object pointer. \\ \hline
+		检查类型是否为非静态成员对象指针。 \\ \hline
 		\begin{tabular}[c]{@{}l@{}}is\_member\_function\_\\ pointer\end{tabular} &
-		\begin{tabular}[c]{@{}l@{}}Checks whether a type is a non-static member function\\ pointer.\end{tabular} \\ \hline
+		检查类型是否为非静态成员函数指针。 \\ \hline
 		is\_lvalue\_reference &
-		Checks whether a type is an lvalue reference type. \\ \hline
+		检查类型是否为左值引用类型。 \\ \hline
 		is\_rvalue\_reference &
-		Checks whether a type is an rvalue reference type. \\ \hline
+		检查类型是否为右值引用类型。 \\ \hline
 		is\_reference &
-		\begin{tabular}[c]{@{}l@{}}Checks whether a type is a reference type. This can be either\\ an lvalue or rvalue reference type.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}检查类型是否为引用类型，可以是左值引用类型，\\ 也可以是右值引用类型。\end{tabular} \\ \hline
 		is\_fundamental &
-		\begin{tabular}[c]{@{}l@{}}Checks whether a type is a fundamental type. Fundamental types \\ are the arithmetic types., the void type, and the std::nullptr\_t\\ type.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}检查类型是否为基本类型。基本类型为算术类型， \\ void类型和std::nullptr\_t类型。.\end{tabular} \\ \hline
 		is\_scalar &
-		\begin{tabular}[c]{@{}l@{}}Checks whether a type is a scalar type or a cv-qualifier\\ version of one. Scalar types are:\\ ·The arithmetic types\\ ·Pointer types\\ ·Pointer to member types\\ ·Enumeration types\\ ·the std::nullptr\_t type\end{tabular} \\ \hline
-	\end{tabular}
-\end{table}
-
-\begin{table}[H]
-\centering
-	\begin{tabular}{|l|l|}
-		\hline
-		\textbf{Name} &
-		\textbf{Description} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}检查类型是标量类型还是标量类型的cv-限定符版本。 标量类型包括:\\ ·算术类型\\ ·指针类型\\ ·指向成员类型的指针\\ ·枚举类型\\ ·std::nullptr\_t\end{tabular} \\ \hline
 		is\_object &
-		\begin{tabular}[c]{@{}l@{}}Checks whether a type is an object type of a cv-qualifier\\ version. An object type is a type that is not a function type,\\ a reference type, or the void type.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}检查类型是否为cv-qualifier版本的对象类型。\\ 对象类型不是函数类型、引用类型或void类型。\end{tabular} \\ \hline
 		is\_compound &
-		\begin{tabular}[c]{@{}l@{}}Checks whether a type is a compound type or any\\ cv-qualified variant of one. Compound types are types that\\ are not fundamental. These are:\\ ·Array types\\ ·Function types\\ ·Class types\\ ·Union types\\ ·Object pointer and function pointer types\\ ·Member object pointer and member function pointer types\\ ·Reference types\\ ·Enumeration types\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}检查类型是复合类型还是复合类型的cv变体。\\ 复合类型不是基本类型，它们是\\ ·数组\\ ·函数\\ ·类\\ ·联合\\ ·对象指针和函数指针\\ ·成员对象指针和成员函数指针\\ ·引用\\ ·枚举\end{tabular} \\ \hline
 	\end{tabular}
 \end{table}
 
 \begin{center}
-Table 5.1
+表 5.1
 \end{center}
 
-All these type traits are available in C++11. For each of them, starting with C++17, a variable template is available to simplify the access to the Boolean member called value. For a type trait with the name is\_abc, a variable template with the name is\_abc\_v exists. This is true for all the type traits that have a Boolean member called value. The definition of these variables is very simple. The next snippet shows the definition for the is\_arithmentic\_v variable template:
+这些类型特征在C++11中可用。从C++17开始，每个变量都有一个变量模板来简化对布尔成员value的访问。对于名称为is\_abc的类型特征，则存在名称为is\_abc\_v的变量模板。对于所有具有名为value的布尔成员的类型特征都是如此，这些变量的定义很简单。下面的代码片段显示了is\_arithmentc\_v变量模板的定义:
 
 \begin{lstlisting}[style=styleCXX]
 template< class T >
@@ -108,7 +98,7 @@ inline constexpr bool is_arithmetic_v =
 	is_arithmetic<T>::value;
 \end{lstlisting}
 
-Here is an example of using some of these type traits:
+下面是使用这些类型特征的例子:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -130,30 +120,30 @@ std::cout << as_string(42.0) << '\n'; // prints 42.000000
 std::cout << as_string("42") << '\n'; // error
 \end{lstlisting}
 
-The function template as\_string returns a string containing the value pass as an argument. It works with arithmetic types only and with the nullptr\_t for which it returns the value "null".
+函数模板as\_string返回一个包含pass值作为参数的字符串。它只适用于算术类型，并且适用于nullptr\_t，它将为其返回值“null”。
 
-You must have noticed the statement, static\_assert(always\_false<T>), and wondering what this always\_false<T> expression actually is. It is a variable template of the bool type that evaluates to false. Its definition is as simple as the following:
+聪明的读者一定注意到了static\_assert(always\_false<T>)，并想知道这个always\_false<T>表达式到底是什么。它是一个bool类型的变量模板，计算结果为false。其定义简单如下:
 
 \begin{lstlisting}[style=styleCXX]
 template<class T>
 constexpr bool always_false = std::false_type::value;
 \end{lstlisting}
 
-This is needed because the statement, static\_assert(false), would make the program ill-formed. The reason for this is that its condition would not depend on a template argument but evaluate to false. When no valid specialization can be generated for a sub-statement of a constexpr if statement within a template, the program is ill-formed (and no diagnostic is required). To avoid this, the condition of the static\_assert statement must depend on a template argument. With static\_assert(always\_false<T>), the compiler does not know whether this would evaluate to true or false until the template is instantiated.
+这是必需的，因为static\_assert(false)语句会使程序格式不正确。原因是它的条件不依赖于模板参数，而是求值为false。若模板中不能为constexpr if语句的子语句生成有效的特化，则程序是格式错误的(不需要诊断)。为了避免这种情况，static\_assert语句的条件必须依赖于模板参数。对于静态\_assert(always\_false<T>)，编译器在模板实例化之前，不知道这将计算为true还是false。
 
-The next category of type traits we explore allows us to query properties of types.
+我们探索的下一类类型特征，是查询类型的属性。
 
-\subsubsubsection{5.5.2\hspace{0.2cm}Querying type properties}
+\subsubsubsection{5.5.2\hspace{0.2cm}查询类型属性}
 
-The type traits that enable us to query properties of types are the following:
+能够查询类型属性的类型特征如下所示:
 
 \begin{table}[H]
 \centering
 	\begin{tabular}{|l|l|l|}
 		\hline
-		\textbf{Name} & \textbf{C++ Version} & \textbf{Description}                                                                                                      \\ \hline
-		is\_const     & C++11                & \begin{tabular}[c]{@{}l@{}}Checks whether a type is const-qualified(either\\ const or const volatile).\end{tabular}       \\ \hline
-		is\_volatile  & C++11                & \begin{tabular}[c]{@{}l@{}}Checks whether a type is volatile-qualified(either\\ volatile or const volatile).\end{tabular} \\ \hline
+		\textbf{名称} & \textbf{C++版本} & \textbf{描述}                                                                                                      \\ \hline
+		is\_const     & C++11                & \begin{tabular}[c]{@{}l@{}}是否为const限定(const或const volatile)。\end{tabular}       \\ \hline
+		is\_volatile  & C++11                & \begin{tabular}[c]{@{}l@{}}是否为volatile限定(volatile或const volatile)。\end{tabular} \\ \hline
 	\end{tabular}
 \end{table}
 
@@ -161,71 +151,61 @@ The type traits that enable us to query properties of types are the following:
 \centering
 	\begin{tabular}{|l|l|l|}
 		\hline
-		\textbf{Name} &
-		\textbf{C++ Version} &
-		\textbf{Description} \\ \hline
+		\textbf{名称} &
+		\textbf{C++版本} &
+		\textbf{描述} \\ \hline
 		is\_trivial &
 		C++11 &
-		\begin{tabular}[c]{@{}l@{}}Checks whether a type is a trivial type or\\ a cv-qualified variant. The following are trivial types:\\ ·Scalar types or arrays of a scalar type\\ ·Trivially copyable classes with a trivaial default\\   constructor or arrarys of such a class.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}是普通类型，还是cv限定变量。以下是简单类型:\\  ·标量类型或标量类型的数组\\ ·具有简单的默认构造函数\\   或此类数组的简单的可复制类。\end{tabular} \\ \hline
 		\begin{tabular}[c]{@{}l@{}}is\_trivially\_\\ copyable\end{tabular} &
 		C++11 &
-		\begin{tabular}[c]{@{}l@{}}Checks whether a type is trivially copyable. The \\ following are trivially copyable types:\\ ·Scalar types or arrays of a scalar type\\ ·Trivially copyable classes or arrays of such a class\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}是否可复制。 以下是可简单复制的类型:\\ ·标量类型或标量类型的数组\\ ·可简单复制的类或此类的数组\end{tabular} \\ \hline
 		\begin{tabular}[c]{@{}l@{}}is\_standard\_\\ layout\end{tabular} &
 		C++11 &
-		\begin{tabular}[c]{@{}l@{}}Checks whether a type is a standard layout type or a\\ cv-qualified variant. The following are such types:\\ ·Scalar types or arrays of a scalar type\\ ·Standard-layout classes or arrays of such a class\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}是标准布局类型，还是cv限定变体\\ ·标量类型或标量类型的数组\\ ·标准布局类或此类的数组\end{tabular} \\ \hline
 		is\_empty &
 		C++11 &
-		\begin{tabular}[c]{@{}l@{}}Checks whether a type is an empty type. An empty type is\\ a class type(that is not a union) and has no non-static\\ data members(except for bit fields of size 0), no virtual\\ functions, \\ no virtual base classes, and no non-empty base classes.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}是否为空类型。空类型是一种类类型(不是联合)，\\ 是否为空类型。空类型是一种类类型(不是联合)，\\ 没有虚函数，没有虚基类，也没有非空基类。\end{tabular} \\ \hline
 		is\_polymorphic &
 		C++11 &
-		\begin{tabular}[c]{@{}l@{}}Checks whether a type is a polymorphic type. A polymorphic\\ type is a class type(that is not a union) that inherits at\\ least one virtual function.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}检查是否为多态类型。多态类型是继承\\ 至少一个虚函数的类型(不是联合)。\end{tabular} \\ \hline
 		is\_abstract &
 		C++11 &
-		\begin{tabular}[c]{@{}l@{}}Checks whether a type is an abstract type. An abstract type\\ is a class type(that is not a union) that inherits at least\\ one virtual pure function.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}检查是否为抽象类型。抽象类型是继承至少\\ 一个虚纯函数的类型(不是联合)。\end{tabular} \\ \hline
 		is\_final &
 		C++14 &
-		\begin{tabular}[c]{@{}l@{}}Checks whether a type is a class type declared with the \\ final specifier.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}检查是否是使用final说明符声明的类型。\end{tabular} \\ \hline
 		is\_aggregate &
 		C++17 &
-		Checks whether a type is an aggregate type. \\ \hline
+		是否为聚合类型。 \\ \hline
 		is\_signed &
 		C++11 &
-		\begin{tabular}[c]{@{}l@{}}Checks whether a type is a floating-point type or a signed \\ integral type.\end{tabular} \\ \hline
-	\end{tabular}
-\end{table}
-
-\begin{table}[H]
-\centering
-	\begin{tabular}{|l|l|l|}
-		\hline
-		\textbf{Name} &
-		\textbf{C++ Version} &
-		\textbf{Description} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}检查是浮点类型，还是有符号整型。\end{tabular} \\ \hline
 		is\_unsigned &
 		C++11 &
-		\begin{tabular}[c]{@{}l@{}}Checks whether a type is an unsigned integral type\\ or the bool type.\end{tabular} \\ \hline
+		型是无符号整型，还是bool类型。 \\ \hline
 		\begin{tabular}[c]{@{}l@{}}is\_bounded\_\\ array\end{tabular} &
 		C++20 &
-		\begin{tabular}[c]{@{}l@{}}Checks whether a type is an array type of a known\\ bound(such as int{[}5{]})\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}检查是否为已知边界的数组类型(比如int{[}5{]})\end{tabular} \\ \hline
 		\begin{tabular}[c]{@{}l@{}}is\_unbounded\_\\ array\end{tabular} &
 		C++20 &
-		\begin{tabular}[c]{@{}l@{}}Checks wheterh a type is an array type of an unknown\\ bound(such as int{[}{]}).\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}检查是否为未知边界的数组类型(比如int{[}{]}).\end{tabular} \\ \hline
 		is\_scoped\_enum &
 		C++23 &
-		Checks whether a type is a scoped enumeration type. \\ \hline
+		是否为范围枚举类型。 \\ \hline
 		\begin{tabular}[c]{@{}l@{}}has\_unique\_\\ object\_\\ representation\end{tabular} &
 		C++17 &
-		\begin{tabular}[c]{@{}l@{}}Checks whether a type is trivially copyable, and any\\ two objects of this type having the same value also\\ have the same object representation.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}是否可复制，并且该类型的两个具有相同值的对象\\ 也具有相同表现的形式。\end{tabular} \\ \hline
 	\end{tabular}
 \end{table}
 
 \begin{center}
-Table 5.2
+表 5.2
 \end{center}
 
-Although most of these are probably straightforward to understand, there are two that seem the same at a first glance. These are is\_trivial and is\_trivially\_copyable. These both are true for scalar types or arrays of scalar types. They also are true for classes that are trivially copyable or arrays of such classes but is\_trivial is true only for copyable classes that have a trivial default constructor.
+其中大多数可能很容易理解，但有两个乍一看似乎是相同的，is\_trivial和\_trivial\_copyable。对于标量类型或标量类型数组，这两者都成立，也适用于可简单复制的类或此类数组，但is\_trivial仅适用于具有普通默认构造函数的可复制类。
 
-According to the paragraph §11.4.4.1 in the C++ 20 standard, a default constructor is trivial if it is not user-provided, and the class has no virtual member functions, no virtual base classes, no non-static members with default initializers, every direct base of it has a trivial default constructor, and every non-static member of a class type also has a trivial default constructor. To understand this better, let’s look at the following example:
+根据C++20标准§11.4.4.1，若默认构造函数不是用户提供的，那么默认构造函数是普通的，类没有虚成员函数，没有虚基类，没有具有默认初始化式的非静态成员，其每个直接基类都有一个普通的默认构造函数，类的每个非静态成员也都有一个普通的默认构造函数。为了更好地理解这一点，来看看下面的例子:
 
 \begin{lstlisting}[style=styleCXX]
 struct foo
@@ -256,98 +236,98 @@ std::cout << std::is_trivially_copyable_v<tar>
           << '\n'; // true
 \end{lstlisting}
 
-In this example, there are three similar classes. All three of them, foo, bar, and tar, are trivially copyable. However, only the foo class is a trivial class, because it has a trivial default constructor. The bar class has a non-static member with a default initializer, and the tar class has a user-defined constructor, and this makes them non-trivial.
+本例中，有三个类似的类。这三个变量foo、bar和tar都是可复制的，只有foo类是一个普通类，因为它有一个普通的默认构造函数。bar类有一个带有默认初始化式的非静态成员，tar类有一个用户定义的构造函数，这使得它们不普通。
 
-Apart from trivial copy-ability, there are other operations that we can query for with the help of other type traits. We will see these in the following section.
+除了简单的复制能力之外，还可以在其他类型特征的帮助下查询其他操作。
 
-\subsubsubsection{5.5.3\hspace{0.2cm}Querying supported operations}
+\subsubsubsection{5.5.3\hspace{0.2cm}查询支持的操作}
 
-The following set of type traits helps us to query supported operations:
+下面的类型特征可以查询类型支持的操作:
 
 \begin{table}[H]
 \centering
 	\begin{tabular}{|l|l|}
 		\hline
-		\textbf{Name} & \textbf{Description} \\ \hline
+		\textbf{名称} & \textbf{描述} \\ \hline
 		\begin{tabular}[c]{@{}l@{}}is\_constructible\\ is\_trivially\_constructible\\ is\_nothrow\_constructible\end{tabular} &
-		\begin{tabular}[c]{@{}l@{}}Checks whether a type has a \\ constructor that can take specific\\ arguments.\end{tabular} \\ \hline
+		是否有可以接受特定参数的构造函数。 \\ \hline
 		\begin{tabular}[c]{@{}l@{}}is\_default\_constructible\\ is\_trivially\_default\_constructible\\ is\_nothrow\_default\_constructible\end{tabular} &
-		\begin{tabular}[c]{@{}l@{}}Check whether a type has a default\\ constructor.\end{tabular} \\ \hline
-		\begin{tabular}[c]{@{}l@{}}is\_copy\_constructible\\ is\_tribially\_copy\_constructible\\ is\_nothrow\_copy\_constructible\end{tabular} &
-		\begin{tabular}[c]{@{}l@{}}Check whether a type has a copy\\ constructor.\end{tabular} \\ \hline
-	\end{tabular}
+		是否有默认构造函数。 \\ \hline
+		\end{tabular}
 \end{table}
 
 \begin{table}[H]
 \centering
 	\begin{tabular}{|l|l|}
 		\hline
-		\textbf{Name} &
-		\textbf{Description} \\ \hline
+		\textbf{名称} &
+		\textbf{描述} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}is\_copy\_constructible\\ is\_tribially\_copy\_constructible\\ is\_nothrow\_copy\_constructible\end{tabular} &
+		是否具有复制构造函数 \\ \hline
 		\begin{tabular}[c]{@{}l@{}}is\_move\_constructible\\ is\_trivially\_move\_constructible\\ is\_nothrow\_move\_constructible\end{tabular} &
-		\begin{tabular}[c]{@{}l@{}}Check whether a type has a move\\ constructor.\end{tabular} \\ \hline
+		是否具有移动构造函数。 \\ \hline
 		\begin{tabular}[c]{@{}l@{}}is\_assignable\\ is\_trivially\_assignable\\ is\_nothrow\_assignable\end{tabular} &
-		\begin{tabular}[c]{@{}l@{}}Check whether a type has an assignment\\ operator for a specific argumnet.\end{tabular} \\ \hline
+		是否具有特定参数的赋值操作符。 \\ \hline
 		\begin{tabular}[c]{@{}l@{}}is\_copy\_assignable\\ is\_trivially\_copy\_assignable\\ is\_nothrow\_copy\_assignable\end{tabular} &
-		\begin{tabular}[c]{@{}l@{}}Check whether a type a copy assignment\\ operator.\end{tabular} \\ \hline
+		是否为复制赋值运算符。 \\ \hline
 		\begin{tabular}[c]{@{}l@{}}is\_move\_assignable\\ is\_trivially\_move\_assigneable\\ is\_nothrow\_move\_assignable\end{tabular} &
-		\begin{tabular}[c]{@{}l@{}}Check whether a type has a move\\ assignment operator.\end{tabular} \\ \hline
+		否有移动赋值操作符。 \\ \hline
 		\begin{tabular}[c]{@{}l@{}}is\_destructible\\ is\_trivially\_destructible\\ is\_nothrow\_destructible\end{tabular} &
-		\begin{tabular}[c]{@{}l@{}}Check whether a type has a non-deleted\\ destructor.\end{tabular} \\ \hline
+		是否具有未删除的析构函数。 \\ \hline
 		has\_virtual\_destructor &
-		\begin{tabular}[c]{@{}l@{}}Checks whether a type has a virtual\\ destructor.\end{tabular} \\ \hline
+		是否具有虚析构函数。 \\ \hline
 		\begin{tabular}[c]{@{}l@{}}is\_swappable\_with\\ is\_swappable\\ is\_nothrow\_swappable\_with\\ is\_nothrow\_swappable\end{tabular} &
-		\begin{tabular}[c]{@{}l@{}}Check whether objects of the same type\\ or objects of two different types can\\ be swapped.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}是否可以交换相同类型的对象或\\ 不同类型的对象。\end{tabular} \\ \hline
 	\end{tabular}
 \end{table}
 
 \begin{center}
-Table 5.3
+表 5.3
 \end{center}
 
-Except for the last sub-set, which was introduced in C++17, the others are available in C++11. Each kind of these type traits has multiple variants, including ones for checking operations that are trivial or declared as non-throwing with the noexcept specifier.
+除了最后一个是在C++17引入，其他都在C++11引入。每种类型特征都有多个变体，包括用于检查普通操作或使用noexcept说明符声明为无异常抛出操作的变体。
 
-Now let’s look at type traits that allow us to query for relationships between types.
+现在来看看类型特征，如何查询类型之间的关系。
 
-\subsubsubsection{5.5.4\hspace{0.2cm}Querying type relationships}
+\subsubsubsection{5.5.4\hspace{0.2cm}查询类型的关系}
 
-In this category, we can find several type traits that help to query relationships between types. These type traits are as follows:
+在这里，可以找到几个类型特征，可以查询类型之间的关系。这些类型特征如下所示:
 
 \begin{table}[H]
 \centering
 	\begin{tabular}{|l|l|l|}
 		\hline
-		\textbf{Name} &
-		\textbf{C++ Version} &
-		\textbf{Description} \\ \hline
+		\textbf{名称} &
+		\textbf{C++版本} &
+		\textbf{描述} \\ \hline
 		is\_same &
 		C++11 &
-		\begin{tabular}[c]{@{}l@{}}Checks whether two types are the\\ same, including possible cv-qualifiers.\end{tabular} \\ \hline
+		两个类型是否相同，包括可能的cv限定符。 \\ \hline
 		is\_base\_of &
 		C++11 &
-		\begin{tabular}[c]{@{}l@{}}Checks whether one types is derived\\ from another type.\end{tabular} \\ \hline
+		一个类型是否派生自另一个类型。 \\ \hline
 		\begin{tabular}[c]{@{}l@{}}is\_convertible\\ is\_nothrow\_convertible\end{tabular} &
 		\begin{tabular}[c]{@{}l@{}}C++11\\ C++14\end{tabular} &
-		\begin{tabular}[c]{@{}l@{}}Check whether a type can be converted \\ to another type.\end{tabular} \\ \hline
+		一种类型是否可以转换为另一种类型。 \\ \hline
 		\begin{tabular}[c]{@{}l@{}}is\_invocable\\ is\_invocable\_r\\ is\_nothrow\_invocable\\ is\_nothrow\_invocable\_r\end{tabular} &
 		C++17 &
-		\begin{tabular}[c]{@{}l@{}}Check whether a type can be invoked\\ with the specified argument types.\end{tabular} \\ \hline
+		是否可以调用一个类型与指定参数类型。 \\ \hline
 		is\_layout\_compatible &
 		C++20 &
-		\begin{tabular}[c]{@{}l@{}}Checks whether two types have compatible\\ layouts. Two classes are layout-compatible \\ if they are the same type(ignoring cv-qualifiers),\\ or their common initial sequence contains all\\ the non-static data members and bit fields or are\\ enumerations with the same underlying type.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}检查两种类型是否具有兼容的布局。若两个类\\是相同类型  (忽略cv限定符)，或者其公共初始\\ 序列包含所有非静态数据成员和位字段，或者是\\ 具有相同底层类型的枚举，则为布局兼容。\end{tabular} \\ \hline
 		\begin{tabular}[c]{@{}l@{}}is\_pointer\_\\ inconvertible\_base \_of\end{tabular} &
 		C++20 &
-		\begin{tabular}[c]{@{}l@{}}Checks whether a type is a pointer-inconvertible\\ base of another type.\end{tabular} \\ \hline
+		是否为另一类型的指针不可转换基类。 \\ \hline
 	\end{tabular}
 \end{table}
 
 \begin{center}
-Table 5.4
+表 5.4
 \end{center}
 
-Of these type traits, perhaps the most used one is std::is\_same. This type trait is very useful in determining whether two types are the same. Keep in mind that this type trait takes into account the const and volatile qualifiers; therefore, int and int const, for instance, are not the same type.
+这些类型特征中，使用最多的可能是std::is\_same。这种类型特征在判断两种类型是否相同时非常有用，不过这种类型的特征需要考虑const和volatile限定符;因此，int和int const不是同一类型。
 
-We can use this type trait to extend the implementation of the as\_string function shown earlier. Remember that if you called it with the arguments true or false it prints 1 or 0, and not true/false. We can add an explicit check for the bool type and return a string containing one of these two values, shown as follows:
+可以使用这个类型特征来扩展前面所示的as\_string函数的实现，若用true或false参数调用，则会输出1或0，而不是true/false。这里，可以为bool类型添加一个显式检查，并返回一个包含这两个值之一的字符串:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -367,89 +347,81 @@ std::cout << as_string(true) << '\n'; // prints true
 std::cout << as_string(false) << '\n'; // prints false
 \end{lstlisting}
 
-All the type traits seen so far are used to query some kind of information about types. In the next sections, we will see type traits that perform modifications on types.
+目前看到的所有类型特征，都用于查询关于类型的某种信息。在下一节中，我们将看到对类型执行进行修改的类型特征。
 
-\subsubsubsection{5.5.5\hspace{0.2cm}Modifying cv-specifiers, references, pointers, or a sign}
+\subsubsubsection{5.5.5\hspace{0.2cm}修改cv限定符、引用、指针或符号}
 
-The type traits that are performing transformations on types are also called metafunctions. These type traits provided a member type (typedef) called type that represents the transformed type. This category of type traits includes the following:
+类型上执行转换的类型特征也称为元函数。这些类型特征提供了一个称为type的成员类型(typedef)，表示转换后的类型。这类类型特征包括:
 
 \begin{table}[H]
 \centering
 	\begin{tabular}{|l|l|}
 		\hline
-		\textbf{Name} &
-		\textbf{Description} \\ \hline
+		\textbf{名称} &
+		\textbf{描述} \\ \hline
 		\begin{tabular}[c]{@{}l@{}}add\_cv\\ add\_const\\ add\_volatile\end{tabular} &
-		\begin{tabular}[c]{@{}l@{}}Add the const, volatile, or both specifiers\\ to a type.\end{tabular} \\ \hline
+		将const、volatile或两者都添加到类型中。 \\ \hline
 		\begin{tabular}[c]{@{}l@{}}remove\_cv\\ remove\_const\\ remove\_volatile\end{tabular} &
-		\begin{tabular}[c]{@{}l@{}}Remove the const, volatile, or both specifiers\\ from a type.\end{tabular} \\ \hline
+		从类型中删除const、volatile或同时删标识符。 \\ \hline
 		\begin{tabular}[c]{@{}l@{}}add\_lvalue\_reference\\ add\_rvalue\_reference\end{tabular} &
-		Add an lvalue or rvalue reference to a type. \\ \hline
+		向类型添加左值或右值引用。 \\ \hline
 		remove\_reference &
-		\begin{tabular}[c]{@{}l@{}}Removes a reference(either lvalue or rvalue)\\ from a type.\end{tabular} \\ \hline
-	\end{tabular}
-\end{table}
-
-\begin{table}[H]
-\centering
-	\begin{tabular}{|l|l|}
-		\hline
-		\textbf{Name}                                                                 & \textbf{Description}                          \\ \hline
+		从类型中删除引用(左值或右值)。 \\ \hline
 		remove\_cvref &
-		\begin{tabular}[c]{@{}l@{}}Removes the const and volatile specifiers as well\\ as lvalue or rvalue references from a type. It\\ combines the remove\_cv and remove\_reference traits.\end{tabular} \\ \hline
-		add\_pointer                                                                  & Adds a pointer to a type.                     \\ \hline
-		remove\_pointer                                                               & Removes a pointer from a type.                \\ \hline
+		\begin{tabular}[c]{@{}l@{}}从类型中删除const和volatile限定符以及左值或右值引用。\\ 融合了remove\_cv和remove\_reference。\end{tabular} \\ \hline
+		add\_pointer                                                                  & 添加指向类型的指针。                     \\ \hline
+		remove\_pointer                                                               & 从类型中移除指针。                \\ \hline
 		\begin{tabular}[c]{@{}l@{}}make\_signed\\ make\_unsigned\end{tabular} &
-		\begin{tabular}[c]{@{}l@{}}Make an intrgral type(except for bool) or an\\ enumeration type either signed or unsigned. The\\ supported intrgral types are short, int, long,\\ long long, char, wchar\_t, char8\_t, char16\_t, and\\ char32\_t.\end{tabular} \\ \hline
-		\begin{tabular}[c]{@{}l@{}}remove\_extent\\ remove\_all\_extents\end{tabular} & Remove one or all extents from an array type. \\ \hline
+		\begin{tabular}[c]{@{}l@{}}创建一个有符号或无符号的整型(bool类型除外)或枚举类型。\\ 支持的整数类型有short, int, long, long long, char, wchar\_t, \\ char8\_t, char16\_t和 char32\_t。\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}remove\_extent\\ remove\_all\_extents\end{tabular} & 从数组类型中移除一个范围或所有范围。 \\ \hline
 	\end{tabular}
 \end{table}
 
 \begin{center}
-Table 5.5
+表 5.5
 \end{center}
 
-With the exception of remove\_cvref, which was added in C++20, all the other type traits listed in this table are available in C++11. These are not all the metafunctions from the standard library. More are listed in the next section.
+除了remove\_cvref是在C++20中添加的，本表中列出的所有其他类型特征在C++11中可用。这些并不是标准库中的所有元函数，更多的将在下一节中列出。
 
-\subsubsubsection{5.5.6\hspace{0.2cm}Miscellaneous transformations}
+\subsubsubsection{5.5.6\hspace{0.2cm}各种转换}
 
-Apart from the metafunctions previously listed, there are other type traits performing type transformations. The most important of these are listed in the following table:
+除了前面列出的元函数之外，还有其他执行类型转换的类型特征。其中重要的如下表所示:
 
 \begin{table}[H]
 \centering
 	\begin{tabular}{|l|l|l|}
 		\hline
-		\textbf{Name} &
-		\textbf{C++ Version} &
-		\textbf{Description} \\ \hline
+		\textbf{名称} &
+		\textbf{C++版本} &
+		\textbf{描述} \\ \hline
 		enable\_if &
 		C++11 &
-		\begin{tabular}[c]{@{}l@{}}Enables the removal of a function overload or\\ template specialization from overload resolution.\end{tabular} \\ \hline
+		启用从重载解析中删除函数重载或模板特化。 \\ \hline
 		conditional &
 		C++11 &
-		\begin{tabular}[c]{@{}l@{}}Defines the member type called type to be one\\ of two possible types by selecting them based on\\ a compile-time Boolean condition.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}通过基于编译时布尔条件进行选择，\\ 将type成员类型定义为两种可能类型之一。\end{tabular} \\ \hline
 		decay &
 		C++11 &
-		\begin{tabular}[c]{@{}l@{}}Applies transformations on a type(array-to-pointer\\ for array types, lvalue-to-rvalue for reference\\ types, and function-to-pointer to function types),\\ removes const and volatile qualifiers, and uses the\\ resulting member typedef type as its own member\\ typedef type.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}在类型上应用转换(数组类型为数组到指针，\\ 引用类型为左值到右值，函数类型为指针)，\\ 删除const和volatile限定符，并使用结果成员\\ 类型定义类型作为其自己的成员类型定义类型。\end{tabular} \\ \hline
 		common\_type &
 		C++11 &
-		Determines the common type from a group of types. \\ \hline
+		从一组类型中确定公共类型。 \\ \hline
 		common\_reference &
 		C++20 &
-		\begin{tabular}[c]{@{}l@{}}Determines the common reference type from a group\\ of types.\end{tabular} \\ \hline
+		从一组类型中确定公共引用类型。 \\ \hline
 		underlaying\_type &
 		C++11 &
-		\begin{tabular}[c]{@{}l@{}}Determines the underlying type of an enumeration\\ type.\end{tabular} \\ \hline
+		确定枚举类型的基础类型。 \\ \hline
 		void\_t &
 		C++17 &
-		\begin{tabular}[c]{@{}l@{}}A type alias mapping a sequence of types to the void\\ type.\end{tabular} \\ \hline
+		将类型序列映射到void类型的类型别名。 \\ \hline
 		type\_identity &
 		C++20 &
-		\begin{tabular}[c]{@{}l@{}}Provides the member typedef type as an alias for\\ the type argument T.\end{tabular} \\ \hline
+		提供成员typedef类型作为类型参数T的别名。 \\ \hline
 	\end{tabular}
 \end{table}
 
-From this list, we have already discussed enable\_if. There are some other type traits here that are worth exemplifying. Let’s first look at std::decay and for this purpose, let’s consider the following slightly changed implementation of the as\_string function:
+列表中，已经讨论了enable\_if，还有一些需要举例说明的类型特征。先来看看std::decay，考虑一下as\_string函数的另一种实现方式:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -466,7 +438,7 @@ std::string as_string(T&& value)
 }
 \end{lstlisting}
 
-The only change is the way we pass arguments to the function. Instead of passing by value, we pass by rvalue reference. If you remember from Chapter 4, Advanced Template Concepts, this is a forwarding reference. We can still make calls passing rvalues (such as literals) but passing lvalues will trigger compiler errors:
+其中的变化是将参数传递给函数的方式。不是按值传递，而是按右值引用传递。若还记得第4章，这是一个转发引用。仍然可以通过传递右值(例如字面量)进行调用，但传递左值会触发编译器错误:
 
 \begin{lstlisting}[style=styleCXX]
 std::cout << as_string(true) << '\n'; // OK
@@ -479,7 +451,7 @@ int n = 42;
 std::cout << as_string(n) << '\n'; // error
 \end{lstlisting}
 
-The last two calls are triggering the static\_assert statement to fail. The actual type template arguments are bool\& and int\&. Therefore std::is\_same<bool, bool\&> will initialize the value member with false. Similarly, std::is\_arithmetic<int\&> will do the same. In order to evaluate these types, we need to ignore references and the const and volatile qualifiers. The type trait that helps us do so is std::decay, which performs several transformations, as described in the previous table. Its conceptual implementation is the following:
+最后两个调用触发static\_assert语句失败。实际的类型模板参数是bool\&和int\&。因此std::is\_same<bool, bool\&>将用false初始化值member。类似地，std::is\_arithmetic<int\&>也会做同样的事情。为了求值这些类型，需要忽略引用以及const和volatile限定符。辅助我们的类型特征是std::decay，它会执行几个转换，如前一个表所述。其概念执行如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -500,9 +472,9 @@ public:
 };
 \end{lstlisting}
 
-From this snippet, we can see that std::decay is implemented with the help of other metafunctions, including std::conditional, which is key for selecting between one type or another based on a compile-time expression. Actually, this type trait is used multiple times, which is something you can do if you need to make a selection based on multiple conditions.
+从这段代码中，可以看到std::decay是在其他元函数的帮助下实现的，包括std::conditional，是基于编译时表达式在一种类型或另一种类型之间进行选择的关键。实际上，这种类型特征会多次使用，若需要根据多个条件进行选择可以这样做。
 
-With the help of std::decay, we can modify the implementation of the as\_string function, stripping reference, and cv-qualifiers:
+在std::decay的帮助下，可以修改as\_string函数、剥离引用和cv-限定符的实现:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -521,9 +493,9 @@ std::string as_string(T&& value)
 }
 \end{lstlisting}
 
-By changing the implementation as shown here, we made the previous calls to as\_string that failed to compile without any more errors.
+通过修改实现，可使消除前面对as\_string的编译错误。
 
-In the implementation of std::decay we saw the repetitive use of std::conditional. This is a metafunction that is fairly easy to use and can help to simplify many implementations. In Chapter 2, Template Fundamentals, in the section Defining alias templates, we saw an example where we built a list type called list\_t. This had a member alias template called type that was aliasing either the template type T, if the size of the list was 1, or std::vector<T>, if it was higher. Let’s look at the snippet again:
+在std::decay的实现中，多次使用了std::conditional。这是一个相当好用的元函数，可以帮助简化许多实现。在第2章中，我们看到了一个例子，构建了一个名为list\_t的列表类型。它有一个名为type的成员别名模板，若列表的大小为1，则该模板类型为T，若列表的大小大于1，则该模板类型为std::vector<T>。再来回顾一下这个代码段:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T, size_t S>
@@ -542,7 +514,7 @@ template <typename T, size_t S>
 using list_t = typename list<T, S>::type;
 \end{lstlisting}
 
-This implementation can be greatly simplified with the help of std::conditional as follows:
+在std::conditional的帮助下，这个实现可以大大简化:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T, size_t S>
@@ -551,7 +523,7 @@ using list_t =
 					1, T, std::vector<T>>::type;
 \end{lstlisting}
 
-There is no need to rely on class template specialization to define such a list type. The entire solution can be reduced to defining an alias template. We can verify this works as expected with some static\_assert statements, as follows:
+没有必要依赖类模板特化来定义这样的列表类型，整个解决方案可以简化为定义一个别名模板。可以用一些static\_assert来验证它是否如预期的那样工作:
 
 \begin{lstlisting}[style=styleCXX]
 static_assert(std::is_same_v<list_t<int, 1>, int>);
@@ -559,7 +531,7 @@ static_assert(std::is_same_v<list_t<int, 2>,
 							std::vector<int>>);
 \end{lstlisting}
 
-Exemplifying the use of each of the standard type traits is beyond the scope of this book. However, the next section of this chapter provides more complex examples that require the use of several standard type traits.
+举例说明每个标准类型特征的使用超出了本书的范畴。然而，本章的下一节提供了更复杂的例子，需要使用几个标准的类型特征。
 
 
 

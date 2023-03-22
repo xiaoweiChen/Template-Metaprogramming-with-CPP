@@ -1,9 +1,9 @@
 
-In the previous section of the chapter, we have explored the various type traits that the standard library provides. It is difficult and unnecessary to find examples for each and every type trait. However, it is worth showcasing some examples where multiple type traits can be used for solving a problem. We will do this next.
+本章的前一节中，已经探讨了标准库提供的各种类型特征。为每一种类型特征找到例子的确很困难，也没有必要。但有必要展示一些可以使用多种类型特征，来解决问题的示例。
 
-\subsubsubsection{5.6.1\hspace{0.2cm}Implementing a copy algorithm}
+\subsubsubsection{5.6.1\hspace{0.2cm}实现一个复制算法}
 
-The first example problem we will take a look at is a possible implementation for the std::copy standard algorithm (from the <algorithm> header). Keep in mind that what we will see next is not the actual implementation but a possible one that helps us learn more about the use of type traits. The signature of this algorithm is as follows:
+第一个示例问题是std::copy标准算法(<algorithm>)的可能实现。我们接下来将看到的不是实际的实现，而是一个可能帮助我们更多地了解类型特征使用的实现。该算法的声明如下:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename InputIt, typename OutputIt>
@@ -11,7 +11,7 @@ constexpr OutputIt copy(InputIt first, InputIt last,
 						OutputIt d_first);
 \end{lstlisting}
 
-As a note, this function is constexpr only in C++20, but we can discuss it in this context. What it does is copy all the elements in the range [first, last) to another range that begins with d\_first. There is also an overload that takes an execution policy, and a version, std::copy\_if, that copies all the elements that match a predicate, but these are not important for our example. A straightforward implementation of this function is the following:
+这个函数只有在C++20中是constexpr，但是可以在这里进行讨论。其所做的是将范围[first, last)中的所有元素复制到另一个以d\_first开头的范围内。还有一个重载接受执行策略，还有一个版本std::copy\_if，复制与谓词匹配的所有元素，但这些对于我们的示例并不重要。这个函数的简单实现如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename InputIt, typename OutputIt>
@@ -26,36 +26,36 @@ constexpr OutputIt copy(InputIt first, InputIt last,
 }
 \end{lstlisting}
 
-However, there are cases when this implementation can be optimized by simply copying memory. However, there are some conditions that must be met for this purpose:
+但在某些情况下，这种实现可以通过简单地复制内存来优化。为了达到这个目的，必须满足一些条件:
 
 \begin{itemize}
 \item
-Both iterator types, InputIt and OutputIt, must be pointers.
+两种迭代器类型InputIt和OutputIt都必须是指针。
 
 \item
-Both template parameters, InputIt and OutputIt, must point to the same type (ignoring cv-qualifiers).
+两个模板参数InputIt和OutputIt必须指向相同的类型(忽略cv-限定符)。
 
 \item
-The type pointed by InputIt must have a trivial copy assignment operator.
+InputIt所指向的类型，必须具有普通的复制赋值操作符。
 \end{itemize}
 
-We can check these conditions with the following standard type traits:
+可以用以下标准类型特征来检查这些条件:
 
 \begin{itemize}
 \item
-std::is\_same (and the std::is\_same\_v variable) to check that two types are the same.
+std::is\_same(和std::is\_same\_v变量)来检查两种类型是否相同。
 
 \item
-std::is\_pointer (and the std::is\_pointer\_v variable) to check that a type is a pointer type.
+std::is\_pointer(和std::is\_pointer\_v变量)来检查一个类型是否是指针类型。
 
 \item
-std::is\_trivially\_copy\_assignable (and the std::is\_trivially\_copy\_assignable\_v variable) to check whether a type has a trivial copy assignment operator.
+std::is\_trivially\_copy\_assignable(和std::is\_trivially\_copy\_assignable\_v变量)检查类型是否具有普通的复制赋值操作符。
 
 \item
-std::remove\_cv (and the std::remove\_cv\_t alias template) to remove cv-qualifiers from a type.
+std::remove\_cv(和std::remove\_cv\_t别名模板)从类型中删除cv-限定符。
 \end{itemize}
 
-Let’s see how we can implement this. First, we need to have a primary template with the generic implementation, and then a specialization for pointer types with the optimized implementation. We can do this using class templates with member function templates as shown next:
+来看看如何实现。首先，需要有一个带有泛型实现的主模板，然后有一个带有优化实现的指针类型特化。可以使用带有成员函数模板的类模板来做到这一点，如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 namespace detail
@@ -92,7 +92,7 @@ namespace detail
 }
 \end{lstlisting}
 
-To copy memory between a source and a destination we use std::memmove here, which copies data even if objects overlap. These implementations are provided in a namespace called detail, because they are implementation details that are used in turn by the copy function and not directly by the user. The implementation of this generic copy algorithm could be as follows:
+为了在源和目标之间复制内存，这里使用std::memmove，即使对象重叠，也会复制数据。这些实现是在一个名为detail的命名空间中，由复制函数轮流使用进行实现的细节，而不是直接由用户使用。该通用复制算法的实现方式如下:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename InputIt, typename OutputIt>
@@ -114,7 +114,7 @@ OutputIt d_first)
 }
 \end{lstlisting}
 
-You can see here that the decision to select one specialization or the other is based on a constexpr Boolean value that is determined using the aforementioned type traits. Examples of using this copy function are shown in the next snippet:
+这里，可以看到选择哪个特化的决定，是基于使用前面提到的类型特征确定的constexpr布尔值。下面的代码段显示了使用这个复制函数的例子:
 
 \begin{lstlisting}[style=styleCXX]
 std::vector<int> v1{ 1, 2, 3, 4, 5 };
@@ -130,29 +130,28 @@ int a2[5];
 copy(a1, a1 + 5, a2);
 \end{lstlisting}
 
-Keep in mind that this is not the real definition of the generic algorithm copy you will find in standard library implementations, which are further optimized. However, this was a good example to demonstrate how to use type traits for a real-world problem.
+这不是在标准库实现中找到的泛型算法副本的真正定义，标准库实现是进一步优化的。但这是一个很好的示例，可以演示如何将类型特征用于实际问题。
 
-For simplicity, I have defined the copy function in what appears to be the global namespace. This is a bad practice. In general, code, especially in libraries, is grouped in namespaces. In the source code on GitHub that accompanies the book, you will find this function defined in a namespace called n520 (this is just a unique name, nothing relevant to the topic). When calling the copy function that we have defined, we would actually need to use the fully qualified name (that includes the namespace name) such as the following:
+简单起见，我在全局命名空间中定义了复制函数。这是一个不好的做法。一般来说，代码(尤其是库中的代码)是按命名空间分组的。在本书附带的GitHub源代码中，会发现这个函数定义在一个名为n520的命名空间中(这只是一个唯一的名称，与主题无关)。当调用我们定义的复制函数时，实际上需要使用完全限定名(包括命名空间名)，如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 n520::copy(std::begin(v1), std::end(v1), std::begin(v2));
 \end{lstlisting}
 
-Without this qualification, a process called Argument-Dependent Lookup (ADL) would kick in. This would result in resolving the call to copy to the std::copy function because the arguments we pass are found in the std namespace. You can read more about ADL at \url{https://en.cppreference.com/w/cpp/language/adl}.
+若没有这个条件，一个叫做参数依赖查找(ADL)的过程就会开始运作。因为传递的参数可以在std命名空间中找到，所以这将调用std::copy函数。可以在\url{https://en.cppreference.com/w/cpp/language/adl}上阅读更多关于ADL的信息。
 
-Now, let’s look at another example.
+接下来，来看看下一个例子。
 
-\subsubsubsection{5.6.2\hspace{0.2cm}Building a homogenous variadic function template}
+\subsubsubsection{5.6.2\hspace{0.2cm}构建一个同构可变参的函数模板}
 
-For the second example, we want to build a variadic function template that can only take arguments of the same type or types that can be implicitly converted to a common one.
-Let’s start with the following skeleton definition:
+对于第二个示例，我们希望构建一个可变参数函数模板，该模板只能接受相同类型的参数，或者可以隐式转换为公共类型的参数。从下面的框架定义开始:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename... Ts>
 void process(Ts&&... ts) {}
 \end{lstlisting}
 
-The problem with this is that all of the following function calls work (keep in mind that the body of this function is empty so there will be no errors due to performing operations unavailable on some types):
+这样做的问题是，下面所有的函数调用都可以工作(这个函数的函数体是空的，不会因为执行某些类型上不可用的操作而出现错误):
 
 \begin{lstlisting}[style=styleCXX]
 process(1, 2, 3);
@@ -160,11 +159,11 @@ process(1, 2.0, '3');
 process(1, 2.0, "3");
 \end{lstlisting}
 
-In the first example, we pass three int values. In the second example, we pass an int, a double, and a char; both int and char are implicitly convertible to double, so this should be all right. However, in the third example, we pass an int, a double, and a char const*, and this last type is not implicitly convertible to either int or double. Therefore, this last call is supposed to trigger a compiler error but does not.
+第一个例子中，传递了三个int值。第二个例子中，传递了一个int型、一个double型和一个char型的值;int和char都可以隐式转换为double类型，所以这应该是正确的。然而，第三个例子中，传递了一个int型、一个double型和一个char型const*的值，最后一个类型不能隐式转换为int型或double型。因此，最后一个调用应该会触发编译器错误，但实际上并没有。
 
-In order to do so, we need to ensure that when a common type for the function arguments is not available, the compiler will generate an error. To do so, we can use a static\_assert statement or std::enable\_if and SFINAE. However, we do need to figure out whether a common type exists or not. This is possible with the help of the std::common\_type type trait.
+为此，需要确保当函数参数的公共类型不可用时，编译器将生成一个错误。可以使用static\_assert或std::enable\_if和SFINAE，但我们确实需要弄清楚是否存在一种常见类型。这在std::common\_type类型特征的帮助下，可以进行判断。
 
-The std::common\_type is a metafunction that defines the common type among all of its type arguments that all the types can be implicitly converted to. Therefore std::common\_type<int, double, char>::type will alias the double type. Using this type trait, we can build another type trait that tells us whether a common type exists. A possible implementation is as follows:
+std::common\_type是一个元函数，它在所有类型参数中定义公共类型，所有类型都可以隐式转换为该类型。因此std::common\_type<int, double, char>::type将为double类型取别名。使用这个类型特征，可以构建另一个类型特征，从而告诉我们一个共同类型是否存在。一个可能的实现如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename, typename... Ts>
@@ -181,7 +180,7 @@ constexpr bool has_common_type_v =
 	has_common_type<void, Ts...>::value;
 \end{lstlisting}
 
-You can see in this snippet that we base the implementation on several other type traits. First, there is the std::false\_type and std::true\_type pair. These are type aliases for std::bool\_constant<false> and std::bool\_constant<true> respectively. The std::bool\_constant class is available in C++17 and is, in turn, an alias template for a specialization of the std::integral\_constant class for the bool type. This last class template wraps a static constant of the specified type. Its conceptual implementation looks as follows (although some operations are also provided):
+这段代码中，可以看到我们将实现基于其他几个类型特征。首先，有std::false\_type和std::true\_type，分别是std::bool\_constant<false>和std::bool\_constant<true>的类型别名。std::bool\_constant类在C++17中可用，反之，它是bool类型的std::integral\_constant类特化的别名模板。最后一个类模板包装了一个指定类型的静态常量，其的概念实现如下所示(也提供了一些操作):
 
 \begin{lstlisting}[style=styleCXX]
 template<class T, T v>
@@ -192,13 +191,13 @@ struct integral_constant
 };
 \end{lstlisting}
 
-This helps us simplify the definition of type traits that need to define a Boolean compiletime value, as we saw in several cases in this chapter.
+这有助于我们简化需要定义布尔编译时值的类型特征的定义，就像我们在本章的几个例子中看到的那样。
 
-A third type trait used in the implementation of the has\_common\_type class is std::void\_t. This type trait defines a mapping between a variable number of types and the void type. We use this to build a mapping between the common type, if one exists, and the void type. This enables us to leverage SFINAE for the specialization of the has\_common\_type class template.
+has\_common\_type类的实现中使用的第三种类型的特征是std::void\_t，此类型特征定义了可变数量的类型与void类型之间的映射。可以使用它来构建公共类型(若存在的话)和void类型之间的映射。可使我们能够利用SFINAE对has\_common\_type类模板进行特化。
 
-Finally, a variable template called has\_common\_type\_v is defined to ease the use of the has\_common\_type trait.
+最后，定义了一个名为has\_common\_type\_v的变量模板，以简化has\_common\_type特征的使用。
 
-All these can be used to modify the definition of the process function template to ensure it only allows arguments of a common type. A possible implementation is shown next:
+所有这些都可以用来修改流程函数模板的定义，以确保它只允许公共类型的参数。一个可能的实现如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename... Ts,
@@ -208,9 +207,9 @@ void process(Ts&&... ts)
 { }
 \end{lstlisting}
 
-As a result of this, calls such as process(1, 2.0, "3") will produce a compiler error because there is no overloaded process function for this set of arguments.
+因此，像process(1, 2.0, "3")这样的调用将产生编译器错误，因为对于这组参数没有重载的process函数。
 
-As previously mentioned, there are different ways to use the has\_common\_type trait to achieve the defined goal. One of these, using std::enable\_if, was shown here, but we can also use static\_assert. However, a much better approach can be taken with the use of concepts, which we will see in the next chapter.
+如前所述，有不同的方法来使用has\_common\_type特征来实现定义的目标。其中之一是使用std::enable\_if，也可以使用static\_assert。然而，使用概念应该是更好的方式，我们将在下一章中看到。
 
 
 

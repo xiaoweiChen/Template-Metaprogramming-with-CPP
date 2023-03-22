@@ -1,63 +1,63 @@
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Question 1}
+\textbf{习题 1}
 
-What are type traits?
-
-\hspace*{\fill} \\ %插入空行
-\noindent
-\textbf{Answer}
-
-Type traits are small class templates that enable us to either query properties of types or perform transformations of types.
-
+什么是类型特征?
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Question 2}
+\textbf{参考答案}
 
-What is SFINAE?
+类型特征是(小)型类模板，能够查询类型的属性或执行类型的转换。
 
-\hspace*{\fill} \\ %插入空行
-\noindent
-\textbf{Answer}
-
-SFINAE is an acronym for Substitution Failure Is Not An Error. This is a rule for template substitution and works as follows: when the compiler encounters the use of a function template, it substitutes the arguments in order to instantiate the template; if an error occurs at this point, it is not regarded as an ill-formed code, only as a deduction failure. As a result, the function is removed from the overload set instead of causing an error. Therefore, an error only occurs if there is no match in the overload set for a particular function call.
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Question 3}
+\textbf{习题 2}
 
-What is constexpr if?
-
-\hspace*{\fill} \\ %插入空行
-\noindent
-\textbf{Answer}
-
-constexpr if is a compile-time version of the if statement. The syntax for it is if constexpr(condition). It’s been available since C++17 and allows us to discard a branch, at compile time, based on the value of a compile-time expression.
+什么是SFINAE?
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Question 4}
+\textbf{参考答案}
 
-What does std::is\_same do?
-
-\hspace*{\fill} \\ %插入空行
-\noindent
-\textbf{Answer}
-
-std::is\_same is a type trait that checks whether two types are the same. It includes checks for the const and volatile qualifiers, yielding false for two types that have different qualifiers (such as int and int const).
+SFINAE是替换失败不是错误的首字母缩写。这是模板替换的规则，其工作原理如下:当编译器遇到使用函数模板时，会替换实参以实例化模板;若此时发生错误，则不将其视为格式错误的代码，只将其视为推导失败，相应函数从重载集中删除，而不是引起错误。因此，只有在特定函数调用的重载集中没有匹配项时，才会产生错误。
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Question 5}
+\textbf{习题 3}
 
-What does std::conditional do?
+什么是constexpr if?
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Answer}
+\textbf{参考答案}
 
-std::conditional is a metafunction that chooses one type or another based on a compile-time constant.
+constexpr if是if语句的编译时版本，其语法是if constexpr(condition)，从C++17开始可用。允许在编译时，根据编译时表达式的值丢弃分支。
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{习题 4}
+
+std::is\_same可用来做什么?
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{参考答案}
+
+std::is\_same是一个类型特征，用于检查两个类型是否相同，包括对const和volatile限定符的检查，对于具有不同限定符的两种类型(例如int和int const)，将生成false。
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{习题 5}
+
+std::conditional可用来做什么?
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{参考答案}
+
+std::conditional是一个元函数，可根据编译时常数选择一种类型或另一种类型。
 
 
 
