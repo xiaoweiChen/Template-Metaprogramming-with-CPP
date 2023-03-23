@@ -1,7 +1,7 @@
 
-We have seen multiple examples of constraining template arguments but in all the cases so far, we used a single constraint. It is possible though for constraints to be composed using the \&\& and || operators. A composition of two constraints using the \&\& operator is called a conjunction and the composition of two constraints using the || operator is called a disjunction.
+我们已经看到了多个约束模板参数的例子，但目前为止，我们使用的都是单一约束。不过，可以使用\&\&和||操作符组合约束。使用\&\&操作符组合两个约束称为合取，使用||操作符组合两个约束称为析取。
 
-For a conjunction to be true, both constraints must be true. Like in the case of logical AND operations, the two constraints are evaluated from left to right, and if the left constraint is false, the right constraint is not evaluated. Let’s look at an example:
+要使一个合取为真，两个约束都必须为真。与逻辑与操作类似，两个约束从左到右求值，若左边的约束为假，则不对右边的约束求值。来看一个例子:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -12,7 +12,7 @@ T decrement(T value)
 }
 \end{lstlisting}
 
-In this snippet, we have a function template that returns the decremented value of the received argument. However, it only accepts signed integral values. This is specified with the conjunction of two constraints, std::is\_integral\_v<T> \&\& std::is\_signed\_v<T>. The same result can be achieved using a different approach to defining the conjunction, as shown next:
+这段代码中，有一个函数模板，返回接收到的参数的递减值，但只接受带符号的整数值。这是通过连接两个约束来指定的，std::is\_integral\_v<T> \&\& std::is\_signed\_v<T>。使用不同的方法定义连接可以获得相同的结果:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -31,9 +31,9 @@ T decrement(T value)
 }
 \end{lstlisting}
 
-You can see three concepts defined here: one that constrains integral types, one that constrains signed types, and one that constrains integral and signed types.
+可以看到这里定义了三个概念:一个约束整型，一个约束有符号类型，一个约束整型和有符号类型。
 
-Disjunctions work in a similar way. For a disjunction to be true, at least one of the constraints must be true. If the left constraint is true, then the right one is not evaluated. Again, let’s see an example. If you recall the add function template from the first section of the chapter, we constrained it with the std::is\_arithmetic type trait. However, we can get the same result using std::is\_integral and std::is\_floating\_point, used as follows:
+析取的工作原理与此类似。要使析取为真，至少有一个约束条件必须为真。若左边的约束为真，则不对右边的约束求值。再看一个例子，若还记得本章第一节的add函数模板，我们用std::is\_arithmetic类型特征来约束它。还可以使用std::is\_integral和std::is\_float\_point得到相同的结果:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -44,7 +44,7 @@ T add(T a, T b)
 }
 \end{lstlisting}
 
-The expression std::is\_integral\_v<T> || std::is\_floating\_point\_v<T> defines a disjunction of two atomic constraints. We will look at this kind of constraint in more detail later. For the time being, keep in mind that an atomic constraint is an expression of the bool type that cannot be decomposed into smaller parts. Similarly, to what we’ve done previously, we can also build a disjunction of concepts and use that. Here is how:
+表达式std::is\_integral\_v<T> || std::is\_float\_point\_v<T>定义了两个原子约束的析取。稍后我们将更详细地讨论这种约束。目前，原子约束是bool类型的表达式，不能分解为更小的部分。类似地，对于我们之前所做的，也可以建立一个析取的概念并使用它:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -63,9 +63,9 @@ T add(T a, T b)
 }
 \end{lstlisting}
 
-As already mentioned, conjunctions and disjunctions are short-circuited. This has an important implication in checking the correctness of a program. Considering a conjunction of the form A<T> \&\& B<T>, then A<T> is checked and evaluated first, and if it is false, the second constraint, B<T>, is not checked anymore.
+如前所述，合取和析取是短路的。这对检查程序的正确性有重要的意义。考虑形式为A<T> \&\& B<T>的连接，则首先检查并求值A<T>，如果为假，则不再检查第二个约束B<T>。
 
-Similarly, for the A<T> || B<T> disjunction, after A<T> is checked, if it evaluates to true, the second constraint, B<T>, will not be checked. If you want both conjunctions to be checked for well-formedness and then their Boolean value determined, then you must use the \&\& and || operators differently. A conjunction or disjunction is formed only when the \&\& and || tokens, respectively, appear nested in parentheses or as an operand of the \&\& or || tokens. Otherwise, these operators are treated as logical operators. Let’s explain this with examples:
+类似地，对于A<T> || B<T>的析取，在检查A<T>后，若它的计算结果为真，则不会检查第二个约束B<T>。若希望检查两个合取的格式是否良好，可以在之后通过其布尔值进行确定，要么不使用\&\&和||操作符。只有当\&\&和||分别嵌套在括号中或作为\&\&或||的操作数出现时，才会形成合取或析取。否则，这些操作符将被视为逻辑操作符。这里，用例子来解释一下:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -81,7 +81,7 @@ requires A<T> && (!A<T> || B<T>)
 void f() {}
 \end{lstlisting}
 
-In all these examples, the || token defines a disjunction. However, when used inside a cast expression or a logical NOT, the \&\& and || tokens define a logical expression:
+所有这些示例中，||定义了一个析取。然而，当在强制转换表达式或逻辑NOT中使用时，\&\&和||定义了一个逻辑表达式:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -93,9 +93,9 @@ requires (static_cast<bool>(A<T> || B<T>))
 void f() {}
 \end{lstlisting}
 
-In these cases, the entire expression is first checked for correctness, and then its Boolean value is determined. It is worth mentioning that in this latter example both expressions, !(A<T> || B<T>) and static\_cast<bool>(A<T> || B<T>), need to be wrapped inside another set of parentheses because the expression of a requires clause cannot start with the ! token or a cast.
+这中情况下，首先检查整个表达式的正确性，然后确定其布尔值。在后面的例子中，两个表达式!(A<T> || B<T>)和static\_cast<bool>(A<T> || B<T>)都需要包装在另一组括号中，因为requires子句的表达式不能以!标记或转换。
 
-Conjunctions and disjunctions cannot be used to constrain template parameter packs. However, there is a workaround to make it happen. Let’s consider a variadic implementation of the add function template with the requirement that all arguments must be integral types. One would attempt to write such a constraint in the following form:
+合取和析取符不能用于约束模板参数包，但有一种变通方法可以实现它。考虑add函数模板的可变参数实现，要求所有参数必须是整型。可以尝试以以下形式编写这样的约束:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename ... T>
@@ -106,7 +106,7 @@ auto add(T ... args)
 }
 \end{lstlisting}
 
-This will generate a compiler error because the ellipsis is not allowed in this context. What we can do to avoid this error is to wrap the expression in a set of parentheses, as follows:
+这将产生编译器错误，因为在此上下文中不允许使用省略号。为了避免这个错误，可以把表达式用括号括起来:
 
 \begin{lstlisting}[style=styleCXX]
 	template <typename ... T>
@@ -117,14 +117,14 @@ This will generate a compiler error because the ellipsis is not allowed in this 
 	}
 \end{lstlisting}
 
-The expression, (std::is\_integral\_v<T> \&\& ...), is now a fold expression. It is not a conjunction, as one would expect. Therefore, we get a single atomic constraint. The compiler will first check the correctness of the entire expression and then determine its Boolean value. To build a conjunction we first need to define a concept:
+表达式(std::is\_integral\_v<T> \&\&…)现在是一个折叠表达式，不是一个合取。因此，得到了一个原子约束。编译器将首先检查整个表达式的正确性，然后确定其布尔值。要构建一个合取，首先需要定义一个概念:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
 concept Integral = std::is_integral_v<T>;
 \end{lstlisting}
 
-What we need to do next is change the requires clause so that it uses the newly defined concept and not the Boolean variable, std::is\_integral\_v<T>:
+接下来我们需要做的是更改requires子句，以便使用新定义的概念，而不是布尔变量std::is\_integral\_v<T>:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename ... T>
@@ -135,22 +135,22 @@ auto add(T ... args)
 }
 \end{lstlisting}
 
-It does not look like much of a change but, in fact, because of the use of concepts, validating the correctness and determining the Boolean value occur individually for each template argument. If the constraint is not met for a type, the rest is short-circuited, and the validation stops.
+看起来变化不大，由于使用了概念，验证正确性和确定布尔值将分别针对每个模板参数进行。若某个类型的约束不满足，其余部分将短路，验证将停止。
 
-You must have noticed that earlier in this section I used the term atomic constraint twice. Therefore, one would ask, what is an atomic constraint? It is an expression of the bool type that cannot be decomposed further. Atomic constraints are formed during the process of constraint normalization when the compiler decomposes constraints into conjunction and disjunctions of atomic constraints. This works as follows:
+在本节前面，我两次使用了原子约束这个术语。因此，有人会问，什么是原子约束?它是bool类型的表达式，不能进一步分解。原子约束是在约束规范化过程中形成的，编译器将约束分解为原子约束的合取和析取。其工作原理如下:
 
 \begin{itemize}
 \item
-The expression, E1 \&\& E2, is decomposed into the conjunction of E1 and E2.
+表达式E1 \&\& E2可分解为E1和E2的合取。
 
 \item
-The expression, E1 || E2, is decomposed into the disjunction of E1 and E2.
+表达式E1 || E2可分解为E1和E2的析取。
 
 \item
-The concept, C<A1, A2, … An>, is replaced with its definition after substituting all the template arguments into its atomic constraints.
+概念C<A1, A2，…An>在将所有模板参数替换为其原子约束后，其定义被替换。
 \end{itemize}
 
-Atomic constraints are used for determining the partial ordering of constraints that, in turn, determine the partial ordering of function templates and class template specializations, as well as the next candidate for non-template functions in overload resolution. We will discuss this topic next.
+原子约束用于确定约束的部分排序，这些约束又决定函数模板和类模板特化部分的排序，以及重载解析中非模板函数的下一个候选。我们接下来将讨论这个话题。
 
 
 

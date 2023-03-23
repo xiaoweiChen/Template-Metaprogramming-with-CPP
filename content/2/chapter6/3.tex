@@ -1,48 +1,48 @@
 
-A requires expression may be a complex expression, as seen earlier in the example with the container concept. The actual form of a requires expression is very similar to function syntax and is as follows:
+requires表达式可能是一个复杂表达式，如前面的容器概念示例中所示。requires表达式的形式与函数语法非常相似:
 
 \begin{lstlisting}[style=styleCXX]
 requires (parameter-list) { requirement-seq }
 \end{lstlisting}
 
-The parameter-list is a comma-separated list of parameters. The only difference from a function declaration is that default values are not allowed. However, the parameters that are specified in this list do not have storage, linkage, or lifetime. The compiler does not allocate any memory for them; they are only used to define requirements. However, they do have a scope, and that is the closing curly brace of the requires expression.
+参数列表是一个以逗号分隔的参数列表。与函数声明的唯一区别是不允许使用默认值。但是，此列表中指定的参数不具有存储空间、链接或生命周期。编译器不为它们分配任何内存，只用于定义需求。但它们有一个作用域，那就是requires表达式的右大括号。
 
-The requirements-seq is a sequence of requirements. Each such requirement must end with a semicolon, like any statement in C++. There are four types of requirements:
-
-\begin{itemize}
-\item
-Simple requirements
-
-\item
-Type requirements
-
-\item
-Compound requirements
-
-\item
-Nested requirements
-\end{itemize}
-
-These requirements may refer to the following:
+requirements-seq是一系列需求。每个这样的需求都必须以分号结束。这里，有四种类型的需求:
 
 \begin{itemize}
 \item
-Template parameters that are in scope
+简单需求
 
 \item
-Local parameters introduced in the parameter list of the requires expression
+类型需求
 
 \item
-Any other declaration that is visible from the enclosing context
+复合需求
+
+\item
+嵌套需求
 \end{itemize}
 
-In the following subsections, we will explore all the mentioned types of requirements. In the beginning, we’ll look at the simple requirements.
+这些需求的参考如下:
+
+\begin{itemize}
+\item
+模板范围内的参数
+
+\item
+requires表达式的参数列表中可以引入局部参数
+
+\item
+封闭上下文中可见的其他声明
+\end{itemize}
+
+在下面的小节中，我们将探讨所有提到的需求类型。
 
 \subsubsubsection{6.3.1\hspace{0.2cm}简单需求}
 
-A simple requirement is an expression that is not evaluated but only checked for correctness. The expression must be valid for the requirement to be evaluated to the value true. The expression must not start with the requires keyword as that defines a nested requirement (which will be discussed later).
+简单需求是一个不求值，只检查正确性的表达式。表达式必须是有效的，以便对需求求值为true。表达式不能以requires关键字开头，因为它定义了嵌套的需求。
 
-We already saw examples of simple statements when we defined the arithmetic and container concepts earlier. Let’s see a few more:
+前面定义算术和容器概念时，已经看到了简单语句的示例。让我们再看几个:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename T>
@@ -66,11 +66,11 @@ concept logger = requires(T t)
 };
 \end{lstlisting}
 
-The first concept, arithmetic, is the same one we defined earlier. The std::is\_arithmetic\_v<T> expression is a simple requirement. Notice that when the parameter list is empty it can be completely omitted, as seen in this case, where we only check that the T type template parameter is an arithmetic type.
+第一个概念arithmetic，和我们之前定义的是一样的。std::is\_arithmetic\_v<T>表达式是一个简单的需求。当参数列表为空时，完全可以省略，只检查T类型模板参数是否为算术类型。
 
-The addable and logger concepts both have a parameter list because we are checking operations on values of the T type. The expression a + b is a simple requirement, as the compiler just checks that the plus operator is overloaded for the T type. In the last example, we make sure that the T type has three member functions called error, warning, and info that take a single parameter of the const char* type or some type that can be constructed from const char*. Keep in mind that the actual values passed as arguments have no importance since these calls are never performed; they are only checked for correctness.
+addable和logger概念都有一个参数列表，因为正在检查T类型值的操作。表达式a + b是一个简单的要求，因为编译器只检查加号运算符是否为T类型重载。最后一个例子中，确保T类型有三个成员函数，分别是error、warning和info，它们接受一个const char*类型的参数，或可以从const char*构造的其他类型的参数。但作为参数传递的实际值并不重要，因为这些调用从未执行过，只检查它们的正确性。
 
-Let’s elaborate briefly on the last example and consider the following snippet:
+简要地阐述最后一个例子，并看看如下的代码段:
 
 \begin{lstlisting}[style=styleCXX]
 template <logger T>
@@ -92,9 +92,9 @@ struct stream_logger
 };
 \end{lstlisting}
 
-The log\_error function template requires an argument of a type that meets the logger requirements. We have two classes, called console\_logger and stream\_logger. The first meets the logger requirements, but the second does not. That is because the info function cannot be invoked with a single argument of type const char*. This function also requires a second, Boolean, argument. The first two methods, error and warning, define a default value for the second argument, so they can be invoked with calls such as t.error("just") and warning("a").
+log\_error函数模板需要一个类型满足记录器要求的参数。我们有两个类，分别为console\_logger和stream\_logger。第一个满足logger的要求，但第二个不满足。这是因为info函数不能用const char*类型的单个参数调用。该函数还需要第二个布尔参数。前两个方法，error和warning，为第二个参数定义了默认值，所以可以通过t.error("just")和warning("a")进行调用。
 
-However, because of the third member function, stream\_logger is not a log class that meets the expected requirements and, therefore, cannot be used with the log\_error function. The use of console\_logger and stream\_logger is exemplified in the following snippet:
+然而，由于第三个成员函数，stream\_logger不是一个满足预期要求的log类，因此不能与log\_error函数一起使用。console\_logger和stream\_logger的使用示例如下:
 
 \begin{lstlisting}[style=styleCXX]
 console_logger cl;
@@ -104,24 +104,24 @@ stream_logger sl;
 log_error(sl); // error
 \end{lstlisting}
 
-In the next section, we look at the second category of requirements, type requirements.
+下一节中，将讨论第二类需求：类型需求。
 
 \subsubsubsection{6.3.2\hspace{0.2cm}类型需求}
 
-Type requirements are introduced with the keyword typename followed by the name of a type. We have already seen several examples when we defined the container constraint. The name of the type must be valid for the requirement to be true. Type requirements can be used for several purposes:
+类型需求是通过关键字typename，后面跟着类型名称引入的。定义容器约束时，已经看到了几个例子。类型名必须有效，需求才为真。类型需求可用于以下几个目的:
 
 \begin{itemize}
 \item
-To verify that a nested type exists (such as in typename T::value\_type;)
+验证嵌套类型是否存在(例如typename T::value\_type;)
 
 \item
-To verify that a class template specialization names a type
+验证类模板特化是否命名了类型
 
 \item
-To verify that an alias template specialization names a type
+验证别名模板特化是否命名了类型
 \end{itemize}
 
-Let’s see several examples to learn how to use type requirements. In the first example, we check whether a type contains the inner types, key\_type and value\_type:
+看几个例子来学习如何使用类型需求。第一个例子中，检查一个类型是否包含内部类型，key\_type和value\_type:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -145,9 +145,9 @@ static_assert(KVP<key_value_pair<int, std::string>>);
 static_assert(!KVP<std::pair<int, std::string>>);
 \end{lstlisting}
 
-The type, key\_value\_pair<int, std::string>, satisfies these type requirements, but std::pair<int, std::string> does not. The std::pair type does have inner types, but they are called first\_type and second\_type.
+类型key\_value\_pair<int, std::string>满足这些类型要求，但std::pair<int, std::string>不满足。pair类型确实有内部类型，但被称为first\_type和second\_type。
 
-In the second example, we check whether a class template specialization names a type. The class template is container, and the specialization is container<T>:
+第二个例子中，检查类模板特化是否命名了类型。类模板是container，特化是container<T>:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -164,32 +164,32 @@ static_assert(containerizeable<int>);
 static_assert(!containerizeable<std::string>);
 \end{lstlisting}
 
-In this snippet, container is a class template that can only be specialized for arithmetic types, such as int, long, float, or double. Therefore, specializations such as container<int> exist, but container<std::string> does not. The containerizeable concept specifies a requirement for a type T to define a valid specialization of container. Therefore, containerizeable<int> is true, but containerizeable<std::string> is false.
+这段代码中，container是一个类模板，只能针对算术类型特化，例如int、long、float或double。因此，特化container<int>存在，但container<std::string>不存在。containerizeable概念指定了类型T定义有效的container特化的需求。因此，containerizeable<int>为true，但containerizeable<std::string>为false。
 
-Now that we have understood simple requirements and type requirements it is time to explore the more complex category of requirements. The first to look at is compound requirements.
+现在已经理解了简单的需求和类型需求，是时候探索更复杂的需求类别了。首先，要看的是复合需求。
 
 \subsubsubsection{6.3.3\hspace{0.2cm}复合需求}
 
-Simple requirements allow us to verify that an expression is valid. However, sometimes we need to verify some properties of an expression not just that it is valid. This can include whether an expression does not throw exceptions or requirements on the result type (such as the return type of a function). The general form is the following:
+简单需求允许我们验证表达式是否有效，但有时需要验证表达式的某些属性，而不仅仅是其是否有效。这可以包括表达式是否对结果类型抛出异常或要求(例如函数的返回类型)。一般形式如下:
 
 \begin{lstlisting}[style=styleCXX]
 { expression } noexcept -> type_constraint;
 \end{lstlisting}
 
-Both the noexcept specification and the type\_constraint (with the leading ->) are optional. The substitution process and the checking of the constraints occur as follows:
+noexcept规范和type\_constraint(前导为->)都是可选的。替换过程和约束的检查如下所示:
 
 \begin{enumerate}
 \item
-The template arguments are substituted in the expression.
+替换表达式中的模板参数。
 
 \item
-If noexcept is specified, then the expression must not throw exceptions; otherwise, the requirement is false.
+若指定了noexcept，则表达式不能抛出异常;否则，需求为false。
 
 \item
-If the type constraint is present, then the template arguments are also substituted into type\_contraint and decltype((expression)) must satisfy the conditions imposed by type\_constraint; otherwise, the requirement is false.
+若存在类型约束，则模板参数也会被替换为type\_constraint，并且decltype((expression))必须满足type\_constraint所施加的条件;否则，需求为false。
 \end{enumerate}
 
-We will discuss a couple of examples to learn how to use compound requirements. In the first example, we check whether a function is marked with the noexcept specifier:
+这里讨论几个示例，来学习如何使用复合需求。第一个例子中，我们检查函数是否标记了noexcept说明符:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -212,14 +212,14 @@ void invoke(F&& func, T... t)
 }
 \end{lstlisting}
 
-In this snippet, there are two function templates: f is declared noexcept; therefore, it shall not throw any exception, and g, which potentially throws exceptions. The NonThrowing concept imposes the requirement that the variadic function of type F must not throw exceptions. Therefore, of the following two invocations, only the first is valid and the second will produce a compiler error:
+代码片段中，有两个函数模板:f声明为noexcept;因此，它不会抛出任何异常，而g可能会抛出异常。NonThrowing概念强制要求类型为F的可变函数不能抛出异常。因此，在以下两个调用中，只有第一个是有效的，而第二个将产生编译错误:
 
 \begin{lstlisting}[style=styleCXX]
 invoke(f<int>, 42);
 invoke(g<int>, 42); // error
 \end{lstlisting}
 
-The error messages generated by Clang are shown in the following listing:
+Clang生成的错误消息如下表所示:
 
 \begin{tcblisting}{commandshell={}}
 prog.cc:28:7: error: no matching function for call to 'invoke'
@@ -238,9 +238,9 @@ prog.cc:13:20: note: because 'func(t)' may throw an exception
                        ^
 \end{tcblisting}
 
-These error messages tell us that the invoke(g<int>, 42) call is not valid because g<int> may throw an exception, which results in NonThrowing<F, T…> to evaluating as false.
+这些错误消息告诉我们调用(g<int>， 42)无效，因为g<int>可能抛出异常，导致nonthrows <F, T…>计算为false。
 
-For the second example, we will define a concept that provides requirements for timer classes. Specifically, it requires that a function called start exists, that it can be invoked without any parameters, and that it returns void. It also requires that a second function called stop exists, that it can be invoked without any parameters, and that it returns a value that can be converted to long long. The concept is defined as follows:
+对于第二个示例，我们将定义一个概念，为计时器类提供需求。它要求存在一个名为start的函数，可以在没有参数的情况下调用它，并且它返回void。还要求存在第二个名为stop的函数，可以在没有任何参数的情况下调用，并且它返回一个可以转换为long long的值。概念定义如下:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -251,7 +251,7 @@ concept timer = requires(T t)
 };
 \end{lstlisting}
 
-Notice that the type constraint cannot be any compile-time Boolean expression, but an actual type requirement. Therefore, we use other concepts for specifying the return type. Both std::same\_as and std::convertible\_to are concepts available in the standard library in the <concepts> header. We’ll learn more about these in the Exploring the standard concepts library section. Now, let’s consider the following classes that implement timers:
+注意，类型约束不能是任何编译时布尔表达式，而是实际的类型需求。因此，使用其他概念来指定返回类型。std::same\_as和std::convertible\_to都是在标准库<concepts>头文件中可用的概念。现在，让我们考虑以下实现计时器的类:
 
 \begin{lstlisting}[style=styleCXX]
 struct timerA
@@ -278,34 +278,34 @@ static_assert(timer<timerB>);
 static_assert(!timer<timerC>);
 \end{lstlisting}
 
-In this example, timerA satisfies the timer concept because it contains the two required methods: start that returns void and stop that returns long long. Similarly, timerB also satisfies the timer concept because it features the same methods, even though stop returns an int. However, the int type is implicitly convertible to the long long type; therefore, the type requirement is met. Lastly, timerC also has the same methods, but both of them return void, which means the type requirement for the return type of stop is not met, and therefore, the constraints imposed by the timer concept are not satisfied.
+本例中，timerA满足timer概念，包含两个必需的方法:返回void的start方法和返回long long的stop方法。类似地，timerB也满足timer概念，具有相同的方法，即使stop返回int。然而，int类型可隐式转换为long long类型;因此，满足类型要求。最后，timerC也有相同的方法，但返回void，所以停止返回类型的类型要求不满足，因此，timer概念的约束条件不满足。
 
-The last category of requirements left to look into is nested requirements. We will do this next.
+最后一类需要研究的需求是嵌套需求。
 
 \subsubsubsection{6.3.4\hspace{0.2cm}嵌套需求}
 
-The last category of requirements is nested requirements. A nested requirement is introduced with the requires keyword (remember we mentioned that a simple requirement is a requirement that is not introduced with the requires keyword) and has the following form:
+最后一类需求是嵌套需求。嵌套需求是通过requires关键字引入的(简单需求不使用requires关键字引入需求)，其形式如下:
 
 \begin{lstlisting}[style=styleCXX]
 requires constraint-expression;
 \end{lstlisting}
 
-The expression must be satisfied by the substituted arguments. The substitution of the template arguments into constraint-expression is done only to check whether the expression is satisfied or not.
+表达式必须由替换的参数来满足，将模板参数替换为约束表达式，只是为了检查表达式是否满足。
 
-In the following example, we want to define a function that performs addition on a variable number of arguments. However, we want to impose some conditions:
+下面的例子中，要定义一个函数，对可变数量的参数执行加法。但是，我们想提出一些条件:
 
 \begin{itemize}
 \item
-There is more than one argument.
+有多个参数。
 
 \item
-All the arguments have the same type.
+所有的参数都有相同的类型。
 
 \item
-The expression arg1 + arg2 + … + argn is valid.
+表达式arg1 + arg2 +…+ argn是有效的。
 \end{itemize}
 
-To ensure this, we define a concept called HomogenousRange as follows:
+为了确保这一点，我们定义了一个名为HomogenousRange的概念，如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename T, typename... Ts>
@@ -321,9 +321,9 @@ concept HomogenousRange = requires(T... t)
 };
 \end{lstlisting}
 
-This concept contains one simple requirement and two nested requirements. One nested requirement uses the are\_same\_v variable template whose value is determined by the conjunction of one or more type traits (std::is\_same), and the other, the compile-time Boolean expression size…(T) > 1.
+这个概念包含一个简单的需求和两个嵌套的需求。一个嵌套需求使用are\_same\_v变量模板，其值由一个或多个类型特征(std::is\_same)连接决定的，另一个是编译时布尔表达式size…(T) > 1。
 
-Using this concept, we can define the add variadic function template as follows:
+使用这个概念，可以这样定义add可变函数模板:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename ... T>
@@ -338,9 +338,9 @@ add(1, 2.0); // error, types not the same
 add(1); // error, size not greater than 1
 \end{lstlisting}
 
-The first call exemplified previously is correct, as there are two arguments, and both are of type int. The second call produces an error because the types of the arguments are different (int and double). Similarly, the third call also produces an error because only one argument was supplied.
+前面举例的第一个调用是正确的，因为有两个参数，而且都是int类型。第二次调用产生错误，因为实参的类型不同(int和double)。类似地，第三个调用也会产生错误，因为只提供了一个参数。
 
-The HomogenousRange concept can also be tested with the help of several static\_assert statements, as shown next:
+HomogenousRange概念也可以在几个static\_assert的辅助下测试，如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 static_assert(HomogenousRange<int, int>);
@@ -348,7 +348,7 @@ static_assert(!HomogenousRange<int>);
 static_assert(!HomogenousRange<int, double>);
 \end{lstlisting}
 
-We have walked through all the categories of the requires expressions that can be used for defining constraints. However, constraints can also be composed, and this is what we will discuss next.
+我们已经介绍了可用于定义约束的所有需求表达式的类别，约束也可以组合，这就是我们接下来要讨论的内容。
 
 
 
