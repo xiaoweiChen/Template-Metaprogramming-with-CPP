@@ -38,7 +38,7 @@ Any other declaration that is visible from the enclosing context
 
 In the following subsections, we will explore all the mentioned types of requirements. In the beginning, we’ll look at the simple requirements.
 
-\subsubsubsection{6.3.1\hspace{0.2cm}Simple requirements}
+\subsubsubsection{6.3.1\hspace{0.2cm}简单需求}
 
 A simple requirement is an expression that is not evaluated but only checked for correctness. The expression must be valid for the requirement to be evaluated to the value true. The expression must not start with the requires keyword as that defines a nested requirement (which will be discussed later).
 
@@ -106,7 +106,7 @@ log_error(sl); // error
 
 In the next section, we look at the second category of requirements, type requirements.
 
-\subsubsubsection{6.3.2\hspace{0.2cm}Type requirements}
+\subsubsubsection{6.3.2\hspace{0.2cm}类型需求}
 
 Type requirements are introduced with the keyword typename followed by the name of a type. We have already seen several examples when we defined the container constraint. The name of the type must be valid for the requirement to be true. Type requirements can be used for several purposes:
 
@@ -168,7 +168,7 @@ In this snippet, container is a class template that can only be specialized for 
 
 Now that we have understood simple requirements and type requirements it is time to explore the more complex category of requirements. The first to look at is compound requirements.
 
-\subsubsubsection{6.3.3\hspace{0.2cm}Compound requirements}
+\subsubsubsection{6.3.3\hspace{0.2cm}复合需求}
 
 Simple requirements allow us to verify that an expression is valid. However, sometimes we need to verify some properties of an expression not just that it is valid. This can include whether an expression does not throw exceptions or requirements on the result type (such as the return type of a function). The general form is the following:
 
@@ -282,7 +282,7 @@ In this example, timerA satisfies the timer concept because it contains the two 
 
 The last category of requirements left to look into is nested requirements. We will do this next.
 
-\subsubsubsection{6.3.4\hspace{0.2cm}Nested requirements}
+\subsubsubsection{6.3.4\hspace{0.2cm}嵌套需求}
 
 The last category of requirements is nested requirements. A nested requirement is introduced with the requires keyword (remember we mentioned that a simple requirement is a requirement that is not introduced with the requires keyword) and has the following form:
 

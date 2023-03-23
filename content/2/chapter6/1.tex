@@ -1,4 +1,4 @@
-As briefly mentioned in the introduction to this chapter, there are some important benefits that concepts provide. Arguably, the most important ones are code readability and better error messages. Before we look at how to use concepts, let’s revisit an example we saw previously and see how it stands in relation to these two programming aspects:
+概念可以让代码有更好的可读性和错误消息。在了解如何使用概念之前，回顾一下之前的例子:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -8,9 +8,9 @@ T add(T const a, T const b)
 }
 \end{lstlisting}
 
-This simple function template takes two arguments and returns their sum. In fact, it does not return the sum, but the result of applying the plus operator to the two arguments. A user-defined type can overload this operator and perform some particular operation. The term sum only makes sense when we discuss mathematical types, such as integral types, floating-point types, the std::complex type, matrix types, vector types, etc.
+这个简单的函数模板接受两个参数，并返回它们的和。实际上，返回的不是和，而是对两个参数应用加号运算符后的结果。用户定义的类型可以重载此操作符并执行某些特定的操作。术语和只有在讨论数学类型时才有意义，例如整型、浮点类型、std::complex类型、矩阵类型、向量类型等。
 
-For a string type, for instance, the plus operator can mean concatenation. And for most types, its overloading does not make sense at all. Therefore, just by looking at the declaration of the function, without inspecting its body, we cannot really say what this function may accept as input and what it does. We can call this function as follows:
+对于字符串类型，加号操作符可以表示连接。对于大多数类型来说，重载根本没有意义。因此，只看函数的声明，而不检查它的主体，不能真正说这个函数可以接受什么作为输入，以及这个函数是做什么的。可以这样调用这个函数:
 
 \begin{lstlisting}[style=styleCXX]
 add(42, 1); // [1]
@@ -19,9 +19,9 @@ add("42"s, "1"s); // [3]
 add("42", "1"); // [4] error: cannot add two pointers
 \end{lstlisting}
 
-The first three calls are all good; the first call adds two integers, the second adds two double values, and the third concatenates two std::string objects. However, the fourth call will produce a compiler error because const char * is substituted for the T type template parameter, and the plus operator is not overloaded for pointer types.
+前三个调用都很好;第一个调用添加两个整数，第二个调用添加两个double值，第三个调用连接两个std::string对象。但第四次调用将产生编译器错误，因为const char *替换了T类型模板参数，并且指针类型没有重载加号操作符。
 
-The intention for this add function template is to allow passing only values of arithmetic types, that is, integer and floating-point types. Before C++20, we could do this in several ways. One way is to use std::enable\_if and SFINAE, as we saw in the previous chapter. Here is such an implementation:
+这个add函数模板的目的是只允许传递算术类型的值，即整型和浮点型。C++20之前，可以通过几种方式实现这一点。一种方法是使用std::enable\_if和SFINAE，就像我们在前一章看到的那样:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T,
@@ -33,11 +33,11 @@ T add(T const a, T const b)
 }
 \end{lstlisting}
 
-The first thing to notice here is that the readability has decreased. The second type template parameter is difficult to read and requires good knowledge of templates to understand. However, this time, both the calls on the lines marked with [3] and [4] are producing a compiler error. Different compilers are issuing different error messages. Here are the ones for the three major compilers:
+首先，可读性下降了。第二，类模板参数难以阅读，需要对模板有很好的了解才能理解。但这一次，标记为[3]和[4]的行上的调用都产生了编译器错误。不同的编译器会产生不同的错误消息。下面是三个主要编译器的代码:
 
 \begin{itemize}
 \item
-In VC++ 17, the output is:
+VC++ 17:
 
 \begin{tcblisting}{commandshell={}}
 error C2672: 'add': no matching overloaded function found
@@ -46,7 +46,7 @@ template argument for '<unnamed-symbol>'
 \end{tcblisting}
 
 \item
-In GCC 12, the output is:
+GCC 12:
 \begin{tcblisting}{commandshell={}}
 prog.cc: In function 'int main()':
 prog.cc:15:8: error: no matching function for call
@@ -86,7 +86,7 @@ void>'
 \end{tcblisting}
 
 \item
-In Clang 13, the output is:
+Clang 13:
 \begin{tcblisting}{commandshell={}}
 prog.cc:15:5: error: no matching function for call to
 'add'
@@ -100,9 +100,9 @@ satisfied [with T = std::string]
 \end{tcblisting}
 \end{itemize}
 
-The error message in GCC is very verbose, and VC++ doesn’t say what the reason for failing to match the template argument is. Clang does, arguably, a better job at providing an understandable error message.
+GCC中的错误消息非常冗长，VC++没有说明匹配模板参数失败的原因是什么。可以说，Clang在提供可理解的错误消息方面做得更好。
 
-Another way to define restrictions for this function, prior to C++20, is with the help of a static\_assert statement, as shown in the following snippet:
+C++20之前，定义此函数限制的另一种方法是借助static\_assert:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -114,11 +114,11 @@ T add(T const a, T const b)
 }
 \end{lstlisting}
 
-With this implementation, however, we returned to the original problem that just by looking at the declaration of the function, we wouldn’t know what kind of parameters it would accept, provided that any restriction exists. The error messages, on the other hand, are as follows:
+这个实现中，我们回到了最初的问题，即仅通过查看函数的声明，不知道它会接受什么样的参数，没有任何限制。另一方面，错误信息如下所示:
 
 \begin{itemize}
 \item
-In VC++ 17:
+VC++ 17:
 
 \begin{tcblisting}{commandshell={}}
 error C2338: Arithmetic type required
@@ -132,7 +132,7 @@ T)' being compiled
 \end{tcblisting}
 
 \item
-In GCC 12:
+GCC 12:
 
 \begin{tcblisting}{commandshell={}}
 prog.cc: In instantiation of 'T add(T, T) [with T =
@@ -148,7 +148,7 @@ cxx11::basic_string<char> >' evaluates to false
 \end{tcblisting}
 
 \item
-In Clang 13:
+Clang 13:
 
 \begin{tcblisting}{commandshell={}}
 prog.cc:7:5: error: static_assert failed due to
@@ -164,9 +164,9 @@ specialization 'add<std::string>' requested here
 \end{tcblisting}
 \end{itemize}
 
-The use of the static\_assert statement results in similar error messages received regardless of the compiler.
+不管编译器是什么，使用static\_assert会导致接收到类似的错误消息。
 
-We can improve these two discussed aspects (readability and error messages) in C++20 by using constraints. These are introduced with the new requires keyword as follows:
+C++20中，可以通过使用约束来改进这两个方面(可读性和错误消息)。这些是通过新关键字requires引入的，如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -177,7 +177,7 @@ T add(T const a, T const b)
 }
 \end{lstlisting}
 
-The requires keyword introduces a clause, called the requires clause, that defines the constraints on the template parameters. There are, actually, two alternative syntaxes: one when the requires clause follows the template parameter list, as seen previously, and one when the requires clause follows the function declaration, as shown in the next snippet:
+requires关键字引入了一个称为requires子句，定义了模板参数的约束。实际上，有两种可供选择的语法:一种是require子句跟在模板参数列表后面，如前所述;另一种是requires子句跟在函数声明后面，如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -188,11 +188,11 @@ requires std::is_arithmetic_v<T>
 }
 \end{lstlisting}
 
-Choosing between these two syntaxes is a matter of personal preference. However, in both cases, the readability is much better than in the pre-C++20 implementations. You know just by reading the declaration that the T type template parameter must be of an arithmetic type. Also, this implies that the function is simply adding two numbers. You don’t really need to see the definition to know that. Let’s see how the error message changes when we call the function with invalid arguments:
+这两种语法可以根据个人喜好进行选择，但这两种情况，可读性都比C++20之前的实现好得多。通过阅读声明，就知道T类型模板参数必须是算术类型。此外，这意味着函数只是两个数字的相加，不需要看定义就能知道。当我们调用带有无效参数的函数时，错误消息是什么样子:
 
 \begin{itemize}
 \item
-In VC++ 17:
+VC++ 17:
 
 \begin{tcblisting}{commandshell={}}
 error C2672: 'add': no matching overloaded function found
@@ -201,7 +201,7 @@ satisfied
 \end{tcblisting}
 
 \item
-In GCC 12:
+GCC 12:
 
 \begin{tcblisting}{commandshell={}}
 prog.cc: In function 'int main()':
@@ -232,7 +232,7 @@ traits<char>, std::allocator<char> >]' evaluated to 'false'
 \end{tcblisting}
 
 \item
-In Clang 13:
+Clang 13:
 
 \begin{tcblisting}{commandshell={}}
 prog.cc:15:5: error: no matching function for call to
@@ -250,11 +250,11 @@ requires std::is_arithmetic_v<T>
 \end{tcblisting}
 \end{itemize}
 
-The error messages follow the same patterns seen already: GCC is too verbose, VC++ is missing essential information (the constraint that is not met), while Clang is more concise and better pinpoints the cause of the error. Overall, there is an improvement in the diagnostic messages, although there is still room for improvement.
+错误消息遵循相同的模式:GCC太冗长，VC++缺少基本信息(未满足的约束)，而Clang更简洁，更好地定位错误的原因。总的来说，错误消息看起来有了改进，但仍有改进的空间。
 
-A constraint is a predicate that evaluates to true or false at compile-time. The expression used in the previous example, std::is\_arithmetic\_v<T>, is simply using a standard type trait (which we saw in the previous chapter). However, these are different kinds of expressions that can be used in a constraint, and we will learn about them later in this chapter.
+约束是在编译时求值为true或false的谓词。前一个例子中使用的表达式std::is\_arithmetic\_v<T>，只是使用了一个标准类型特征(前一章中看到过)。然而，这些都是可以在约束中使用的不同类型的表达式。
 
-In the next section, we look at how to define and use named constraints.
+下一节中，我们将讨论如何定义和使用命名约束。
 
 
 
