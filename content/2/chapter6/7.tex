@@ -1,4 +1,4 @@
-Class templates and class template specializations can also be constrained just like function templates. To start, we’ll consider the wrapper class template again, but this time with the requirement that it should only work for template arguments of integral types. This can be simply specified in C++20 as follows:
+类模板和类模板特化也可以像函数模板一样受到约束。首先，再次考虑wrapper类模板，但这一次要求它只适用于整型的模板参数。这可以在C++20中简单地进行指定:
 
 \begin{lstlisting}[style=styleCXX]
 template <std::integral T>
@@ -11,9 +11,9 @@ wrapper<int> a{ 42 }; // OK
 wrapper<double> b{ 42.0 }; // error
 \end{lstlisting}
 
-Instantiating the template for the int type is fine but does not work for double because this is not an integral type.
+为int实例化模板是可以的，但对double无效，因为其不是整型。
 
-Requirements that also be specified with requires clauses and class template specializations can also be constrained. To demonstrate this, let’s consider the scenario when we want to specialize the wrapper class template but only for types whose size is 4 bytes. This can be implemented as follows:
+同样用requires子句和类模板特化指定的需求也可以约束。为了展示这一点，考虑这样一个场景:我们希望特化包装器类模板，但只针对大小为4字节的类型。这可以实现如下:
 
 \begin{lstlisting}[style=styleCXX]
 template <std::integral T>
@@ -40,7 +40,7 @@ struct wrapper<T>
 };
 \end{lstlisting}
 
-We can use this class template as shown in the following snipp
+可以使用这个类模板，如下面的代码所示:
 
 \begin{lstlisting}[style=styleCXX]
 wrapper<short> a{ 42 };
@@ -54,9 +54,9 @@ std::cout << std::hex << (int)b.byte3 << '\n';
 std::cout << std::hex << (int)b.byte4 << '\n';
 \end{lstlisting}
 
-The object a is an instance of wrapper<short>; therefore, the primary template is used. On the other hand, the object b is an instance of wrapper<int>. Since int has a size of 4 bytes (on most platforms) the specialization is used and we can access the individual types of the wrapped value through the byte1, byte2, byte3, and byte4 members.
+对象a是wrapper<short>;因此，使用主模板。另一方面，对象b是wrapper<int>的实例。由于int的大小为4字节(在大多数平台上)，因此使用了特化，我们可以通过byte1、byte2、byte3和byte4成员访问包装值的各个类型。
 
-Lastly on this topic, we will discuss how variable templates and template aliases can also be constrained.
+最后，我们将讨论如何约束变量模板和模板别名。
 
 
 

@@ -1,63 +1,63 @@
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Question 1}
+\textbf{习题 1}
 
-What are constraints? What about concepts?
-
-\hspace*{\fill} \\ %插入空行
-\noindent
-\textbf{Answer}
-
-A constraint is a requirement imposed on a template argument. A concept is a named set of one or more constraints.
-
+什么是约束，什么是概念?
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Question 2}
+\textbf{参考答案}
 
-What is a requires clause and a requires expression?
+约束是强加在模板参数上的要求。概念是一个或多个约束的命名集。
 
-\hspace*{\fill} \\ %插入空行
-\noindent
-\textbf{Answer}
-
-A requires clause is a construct that allows us to specify a constraint on a template argument or function declaration. This construct is composed of the requires keyword followed by a compile-time Boolean expression. A requires clause affects the behavior of a function, including it for overload resolution only if the Boolean expression is true. On the other hand, a requires expression has the requires (parameters-list) expression; form, where parameters-list is optional. Its purpose is to verify that some expressions are well-formed, without having any side effects or affecting the behavior of the function. Requires expressions can be used with requires clauses, although named concepts are preferred, mainly for readability.
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Question 3}
+\textbf{习题 2}
 
-What are the categories of requires expressions?
-
-\hspace*{\fill} \\ %插入空行
-\noindent
-\textbf{Answer}
-
-There are four categories of requires expressions: simple requirements, type requirements, compound requirements, and nested requirements.
+什么是requires子句和requires表达式?
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Question 4}
+\textbf{参考答案}
 
-How do constraints affect the ordering of templates in overload resolution?
-
-\hspace*{\fill} \\ %插入空行
-\noindent
-\textbf{Answer}
-
-The constraining of functions affects their order in the overload resolution set. When multiple overloads match the set of arguments, the overload that is more constrained is selected. However, keep in mind that constraining with type traits (or Boolean expressions in general) and concepts is not semantically equal. For details on this topic, revisit the Learning about the ordering of templates with constraints section.
+requires子句是一个构造，允许在模板参数或函数声明上指定约束。这个构造由requires关键字和一个编译时布尔表达式组成。require子句影响函数的行为，只有当布尔表达式为true时，才包括它进行重载解析。另一方面，requires表达式有requires(参数列表)表达式，其中parameters-list可选，其目的是验证某些表达式是否格式良好，而不会产生任何副作用或影响函数的行为。requires表达式可以与requires子句一起使用。不过，推荐首选命名概念，主要是从可读性的角度考虑。
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Question 5}
+\textbf{习题 3}
 
-What are abbreviated function templates?
+requires表达式的类别是什么?
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Answer}
+\textbf{参考答案}
 
-Abbreviated function templates are a new feature introduced in C++20 that provides a simplified syntax for function templates. The auto specifier can be used to define function parameters and the template syntax can be skipped. The compiler will automatically generate a function template from an abbreviated function template. Such functions can be constrained using concepts, therefore imposing requirements on the template arguments.
+需求表达式有四类:简单需求、类型需求、复合需求和嵌套需求。
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{习题 4}
+
+约束如何影响重载解析中模板的顺序?
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{参考答案}
+
+函数的约束影响重载解析他们的顺序。当多个重载与参数集匹配时，将选择约束更强的重载。但请记住，类型特征(或布尔表达式)和概念的约束在语义上不相同。
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{习题 5}
+
+简写函数模板是什么?
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{参考答案}
+
+缩写函数模板是C++20引入的一个新特性，为函数模板提供了简化的语法。自动说明符可用于定义函数形参，模板语法可跳过。编译器会自动从缩写的函数模板生成一个函数模板。可以使用概念约束这些函数，因此可以对模板参数施加约束。
 
 
 

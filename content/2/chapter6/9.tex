@@ -1,14 +1,14 @@
-We have discussed in this chapter about requires clauses and requires expressions. Although both are introduced with the new requires keyword, they are different things and should be fully understood:
+本章中，已经讨论了requires子句和requires表达式。虽然两者都是用新的requires关键字引入的，但它们是不同的东西:
 
 \begin{itemize}
 \item
-A requires clause determines whether a function participates in overload resolution or not. This happens based on the value of a compile-time Boolean expression.
+requires子句决定函数是否参与重载解析，这取决于编译时布尔表达式的值。
 
 \item
-A requires expression determines whether a set of one or more expressions is well-formed, without having any side effects on the behavior of the program. A requires expression is a Boolean expression that can be used with a requires clause.
+requires表达式确定一个或多个表达式的集合是否格式良好，而不会对程序的行为产生任何副作用。requires表达式是一个布尔表达式，可以与requires子句一起使用。
 \end{itemize}
 
-Let’s see an example again:
+再来看一个例子:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -22,9 +22,9 @@ auto add(T a, T b)
 }
 \end{lstlisting}
 
-The construct at line [1] that starts with the requires keyword is a requires expression. It verifies that the expression, a + b, is well-formed for any T. On the other hand, the construct at line [2] is a requires clause. If the Boolean expression addable<T> evaluates to true, the function takes part in overload resolution; otherwise, it does not.
+第[1]行以requires关键字开头的构造是一个requires表达式。验证表达式a + b对于任何T类型都是格式良好的。另一方面，行[2]处的构造是一个requires子句。若布尔表达式addable<T>的值为true，则该函数参与重载解析;否则，不会。
 
-Although requires clauses are supposed to use concepts, a requires expression can also be used. Basically, anything that can be placed on the right-hand side of the = token in a concept definition can be used with a requires clause. That means we can do the following:
+虽然requires子句应该使用概念，但也可以使用requires表达式。基本上，概念定义中可以放在=标记右侧的东西都可以与requires子句一起使用。所以，可以做到以下几点:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -35,9 +35,9 @@ auto add(T a, T b)
 }
 \end{lstlisting}
 
-Although this is perfectly legal code it is arguable whether it’s a good way of using constraints. I would recommend avoiding creating constructs that start with requires requires. They are less readable and may create confusion. Moreover, named concepts can be used anywhere, while a requires clause with a requires expression will have to be duplicated if it needs to be used for multiple functions.
+虽然这是完全合法的代码，但是否是使用约束的好方法是有争议的。我建议避免创建以requires requires开头的构造，因为其可读性较差，可能会造成混乱。此外，命名概念可以在其他地方使用，而若需要用于多个函数，则必须复制带有requires表达式的requires子句。
 
-Now that we’ve seen how to constrain template arguments in several ways using constraints and concepts, let’s see how we can simplify function template syntax and constrain the template arguments.
+现在已经了解了如何使用约束和概念以多种方式约束模板实参，让我们看看如何简化函数模板语法，并约束模板实参。
 
 
 

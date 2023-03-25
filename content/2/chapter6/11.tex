@@ -1,69 +1,60 @@
-The standard library provides a set of fundamental concepts that can be used to define requirements on the template arguments of function templates, class templates, variable templates, and alias templates, as we have seen throughout this chapter. The standard concepts in C++20 are spread across several headers and namespaces. We will present some of them in this section although not all of them. You can find all of them online at \url{https://en.cppreference.com/}.
+标准库提供了一组基本概念，可用于定义对函数模板、类模板、变量模板和别名模板的模板实参的需求，正如在本章中看到的那样。C++20中的标准概念分布在多个头文件和命名空间中。我们将在本节中介绍其中一些，你可以在\url{https://en.cppreference.com/}上找到所有的概念。
 
-The main set of concepts is available in the <concepts> header and the std namespace. Most of these concepts are equivalent to one or more existing type traits. For some of them, their implementation is well-defined; for some, it is unspecified. They are grouped into four categories: core language concepts, comparison concepts, object concepts, and callable concepts. This set of concepts contains the following (but not only):
+主要的概念集可以在<concepts>头文件和std命名空间中找到。这些概念中的大多数等价于一个或多个现有的类型特征。对于其中一些，它们的实现是定义良好的;对另一些，则是不明确的。它们可分为四类:核心语言概念、比较概念、对象概念和可调用概念。这组概念包含以下内容(但不仅如此):
 
 \begin{table}[H]
 \centering
 	\begin{tabular}{|l|l|}
 		\hline
-		\textbf{Concept}   & \textbf{Description}                                                                                            \\ \hline
-		same\_as           & \begin{tabular}[c]{@{}l@{}}Defines the requirement that a type T is the same as\\ another type U.\end{tabular}  \\ \hline
-		derived\_from      & \begin{tabular}[c]{@{}l@{}}Defines the requirement that a type D is derived from\\ another type B.\end{tabular} \\ \hline
+		\textbf{概念}   & \textbf{描述}                                                                                            \\ \hline
+		same\_as           & 类型T与另一个类型U相同。 \\ \hline
+		derived\_from      & 类型D从另一个类型B派生。 \\ \hline
 		convertible\_to &
-		\begin{tabular}[c]{@{}l@{}}Defines the requirement that a type T is implicity\\ convertible to another type U.\end{tabular} \\ \hline
+		类型T可以隐式转换为另一类型U。 \\ \hline
 		common\_reference\_with &
-		\begin{tabular}[c]{@{}l@{}}Defines the requirements that two types, T and U, have\\ a common reference type.\end{tabular} \\ \hline
+		两种类型T和U具有共同引用类型。 \\ \hline
 		common\_with &
-		\begin{tabular}[c]{@{}l@{}}Defines the requirement that two types, T and U, have\\ a common type to which both can be convertible.\end{tabular} \\ \hline
-		integral           & \begin{tabular}[c]{@{}l@{}}Defines the requirement that a type T is an integral\\ type.\end{tabular}            \\ \hline
-		signed\_integral   & \begin{tabular}[c]{@{}l@{}}Defines the requirement that a type T is a signed\\ integral type.\end{tabular}      \\ \hline
-		unsigned\_integral & \begin{tabular}[c]{@{}l@{}}Defines that requirement that a type T is an unsigned\\ integral type.\end{tabular}  \\ \hline
-		floating\_point    & \begin{tabular}[c]{@{}l@{}}Defines the requirement that a type T is a floating-\\ point type.\end{tabular}      \\ \hline
+		两种类型T和U具有共同类型，这两种类型都可以转换为共同类型。 \\ \hline
+		integral           & 类型T是整型。            \\ \hline
+		signed\_integral   & 类型T是有符号整型。      \\ \hline
+		unsigned\_integral & 类型T是无符号整型。  \\ \hline
+		floating\_point    & 类型T是浮点类型。      \\ \hline
 		assignable\_from &
-		\begin{tabular}[c]{@{}l@{}}Defines the requirement that an expression of a type U\\ can be assigned to ab lvalue expression of a type T.\end{tabular} \\ \hline
-	\end{tabular}
-\end{table}
-
-\begin{table}[H]
-\centering
-	\begin{tabular}{|l|l|}
-		\hline
-		\textbf{Concept} &
-		\textbf{Description} \\ \hline
+		U类型的表达式可以赋值给T类型的左值表达式。 \\ \hline
 		swappable &
-		\begin{tabular}[c]{@{}l@{}}Defines the requirement that two values of the same\\ type T can be swapped.\end{tabular} \\ \hline
+		两个相同类型T的值可以交换。 \\ \hline
 		swappable\_with &
-		\begin{tabular}[c]{@{}l@{}}Defines the requirement that a value of a type T can\\ be seapped with a value of a type U.\end{tabular} \\ \hline
+		类型T的值可以与类型U的值相匹配。 \\ \hline
 		destructible &
-		\begin{tabular}[c]{@{}l@{}}Defines the requirement that a value of a type T can\\ safely be destroyed(without any exception thrown\\ from the destructor).\end{tabular} \\ \hline
+		可以安全地销毁类型T的值(不需要从析构函数抛出任何异常)。 \\ \hline
 		constructible\_from &
-		\begin{tabular}[c]{@{}l@{}}Defines the requirement that an object of a type T\\ can be constructed with the given set of argumnet types.\end{tabular} \\ \hline
+		可以用给定的参数网类型集构造类型为T的对象。 \\ \hline
 		default\_initializable &
-		\begin{tabular}[c]{@{}l@{}}Defines the requirement that an object of a type T can\\ be default-constructible(either value initialized T(), \\ direct-list-initialized from an empty initializer list\\ T\{\}, or default-initialized, as in T t).\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}类型T的对象可以是默认可构造(值初始化T()，从空初始化列表T\{\}\\ 直接列表初始化，或默认初始化，如T t;)。\end{tabular} \\ \hline
 		move\_constructible &
-		\begin{tabular}[c]{@{}l@{}}Defines the requirement that an object of a type T can\\ be constructed with move semantics.\end{tabular} \\ \hline
+		可以用移动语义构造类型T的对象。 \\ \hline
 		copy\_constructible &
-		\begin{tabular}[c]{@{}l@{}}Defines the requirement that an object of a type T can\\ be copy constructed and move constructed.\end{tabular} \\ \hline
+		类型T的对象可以复制构造和移动构造。 \\ \hline
 		moveable &
-		\begin{tabular}[c]{@{}l@{}}Defines the requirement that an object of a type T can\\ be moved and swapped.\end{tabular} \\ \hline
+		可以移动和交换类型为T的对象。 \\ \hline
 		copyable &
-		\begin{tabular}[c]{@{}l@{}}Defines the requirement that an object of a type T can\\ be copied, moved, and swapped.\end{tabular} \\ \hline
+		可以复制、移动和交换类型为T的对象。 \\ \hline
 		regular &
-		\begin{tabular}[c]{@{}l@{}}Defines the requirement that a type T satisfies both\\ the semiregular and equality\_compareable concepts.\end{tabular} \\ \hline
+		类型T需要同时满足semiregular和equality\_comparable两个概念。 \\ \hline
 		semiregular &
-		\begin{tabular}[c]{@{}l@{}}Defines the requirement that an object of a type T can\\ be copied, moved, swapped, and default constructed.\end{tabular} \\ \hline
+		可以复制、移动、交换和默认构造类型为T的对象。 \\ \hline
 		equality\_comparable &
-		\begin{tabular}[c]{@{}l@{}}Defines the requirement that the comparison operator\\ == for a type T reflects equality, meaning that it yields\\ true if and only if two values are equal, Similarly, the\\ =! comparison reflects inequality.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}类型T的比较运算符==反映相等，当两个值相等时为true。\\ 类似的，=!表示了不相等。\end{tabular} \\ \hline
 		predicate &
-		\begin{tabular}[c]{@{}l@{}}Defines the requirement that a callable type T is\\ a Boolean preficate.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}可调用类型T是布尔谓词。\end{tabular} \\ \hline
 	\end{tabular}
 \end{table}
 
 \begin{center}
-Table 6.1
+表 6.1
 \end{center}
 
-Some of these concepts are defined using type traits, some are a combination of other concepts or concepts and type traits, and some have, at least partially, an unspecified implementation. Here are some examples:
+其中一些概念是使用类型特征定义的，一些是其他概念或概念与类型特征的组合，还有一些至少部分具有未指定的实现。下面是一些例子:
 
 \begin{lstlisting}[style=styleCXX]
 template < class T >
@@ -78,38 +69,38 @@ concept regular = std::semiregular<T> &&
                   std::equality_comparable<T>;
 \end{lstlisting}
 
-C++20 also introduces a new system of iterators, based on concepts, and defines a set of concepts in the <iterator> header. Some of these concepts are listed in the following table:
+C++20还引入了一个新的基于概念的迭代器系统，并在<iterator>头文件中定义了一组概念。下表列出了其中一些概念:
 
 \begin{table}[H]
 \centering
 	\begin{tabular}{|l|l|}
 		\hline
-		\textbf{Concept} &
-		\textbf{Description} \\ \hline
+		\textbf{概念} &
+		\textbf{描述} \\ \hline
 		indirectly\_readable &
-		\begin{tabular}[c]{@{}l@{}}Defines the requirement that values of a type can be\\ read by applying the * operator.\end{tabular} \\ \hline
+		可以通过应用*operator读取类型值。 \\ \hline
 		indirectly\_writable &
-		\begin{tabular}[c]{@{}l@{}}Defines the requirement that objects referenced by\\ an iterator type can be written to.\end{tabular} \\ \hline
+		迭代器类型所引用的对象可以写入。 \\ \hline
 		input\_iterator &
-		\begin{tabular}[c]{@{}l@{}}Defines the requirement that a type is an input\\ iterator(supports reading, pre-, and post-increment).\end{tabular} \\ \hline
+		类型是输入迭代器(支持读取、前增量和后增量)。 \\ \hline
 		output\_iterator &
-		\begin{tabular}[c]{@{}l@{}}Defines the requirement that a type is an output\\ iterator(supports writing, pre-, and post-incremnet).\end{tabular} \\ \hline
+		类型是输出迭代器(支持写入、增量前和增量后)。 \\ \hline
 		forward\_iterator &
-		\begin{tabular}[c]{@{}l@{}}Defines the requirement that a type that is an\\ input\_iterator is also a forward iterator (supports\\ equality comparison and multi-pass)\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}作为input\_iterator的类型同时也是前向迭代器(支持相等比较和多次传递)\end{tabular} \\ \hline
 		bidirectional\_iterator &
-		\begin{tabular}[c]{@{}l@{}}Defines the requirement that a type that is a \\ forward\_iterator is also a bidirectional iterator(\\ supportes moving backward).\end{tabular} \\ \hline
+		作为forward\_iterator的类型同时，也是双向迭代器(支持向后移动) \\ \hline
 		randon\_access\_iterator &
-		\begin{tabular}[c]{@{}l@{}}Defines the requirement that a type that is a \\ bidirectional\_iterator is also a random-access iterator\\ (supports subscripting and advancement in constant time).\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}作为bidirectional\_iterator类型的同时，也是随机访问迭代器(支持在常数时间\\ 内下标和前进)。\end{tabular} \\ \hline
 		contiguous\_iterator &
-		\begin{tabular}[c]{@{}l@{}}Defines the requirement that a type that is a \\ random\_access\_iterator is also a contiguous iterator\\ (elements are stored in contiguous memory locations).\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}作为random\_access\_iterator类型同时，也是连续迭代器(元素存储在连续的内\\ 存位置)的要求。\end{tabular} \\ \hline
 	\end{tabular}
 \end{table}
 
 \begin{center}
-Table 6.2
+表 6.2
 \end{center}
 
-Here is how the random\_access\_iterator concept is defined in the C++ standard:
+下面是C++标准中random\_access\_iterator概念的定义:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename I>
@@ -132,64 +123,64 @@ concept random_access_iterator =
 	};
 \end{lstlisting}
 
-As you can see, it uses several concepts (some of them not listed here) as well as a requires expression to ensure that some expressions are well-formed.
+它使用了几个概念(其中一些没有在这里列出)，以及一个requires表达式来确保某些表达式是格式良好的。
 
-Also, in the <iterator> header, there is a set of concepts designed to simplify the constraining of general-purpose algorithms. Some of these concepts are listed in the next table:
+此外，<iterator>头文件中，有一组旨在简化通用算法约束的概念。下表列出了其中一些概念:
 
 \begin{table}[H]
 \centering
 	\begin{tabular}{|l|l|}
 		\hline
-		\textbf{Concept} & \textbf{Description}                                                                                                            \\ \hline
+		\textbf{概念} & \textbf{描述}                                                                                                            \\ \hline
 		indriectly\_movable &
-		\begin{tabular}[c]{@{}l@{}}Defines the requirement that values can be moved from\\ an indirectly\_readable type to an indrectly\_readable\\ type.\end{tabular} \\ \hline
+		值可以从indirectly\_readable类型移动到indirectly\_readable类型。 \\ \hline
 		indirectly\_copyable &
-		\begin{tabular}[c]{@{}l@{}}Defines the requirement that values can be copied from\\ an indirectly\_readable type to an indrectly\_copyable\\ type.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}值可以从indirectly\_readable类型复制到indirectly\_copyable类型。\end{tabular} \\ \hline
 		mergeable &
-		\begin{tabular}[c]{@{}l@{}}Defines the requirements for algorithms that merge sorted\\ sequences into an output sequence by copying elements.\end{tabular} \\ \hline
-		sortable         & \begin{tabular}[c]{@{}l@{}}Defines the requirements for algorithms that modify\\ sequences into ordered sequences.\end{tabular} \\ \hline
-		permutable       & \begin{tabular}[c]{@{}l@{}}Defines the requirements for algorithms that reorder\\ elements in place.\end{tabular}               \\ \hline
+		\begin{tabular}[c]{@{}l@{}}通过复制元素将排序序列合并为输出序列的算法。\end{tabular} \\ \hline
+		sortable         & \begin{tabular}[c]{@{}l@{}}将序列修改为有序序列的算法。\end{tabular} \\ \hline
+		permutable       & \begin{tabular}[c]{@{}l@{}}对元素重新排序的算法。\end{tabular}               \\ \hline
 	\end{tabular}
 \end{table}
 
 \begin{center}
-Table 6.3
+表 6.3
 \end{center}
 
-One of the several major features included in C++20 (along with concepts, modules, and coroutines) are ranges. The ranges library defines a series of classes and functions for simplifying operations with ranges. Among these is a set of concepts. These are defined in the <ranges> header and the std::ranges namespace. Some of these concepts are listed as follows:
+C++20中包含的几个主要特性之一(以及概念、模块和协程)是范围。范围ranges库定义了一系列类和函数，用于简化使用range的操作。其中有一组概念，在<ranges>头文件和std::ranges命名空间中定义。其中的一些概念:
 
 \begin{table}[H]
 \centering
 	\begin{tabular}{|l|l|}
 		\hline
-		\textbf{Concept} &
-		\textbf{Description} \\ \hline
+		\textbf{概念} &
+		\textbf{描述} \\ \hline
 		range &
-		\begin{tabular}[c]{@{}l@{}}Defines the requirement that a type R is range, meaning\\ that it provides a begin iterator and an end sentinel.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}类型R为范围，需要提供了一个开始迭代器和一个结束哨兵。\end{tabular} \\ \hline
 		sized\_range &
-		\begin{tabular}[c]{@{}l@{}}Defines the requirement that a type R is range with the\\ size known in constant time.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}类型R是在常数时间内已知大小的范围。\end{tabular} \\ \hline
 		view &
-		\begin{tabular}[c]{@{}l@{}}Defines the requirement that a type T is a view, meaning\\ that it provides constant-time copy, move, and assignment\\ operations.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}类型T是视图，需要提供了恒定时间的复制、移动和赋值操作。\end{tabular} \\ \hline
 		input\_range &
-		\begin{tabular}[c]{@{}l@{}}Defines the requirement that a type R is a range whose\\ iterator type satisfies the input\_iterator concept.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}类型R是一个范围，其迭代器类型需要满足input\_iterator概念。\end{tabular} \\ \hline
 		output\_range &
-		\begin{tabular}[c]{@{}l@{}}Defiens the requirement that a typt R is a range whose\\ iterator type satisfies the output\_iterator concept.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}类型R是一个范围，其迭代器类型需要满足output\_iterator概念。\end{tabular} \\ \hline
 		forward\_range &
-		\begin{tabular}[c]{@{}l@{}}Defines the requirement that a type R is a range whose\\ iterator type satisfies the forward\_iterator concept.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}类型R是一个范围，其迭代器类型需要满足forward\_iterator概念。\end{tabular} \\ \hline
 		bidirectional\_range &
-		\begin{tabular}[c]{@{}l@{}}Defines the requirement that a type R is a range whose\\ iterator type satisfies the bidirectional\_iterator\\ concept.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}类型R是一个范围，其迭代器类型需要满足bidirectional\_iterator概念。\end{tabular} \\ \hline
 		random\_access\_range &
-		\begin{tabular}[c]{@{}l@{}}Defines the requirement that a type R is a range whose\\ iterator type satisfies the random\_access\_iterator concept.\end{tabular} \\ \hline
+		类型R是一个范围，其迭代器类型需要满足random\_access\_iterator概念。 \\ \hline
 		contiguous\_range &
-		\begin{tabular}[c]{@{}l@{}}Defines the requirement that a type R is a range whose\\ iterator type satisfies the contiguous\_iterator concept.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}类型R是一个范围，其迭代器类型需要满足contiguous\_iterator概念。\end{tabular} \\ \hline
 	\end{tabular}
 \end{table}
 
 \begin{center}
-Table 6.4
+表 6.4
 \end{center}
 
-Here is how some of these concepts are defined:
+以下是其中一些概念的定义:
 
 \begin{lstlisting}[style=styleCXX]
 template< class T >
@@ -209,7 +200,7 @@ concept input_range = ranges::range<T> &&
 	std::input_iterator<ranges::iterator_t<T>>;
 \end{lstlisting}
 
-As mentioned already, there are more concepts than those listed here. Others will probably be added in the future. This section is not intended as a complete reference to the standard concepts but rather as an introduction to them. You can learn more about each of these concepts from the official C++ reference documentation available at \url{https:// en.cppreference.com/}. As for ranges, we will learn more about them and explore what the standard library provides in Chapter 8, Ranges and Algorithms.
+如前所述，这里列出的概念要比这里列出的多得多，未来可能还会增加。本节不打算作为标准概念的完整参考，而是作为它们的介绍。感兴趣的读者可以在\url{https://en.cppreference.com/}官方C++参考文档了解更多关于这些概念的信息。至于范围，我们将在第8章中了解到更多，并探索标准库提供了什么。
 
 
 

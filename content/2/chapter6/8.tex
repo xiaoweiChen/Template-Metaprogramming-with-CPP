@@ -1,13 +1,13 @@
-As you well know, apart from function templates and class templates we also have variable templates and alias templates in C++. These make no exception of the need to define constraints. The same rules for constraining the template arguments discussed so far apply to these two. In this section, we will demonstrate them shortly. Let’s start with variable templates.
+C++中，除了函数模板和类模板外，还有变量模板和别名模板，这些都需要定义约束。目前讨论的约束模板参数的相同规则也适用于这两个参数。
 
-It is a typical example to define the PI constant for showing how variable templates work. Indeed, it is a simple definition that looks as follows:
+定义PI常量以显示变量模板的工作方式是一个典型的例子。事实上，这是一个简单的定义:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
 constexpr T PI = T(3.1415926535897932385L);
 \end{lstlisting}
 
-However, this only makes sense for floating-point types (and maybe other types such as decimal, which does not exist in C++ yet). Therefore, this definition should be restricted to floating-point types, as follows:
+然而，这只对浮点类型有意义(也可能是其他类型，比如十进制，在C++中还不存在)。因此，这个定义应该限制为浮点类型:
 
 \begin{lstlisting}[style=styleCXX]
 template <std::floating_point T>
@@ -17,16 +17,16 @@ std::cout << PI<double> << '\n'; // OK
 std::cout << PI<int> << '\n'; // error
 \end{lstlisting}
 
-The use of PI<double> is correct but PI<int> produces a compiler error. This is what constraints can provide in a simple and readable manner.
+使用PI<double>是正确的，但PI<int>会产生编译器错误。可以以简单易读的方式进行约束。
 
-Finally, the last category of templates that we have in the language, alias templates, can also be constrained. In the following snippet, we can see such an example:
+最后一类模板——别名模板，也可以受到约束。下面的代码片段中，可以看到这样一个例子:
 
 \begin{lstlisting}[style=styleCXX]
 template <std::integral T>
 using integral_vector = std::vector<T>;
 \end{lstlisting}
 
-The integral\_vector template is an alias for std::vector<T> when T is an integral type. The very same can be achieved with the following alternative, although longer, declaration:
+当T是整型时，integral\_vector模板是std::vector<T>的别名。使用以下替代声明也可以达到同样的效果，不过声明更长了:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -34,16 +34,16 @@ requires std::integral<T>
 using integral_vector = std::vector<T>;
 \end{lstlisting}
 
-We can use this integral\_vector alias template as follows:
+可以像下面这样使用这个integral\_vector别名模板:
 
 \begin{lstlisting}[style=styleCXX]
 integral_vector<int> v1 { 1,2,3 }; // OK
 integral_vector<double> v2 {1.0, 2.0, 3.0}; // error
 \end{lstlisting}
 
-Defining the v1 object works fine since int is an integral type. However, defining the v2 vector generates a compiler error because double is not an integral type.
+定义v1对象没问题，因为int是整型。但定义v2会产生编译器错误，因为double不是整型。
 
-If you paid attention to the examples in this section, you will have noticed that they don’t use the type traits (and the associated variable templates) we used previously in the chapter, but a couple of concepts: std::integral and std::floating\_point. These are defined in the <concepts> header and help us avoid repeatedly defining the same concepts based on available C++11 (or newer) type traits. We will look at the content of the standard concepts library shortly. Before we do that, let’s see what other ways we can employ to define constraints in C++20.
+若注意了本节中的例子，会注意到其没有使用我们之前在本章中使用的类型特征(以及相关的变量模板)，而是使用了几个概念:std::integral和std::float\_point。这些定义在<concepts>头文件中，帮助我们避免使用基于C++11(或更新的)类型特征重复定义相同的概念。后面，我们将简要介绍标准概念库的内容。但在此之前，先来看看在C++20中还可以使用哪些方法来定义约束。
 
 
 
