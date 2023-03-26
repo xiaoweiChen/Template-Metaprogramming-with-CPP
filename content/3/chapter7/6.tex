@@ -1,7 +1,7 @@
 
-Expression templates are a metaprogramming technique that enables lazy evaluation of a computation at compile-time. This helps to avoid inefficient operations that occur at runtime. However, this does not come for free, as expression templates require more code and can be cumbersome to read or understand. They are often used in the implementation of linear algebra libraries.
+表达式模板是一种元编程技术，支持在编译时对计算进行惰性计算。这有助于避免在运行时发生低效操作，但这并不是免费的，因为表达式模板需要更多的代码，并且阅读或理解起来可能很麻烦，其经常用于线性代数库的实现中。
 
-Before seeing how expression templates are implemented, let’s understand what is the problem they solve. For this, let’s suppose we want to do some operations with matrices, for which we implemented the basic operations, addition, subtraction, and multiplication (either of two matrices or of a scalar and a matrix). We can have the following expressions:
+了解表达式模板是如何实现的之前，让先了解它们解决的问题是什么。为此，假设我们想要对矩阵进行一些操作，实现了基本的操作，加法、减法和乘法(两个矩阵或一个标量和一个矩阵)。可以有以下表达式:
 
 \begin{lstlisting}[style=styleCXX]
 auto r1 = m1 + m2;
@@ -10,26 +10,26 @@ auto r3 = m1 * m2 + m3 * m4;
 auto r4 = m1 + 5 * m2;
 \end{lstlisting}
 
-In this snippet, m1, m2, m3, and m4 are matrices; similarly, r1, r2, r3, and r4 are matrices that result from performing the operations on the right side. The first operation does not pose any problems: m1 and m2 are added and the result is assigned to r1. However, the second operation is different because there are three matrices that are added. That means m1 and m2 are added first and a temporary is created, which is then added to m3 and the result assigned to r2.
+m1, m2, m3和m4是矩阵;类似地，r1, r2, r3和r4是由右边的操作得到的矩阵。第一个操作没有产生任何问题:m1和m2相加，结果赋值给r1。第二个操作是不同的，因为有三个矩阵被加起来。所以首先操作m1和m2，并创建一个临时对象，然后将其添加到m3，并将结果分配给r2。
 
-For the third operation, there are two temporaries: one for the result of multiplying m1 and m2 and one for the result of multiplying m3 and m4; these two are then added and the result is assigned to r3. Finally, the last operation is similar to the second, meaning that a temporary object results from the multiplication between the scalar 5 and the matrix m2, and then this temporary is added to m1 and the result assigned to r4.
+对于第三个操作，有两个临时值:一个是m1和m2相乘的结果，一个是m3和m4相乘的结果;然后这两个相加结果被赋值给r3。最后一个操作类似于第二个操作，所以一个临时对象是由标量5和矩阵m2相乘产生的，然后将这个临时对象添加到m1，并将结果分配给r4。
 
-The more complex the operation, the more temporaries are generated. This can affect performance when the objects are large. Expression templates help to avoid this by modeling the computation as a compile-time expression. The entire mathematical expression (such as m1 + 5 * m2) becomes a single expression template computed when the assignment is evaluated and without the need for any temporary object.
+操作越复杂，生成的临时项就越多。当对象很大时，这会影响性能。表达式模板通过将计算建模为编译时表达式来帮助避免这种情况。整个数学表达式(如m1 + 5 * m2)在计算赋值时变成一个单独的表达式模板，不需要任何临时对象。
 
-To demonstrate this, we will build some examples using vectors not matrices because these are simpler data structures, and the point of the exercise is not to focus on the representation of data but on the creation of expression templates. In the following listing, you can see a minimal implementation of a vector class that provides several operations:
+为了演示，我们将使用vector而不是矩阵构建一些示例，因为vector是更简单的数据结构，而且练习的重点不是数据的表示，而是表达式模板的创建。在下面的代码中，可以看到一个vector类的最小实现，提供了几个操作:
 
 \begin{itemize}
 \item
-Constructing an instance from an initializer list or from a value representing a size (no initializing values)
+从初始化列表或表示大小的值构造实例(不初始化值)
 
 \item
-Retrieving the number of elements in the vector
+检索向vector的元素数
 
 \item
-Element access with the subscript operator ([])
+使用下标操作符([])访问元素
 \end{itemize}
 
-The code goes as follows:
+代码如下:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename T>
@@ -59,7 +59,7 @@ private:
 };
 \end{lstlisting}
 
-This looks very similar to the std::vector standard container, and, in fact, it uses this container internally to hold the data. However, this aspect is irrelevant to the problem we want to solve. Remember we are using a vector and not a matrix because it’s easier to represent in a few lines of code. Having this class, we can define the necessary operations: addition and multiplication, both between two vectors and between a scalar and a vector:
+这看起来非常类似于std::vector标准容器，其在内部会使用这个容器来保存数据，但这与我们要解决的问题无关。记住，使用的是vector，而不是矩阵，因为用几行代码来表示它更容易。有了这个类，就可以定义必要的操作:两个向量之间，以及标量与向量之间的加法和乘法:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename T, typename U>
@@ -102,7 +102,7 @@ auto operator* (S const& s, vector<T> const& v)
 }
 \end{lstlisting}
 
-These implementations are relatively straightforward and should not pose a problem to understand at this point. Both the + and * operators take two vectors of potentially different types, such as vector<int> and vector<double>, and return a vector holding elements of a result type. This is determined by the result of adding two values of the template types T and U, using std::declval. This has been discussed in Chapter 4, Advanced Template Concepts. A similar implementation is available for multiplying a scalar and a vector. Having these operators available, we can write the following code:
+这些实现相对简单，在这一点上不应该构成理解问题。+和*运算符都取两个可能类型不同的向量，例如vector<int>和vector<double>，并返回一个包含结果类型元素的向量，是由使用std::declval将模板类型T和U的两个值相加的结果决定的。这已经在第4章中讨论过。对于标量和向量相乘，也可以使用类似的实现。有了这些操作符，可以编写如下代码:
 
 \begin{lstlisting}[style=styleCXX]
 vector<int> v1{ 1,2,3 };
@@ -113,34 +113,34 @@ vector<double> v3 = v1 + a * v2; // {7.0, 9.5, 12.0}
 vector<int> v4 = v1 * v2 + v1 + v2; // {9, 17, 27}
 \end{lstlisting}
 
-As previously explained, this will create one temporary object while computing v3 and two temporaries while computing v4. These are exemplified in the following diagrams. The first shows the first computation, v3 = v1 + a * v2:
+如前所述，这将在计算v3时创建一个临时对象，在计算v4时创建两个临时对象。下面的图表举例说明了这一点。第一个是第一个计算，v3 = v1 + a * v2:
 
 \begin{center}
 \includegraphics[width=0.5\textwidth]{content/3/chapter7/images/2.png}\\
-Figure 7.2: A conceptual representation of the first expression
+图7.2:第一个表达式
 \end{center}
 
-The second diagram, shown next, presents a conceptual representation of the computation of the second expression, v4 = v1 * v2 + v1 + v2:
+下面显示的第二个图，给出了第二个表达式，v4 = v1 * v2 + v1 + v2计算的表示:
 
 \begin{center}
 \includegraphics[width=0.5\textwidth]{content/3/chapter7/images/3.png}\\
-Figure 7.3: A conceptual representation of the second expression
+图7.3:第二个表达式
 \end{center}
 
-In order to avoid these temporaries, we can rewrite the implementation of the vector class using the expression templates pattern. This requires several changes:
+为了避免这些临时变量，可以使用表达式模板模式重写vector类的实现。这需要一些改变:
 
 \begin{itemize}
 \item
-Defining class templates to represent an expression between two objects (such as the expression of adding or multiplying two vectors).
+定义类模板来表示两个对象之间的表达式(例如两个向量相加或相乘的表达式)。
 
 \item
-Modifying the vector class and parameterize the container for its internal data, which by default would be a std::vector as previously but can also be an expression template.
+修改vector类并为其内部数据参数化容器，默认情况下，容器内部数据是std::vector，但也可以是表达式模板。
 
 \item
-Changing the implementation of the overloaded + and * operators.
+更改重载的+和*操作符的实现。
 \end{itemize}
 
-Let’s see how this is done, starting with the vector implementation. Here is the code:
+让我们从向量实现开始，看看这是如何完成的:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename T, typename C = std::vector<T>>
@@ -194,26 +194,26 @@ private:
 };
 \end{lstlisting}
 
-In addition to the operations available in the initial implementation, this time we have also defined the following:
+除了初始实现中可用的操作外，这次我们还定义了以下操作:
 
 \begin{itemize}
 \item
-A default constructor
+默认构造函数
 
 \item
-A conversion constructor from a container
+容器的转换构造函数
 
 \item
-A copy constructor from a vector containing elements of a potentially different type
+从包含可能不同类型元素的向量复制构造函数
 
 \item
-A copy-assignment operator from a vector containing elements of a potentially different type
+来自包含可能不同类型元素的向量的复制赋值操作符
 
 \item
-Member function data that provides access to the underlaying container holding the data
+成员函数数据，提供对存储数据的底层容器的访问
 \end{itemize}
 
-An expression template is a simple class template that stores two operands and provides a way to perform the evaluation of the operation. In our case, we need to implement expressions for adding two vectors, multiplying two vectors, and multiplying a scalar and a vector. Let’s look at the implementation of the expression template for adding two vectors:
+表达式模板是一个简单的类模板，其存储两个操作数，并提供了一种执行操作求值的方法。本例中，我们需要实现两个向量相加、两个向量相乘，以及标量与向量相乘的表达式。来看看两个向量相加的表达式模板的实现:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename L, typename R>
@@ -237,11 +237,11 @@ private:
 };
 \end{lstlisting}
 
-This class stores constant references to two vectors (or, in fact, any type that overloads the subscript operator and provides a size member function). The evaluation of the expression occurs in the overloaded subscript operator but not for the entire vector; only the elements at the indicated index are added.
+该类存储对两个向量的常量引用(或者，实际上，任何重载下标操作符并提供size成员函数的类型)。表达式的求值发生在重载下标操作符中，而不是整个向量，只添加指定索引处的元素。
 
-Notice that this implementation does not handle vectors of different sizes (which you can take as an exercise to change). However, it should be easy to understand the lazy nature of this approach since the addition operation only occurs when invoking the subscript operator.
+注意，此实现不处理不同大小的向量(可以将其作为练习进行更改)。但应该很容易理解这种方法的惰性性质，因为加法操作只在调用下标操作符时发生。
 
-The multiplication expression templates for the two operations we need are implemented in a similar fashion. The code is shown in the next listing:
+我们需要的两个操作的乘法表达式模板以类似的方式实现:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename L, typename R>
@@ -287,7 +287,7 @@ private:
 };
 \end{lstlisting}
 
-The last part of the change is to modify the definition of the overloaded + and * operators, which is as follows:
+更改的最后一部分是修改重载的+和*操作符的定义:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename T, typename L, typename U, typename R>
@@ -320,17 +320,17 @@ auto operator*(S const& a, vector<T, E> const& v)
 }
 \end{lstlisting}
 
-Although the code is more complex when implementing this pattern, the client code does not need to change. The snippet showed earlier works without any modifications but in a lazy manner. The evaluation of each element in the result is triggered by the invocation of the subscript operator that occurs in the copy-constructor and copy-assignment operator of the vector class.
+尽管在实现此模式时代码更加复杂，但调用端代码不需要更改。这段代码显示了早期的情况，没有任何修改，但以一种懒惰的方式。结果中每个元素的求值由vector类的复制构造函数和复制赋值操作符中的下标操作符触发。
 
-If this pattern looks cumbersome to you, there is the alternative of something better: the ranges library.
+若这个模式看起来很麻烦，那么还有更好的选择:范围库。
 
-\subsubsubsection{7.6.1\hspace{0.2cm}Using ranges as an alternative to expression templates}
+\subsubsubsection{7.6.1\hspace{0.2cm}使用范围库作为表达式模板的替代方案}
 
-One of the major features of C++20 is the ranges library. A range is a generalization of a container - a class that allows you to iterate over its data (elements). A key element of the range library is the views. These are non-owning wrappers of other ranges that transform the underlying range through some operation.
+C++20的主要特性之一是范围库，其是容器的泛化——允许迭代其数据(元素)的类。范围库的一个关键元素是视图，是其他范围的非所有权包装器，通过某些操作转换底层范围。
 
-Moreover, they are lazy-evaluated and the time to construct, copy, or destroy them does not depend on the size of the underlying range. The lazy evaluation (the fact that transformations are applied to elements at the moment they are requested, not when the view is created) is a key feature of the library. However, that is exactly what the expression templates are also providing. As a result, many uses of the expression templates can be replaced with ranges. Ranges will be discussed in detail in the next chapter.
+此外，它们是惰性求值的，构造、复制或销毁的时间不取决于底层范围的大小。惰性求值(即在元素被请求时应用转换，而不是在视图创建时)是该库的一个关键特性。然而，这正是表达式模板所提供的，所以表达式模板的许多用法可以用范围代替。
 
-The C++ ranges library is based on the range-v3 library created by Eric Niebler. This library is available at \url{https://github.com/ericniebler/range-v3/}. Using range-v3, we can write the following code to perform the operation v1 + a * v2:
+C++的范围库是基于Eric Niebler创建的range-v3库。这个库可以在\url{https://github.com/ericniebler/range-v3/}上获得。使用range-v3，我们可以编写以下代码来执行操作v1 + a * v2:
 
 \begin{lstlisting}[style=styleCXX]
 namespace rv = ranges::views;
@@ -343,9 +343,9 @@ auto sv2 = v2 |
 auto v3 = rv::zip_with(std::plus<>{}, v1, sv2);
 \end{lstlisting}
 
-There is no need for a custom implementation of a vector class; it just works with the std::vector container. There is no need to overload any operator also. The code should be easy to follow, at least if you have some familiarity with the ranges library. First, we create a view that transforms the elements of the v2 vector by multiplying each element with a scalar. Then, a second view is created that applies the plus operator on the elements of the v1 range and the view resulting from the previous operation.
+vector类不需要自定义实现，这只适用于std::vector容器，也不需要重载任何操作符。代码应该很容易理解，若对范围库比较熟悉的话。首先，创建一个视图，通过将每个元素与标量相乘来转换v2向量的元素。然后，创建第二个视图，将加号运算符应用于v1范围的元素和前一个操作生成的视图。
 
-Unfortunately, this code cannot be written in C++20 using the standard library, because the zip\_with view has not been included in C++20. However, this view will be available in C++23 under the name zip\_view. Therefore, in C++23, we will be able to write this code as follows:
+但是，这段代码不能使用标准库在C++20中编写，因为zip\_with视图没有包含在C++20中。但这个视图将在C++23中以zip\_view的名称提供。因此，在C++23中，可以这样实现:
 
 \begin{lstlisting}[style=styleCXX]
 namespace rv = std::ranges::views;
@@ -358,9 +358,9 @@ auto sv2 = v2 |
 auto v3 = rv::zip_wiew(std::plus<>{}, v1, sv2);
 \end{lstlisting}
 
-To conclude the discussion of the expression templates pattern, you should keep in mind the following takeaways: the pattern is designed to provide lazy evaluation for costly operations, and it does so at the expense of having to write more code (that is also arguably more cumbersome) and increased compile-times (since heavy template code will have an impact on that). However, as of C++20, a good alternative to this pattern is represented by the ranges library. We will learn about this new library in Chapter 9, The Ranges Library.
+为了结束对表达式模板模式的讨论，应该记住以下要点:该模式旨在为代价高昂的操作提供惰性求值，而这样做的代价是必须编写更多的代码(也可以说是更麻烦)和增加编译时间(因为沉重的模板代码将对此产生影响)。然而，从C++20开始，这个模式的一个很好的替代是由范围库表示的。我们将在第9章中了解这个新库。
 
-For the next and last section of this chapter, we will look at type lists.
+在本章的下一节也是最后一节，我们将讨论类型列表。
 
 
 

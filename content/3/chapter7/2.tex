@@ -1,18 +1,18 @@
 
-This pattern has a rather curious name: the Curiously Recurring Template Pattern, or CRTP for short. It’s called curious because it is rather odd and unintuitive. The pattern was first described (and its name coined) by James Coplien in a column in the C++ Report in 1995. This pattern is as follows:
+这个模式有一个相当奇怪的名字:奇异递归模板模式，简称CRTP。之所以称为"奇异"，是因为它相当奇怪和不直观。1995年，James Coplien在c++ Report的一个专栏中首次描述了这个模式(并创造了它的名字)。这种模式如下:
 
 \begin{itemize}
 \item
-There is a base class template that defines the (static) interface.
+一个定义(静态)接口的基类模板。
 
 \item
-Derived classes are themselves the template argument for the base class template.
+派生类本身就是基类模板的模板参数。
 
 \item
-History of C++, The member functions of the base class call member functions of its type template parameter (which are the derived classes).
+基类的成员函数调用其类型模板参数(即派生类)的成员函数。
 \end{itemize}
 
-Let’s see how the pattern implementation looks in practice. We will transform the previous example with game units into a version using the CRTP. The pattern implementation goes as follows:
+来看看模式实现在实际中是什么样子的。我们将把前面带有游戏单位的例子转换成使用CRTP的版本。模式实现如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -37,11 +37,11 @@ struct mage : game_unit<mage>
 };
 \end{lstlisting}
 
-The game\_unit class is now a template class but contains the same member function, attack. Internally, this performs an upcast of the this pointer to T* and then invokes a member function called do\_attack. The knight and mage classes derive from the game\_unit class and pass themselves as the argument for the type template parameter T. Both provide a member function called do\_attack.
+game\_unit类现在是一个模板类，但包含相同的成员函数attack。在内部，它将this指针上转换为T*，然后调用一个名为do\_attack的成员函数。knight和mage类派生自game\_unit类，并将自己作为类型模板参数T进行传递。它们都提供了一个名为do\_attack的成员函数。
 
-Notice that the member function in the base class template and the called member function in the derived classes have different names. Otherwise, if they had the same name, the derived class member functions would hide the member from the base since these are no longer virtual functions.
+注意，基类模板中的成员函数和派生类中调用的成员函数具有不同的名称。否则，若具有相同的名称，派生类成员函数将隐藏基类成员，因为它们不再是虚函数了。
 
-The fight function that takes a collection of game units and calls the attack function needs to change too. It needs to be implemented as a function template, as follows:
+fight函数(获取游戏单位集合并调用攻击函数)也需要改变。需要作为函数模板实现，具体实现如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -54,7 +54,7 @@ void fight(std::vector<game_unit<T>*> const & units)
 }
 \end{lstlisting}
 
-Using this function is a little different than before. It goes as follows:
+使用此函数与以前略有不同。具体内容如下:
 
 \begin{lstlisting}[style=styleCXX]
 knight k;
@@ -63,28 +63,28 @@ fight<knight>({ &k });
 fight<mage>({ &m });
 \end{lstlisting}
 
-We have moved the runtime polymorphism to compile-time. Therefore, the fight function cannot treat knight and mage objects polymorphically. Instead, we get two different overloads, one that can handle knight objects and one that can handle mage objects. This is static polymorphism.
+我们已经将运行时多态性移到了编译时，所以fight函数不能多态地处理knight和mage的对象。相反，我们得到了两个不同的重载，一个可以处理knight对象，一个可以处理mage对象。这是静态多态。
 
-Although the pattern might not look complicated after all, the question you’re probably asking yourself at this point is: how is this pattern actually useful? There are different problems you can solve using CRT, including the following:
+尽管这个模式看起来并不复杂，但此需要问问自己:这个模式实际上有什么用处?可以使用CRT解决不同的问题，包括:
 
 \begin{itemize}
 \item
-Limiting the number of times a type can be instantiated
+限制类型可以实例化的次数
 
 \item
-Adding common functionality and avoiding code duplication
+增加公共功能并避免代码重复
 
 \item
-Implementing the composite design pattern
+实现复合设计模式
 \end{itemize}
 
-In the following subsections, we will look at each of these problems and see how to solve them with CRTP.
+下面的小节中，我们将逐一研究这些问题，并了解如何使用CRTP解决它们。
 
-\subsubsubsection{7.2.1\hspace{0.2cm}Limiting the object count with CRTP}
+\subsubsubsection{7.2.1\hspace{0.2cm}限制实例化对象的次数}
 
-Let’s assume that for the game in which we created knights and mages we need some items to be available in a limited number of instances. For instance, there is a special sword type called Excalibur and there should be only one instance of it. On the other hand, there is a book of magic spells but there cannot be more than three instances of it at a time in the game. How do we solve this? Obviously, the sword problem could be solved with the singleton pattern. But what do we do when we need to limit the number to some higher value but still finite? The singleton pattern wouldn’t be of much help (unless we transform it into a “multiton”) but the CRTP would.
+假设在我们创造骑士和法师的游戏中，我们需要一些道具在有限的实例中可用。例如，有一种特殊的剑叫做Excalibur，它应该只有一个实例。另一方面，有一本魔法咒语书，但在游戏中一次不能超过三个实例。怎么解决这个问题?显然，剑的问题可以用单例模式解决。但当我们需要把这个数限制到一个更高的值，但仍然是有限的时候，该怎么办呢?单例模式不会有什么帮助(除非将其转换为“多例”)，但CRTP可以。
 
-First, we start with a base class template. The only thing this class template does is keep a count of how many times it has been instantiated. The counter, which is a static data member, is incremented in the constructor and decremented in the destructor. When that count exceeds a defined limit, an exception is thrown. Here is the implementation:
+首先，从基类模板开始。这个类模板所做的事就是记录实例化的次数。计数器是静态数据成员，在构造函数中自增，在析构函数中自减。当该计数超过定义的限制时，将引发异常。实现如下:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T, size_t N>
@@ -104,7 +104,7 @@ template <typename T, size_t N>
 std::atomic<size_t> limited_instances<T, N>::count = 0;
 \end{lstlisting}
 
-The second part of the template consists of defining the derived classes. For the mentioned problem, they are as follows:
+模板的第二部分包括定义派生类。针对上述问题，具体实现如下:
 
 \begin{lstlisting}[style=styleCXX]
 struct excalibur : limited_instances<excalibur, 1>
@@ -114,7 +114,7 @@ struct book_of_magic : limited_instances<book_of_magic, 3>
 {};
 \end{lstlisting}
 
-We can instantiate excalibur once. The second time we try to do the same (while the first instance is still alive) an exception will be thrown:
+我们可以实例化excalibur一次。当第二次尝试做同样的事情时(当第一个实例仍然存在时)，将抛出异常:
 
 \begin{lstlisting}[style=styleCXX]
 excalibur e1;
@@ -128,7 +128,7 @@ catch (std::exception& e)
 }
 \end{lstlisting}
 
-Similarly, we can instantiate book\_of\_magic three times and an exception will be thrown the fourth time we attempt to do that:
+类似地，可以实例化book\_of\_magic三次，第四次尝试这样做时将抛出异常:
 
 \begin{lstlisting}[style=styleCXX]
 book_of_magic b1;
@@ -144,13 +144,13 @@ catch (std::exception& e)
 }
 \end{lstlisting}
 
-Next, we look at a more common scenario, adding common functionality to types.
+接下来，我们来看一个更常见的场景，向类型添加通用功能。
 
-\subsubsubsection{7.2.2\hspace{0.2cm}Adding functionality with CRTP}
+\subsubsubsection{7.2.2\hspace{0.2cm}增加功能}
 
-Another case when the curiously recurring template pattern can help us is providing common functionalities to derived classes through generic functions in a base class that relies solely on derived class members. Let’s take an example to understand this use case.
+奇异重复模板模式可以帮助我们解决的另一种情况是，通过基类中仅依赖于派生类成员的泛型函数为派生类提供公共功能。让我们通过一个例子来理解这个用例。
 
-Let’s suppose that some of our game units have member functions such as step\_forth and step\_back that move them one position, forward or backward. These classes would look as follows (at a bare minimum):
+假设一些游戏单位拥有step\_forth和step\_back等成员函数，它们将向前或向后移动一个位置。这些类看起来如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 struct knight
@@ -166,7 +166,7 @@ struct mage
 };
 \end{lstlisting}
 
-However, it could be a requirement that everything that can move back and forth one step should also be able to advance or retreat an arbitrary number of steps. However, this functionality could be implemented based on the step\_forth and step\_back functions, which would help avoid having duplicate code in each of these game unit classes. The CRTP implementation for this problem would, therefore, look as follows:
+然而，这可能是一种要求，即所有可以来回移动一步的东西都能够前进或后退任意数量的步骤。但这个功能可以基于step\_forward和step\_back函数来实现，这将有助于避免在每个游戏单元类中出现重复的代码。因此，这个问题的CRTP实现如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -204,7 +204,7 @@ struct mage : movable_unit<mage>
 };
 \end{lstlisting}
 
-We can advance and retreat the units by calling the base class advance and retreat member functions as follows:
+可以通过调用基类advance和retreat成员函数来推进和后退单位，如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 knight k;
@@ -216,7 +216,7 @@ m.advance(5);
 m.retreat(3);
 \end{lstlisting}
 
-You could argue that the same result could be achieved using non-member function templates. For the sake of discussion, such a solution is presented as follows:
+可以认为，使用非成员函数模板也可以实现相同的结果。为了便于讨论，这种解决方案的实现如下:
 
 \begin{lstlisting}[style=styleCXX]
 struct knight
@@ -250,7 +250,7 @@ void retreat(T& t, size_t steps)
 }
 \end{lstlisting}
 
-The client code would need to change but the changes are actually small:
+使用端的代码需要更改，但更改实际上很小:
 
 \begin{lstlisting}[style=styleCXX]
 knight k;
@@ -262,15 +262,15 @@ advance(m, 5);
 retreat(m, 3);
 \end{lstlisting}
 
-The choice between these two may depend on the nature of the problem and your preferences. However, the CRTP has the advantage that it is describing well the interface of the derived classes (such as knight and mage in our example). With the non-member functions, you wouldn’t necessarily know about this functionality, which would probably come from a header that you need to include. However, with CRTP, the class interface is well visible to those using it.
+这两者之间的选择可能取决于问题的性质和偏好。然而，CRTP有一个优点，那就是它很好地描述了派生类的接口(比如我们例子中的knight和mage)。对于非成员函数，并不一定知道这个功能，它可能来自需要包含的头文件。然而，使用CRTP时，类接口对于使用者来说是可见的。
 
-For the last scenario we discuss here, let’s see how CRTP helps to implement the composite design pattern.
+针对在这里讨论的最后一个场景，来看看CRTP如何帮助实现复合设计模式。
 
-\subsubsubsection{7.2.3\hspace{0.2cm}Implementing the composite design pattern}
+\subsubsubsection{7.2.3\hspace{0.2cm}实现复合设计模式}
 
-In their famous book, Design Patterns: Elements of Reusable Object-Oriented Software, the Gang of Four (Erich Gamma, Richard Helm, Ralph Johnson, and John Vlissides) describe a structural pattern called composite that enables us to compose objects into larger structures and treat both individual objects and compositions uniformly. This pattern can be used when you want to represent part-whole hierarchies of objects and you want to ignore the differences between individual objects and compositions of individual objects.
+著名的著作《设计模式:可重用面向对象软件的元素》中，四人组(Erich Gamma、Richard Helm、Ralph Johnson和John Vlissides)描述了一种称为复合的结构模式，它能够将对象组合成更大的结构，并统一对待单个对象和组合。当希望表示对象的部分-整体层次结构，并且希望忽略单个对象和单个对象的组合之间的差异时，可以使用此模式。
 
-To put this pattern into practice, let’s consider the game scenario again. We have heroes that have special abilities and can do different actions, one of which is allying with another hero. That can be easily modeled as follows:
+为了将这种模式付诸实践，再次考虑游戏场景。我们的英雄有特殊的能力，可以做不同的行动，其中之一是与另一个英雄结盟。这可以很容易地进行如下建模:
 
 \begin{lstlisting}[style=styleCXX]
 struct hero
@@ -298,7 +298,7 @@ hero const& obj)
 }
 \end{lstlisting}
 
-These heroes are represented by the hero class that contains a name, a list of connections to other hero objects, as well as a member function, ally\_with, that defines an alliance between two heroes. We can use it as follows:
+这些英雄由一个hero类来表示，这个英雄类包含一个名字，一个到其他hero对象的连接列表，以及一个成员函数ally\_with，它定义了两个英雄之间的联盟。可以这样使用它:
 
 \begin{lstlisting}[style=styleCXX]
 hero k1("Arthur");
@@ -313,7 +313,7 @@ std::cout << k2 << '\n';
 std::cout << k3 << '\n';
 \end{lstlisting}
 
-The output of running this snippet is the following:
+运行代码段的输出如下所示:
 
 \begin{tcblisting}{commandshell={}}
 Arthur --> [Sir Lancelot]
@@ -324,7 +324,7 @@ Sir Lancelot --> [Sir Gawain]
 Sir Gawain --> [Sir Lancelot]
 \end{tcblisting}
 
-Everything was simple so far. But the requirement is that heroes could be grouped together to form parties. It should be possible for a hero to ally with a group, and for a group to ally with either a hero or an entire group. Suddenly, there is an explosion of functions that we need to provide:
+目前为止，一切都很简单。但要求是英雄们可以聚集在一起组成政党。一个英雄可以与一个团体结盟，一个团体可以与一个英雄结盟，也可以与整个团体结盟。突然间，需要的功能激增:
 
 \begin{lstlisting}[style=styleCXX]
 struct hero_party;
@@ -342,7 +342,7 @@ struct hero_party : std::vector<hero>
 };
 \end{lstlisting}
 
-This is where the composite design pattern helps us treat heroes and parties uniformly and avoid unnecessary duplications of the code. As usual, there are different ways to implement it, but one way is using the curiously recurring template pattern. The implementation requires a base class that defines the common interface. In our case, this will be a class template with a single member function called ally\_with:
+这就是复合设计模式可以统一对待英雄和团队，并避免不必要的代码重复的地方。通常有不同的实现方法，但其中一种方法是使用重复出现的模板模式。实现需要定义公共接口的基类。我们的例子中，这将是一个类模板，只有一个名为ally\_with的成员函数:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -353,7 +353,7 @@ struct base_unit
 };
 \end{lstlisting}
 
-We will define the hero class as a derived class from base\_unit<hero>. This time, the hero class no longer implements ally\_with itself. However, it features begin and end methods that are intended to simulate the behavior of a container:
+我们把hero类定义为base\_unit<hero>的派生类。这一次，hero类不再实现自身的ally\_with。但它提供了begin和end方法，用于模拟容器的行为:
 
 \begin{lstlisting}[style=styleCXX]
 struct hero : base_unit<hero>
@@ -376,7 +376,7 @@ private:
 };
 \end{lstlisting}
 
-The class that models a group of heroes is called hero\_party and derives from both std::vector<hero> (to define a container of hero objects) and from base\_unit<hero\_party>. This is why the hero class has begin and end functions to help us perform iterating operations on hero objects, just as we would do with hero\_party objects:
+为一组英雄建模的类叫做hero\_party，源于std::vector<hero>(用来定义英雄对象的容器)和base\_unit<hero\_party>。这就是为什么hero类有begin和end函数来对英雄对象执行迭代操作，就像对hero\_party对象所做的那样:
 
 \begin{lstlisting}[style=styleCXX]
 struct hero_party : std::vector<hero>,
@@ -384,7 +384,7 @@ struct hero_party : std::vector<hero>,
 {};
 \end{lstlisting}
 
-We need to implement the ally\_with member function of the base class. The code is shown as follows. What it does is iterate through all the sub-objects of the current object and connect them with all the sub-objects of the supplied argument:
+需要实现基类的ally\_with成员函数，代码如下所示。其所做的是遍历当前对象的所有子对象，并将它们与所提供参数的所有子对象连接起来:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -402,7 +402,7 @@ void base_unit<T>::ally_with(U& other)
 }
 \end{lstlisting}
 
-The hero class declared the base\_unit class template a friend so that it could access the connections member. It also declared the operator<{}< as a friend so that this function could access both the connections and name private members. For more information about templates and friends, see Chapter 4, Advanced Template Concepts. The output stream operator implementation is shown here:
+hero类将基类base\_unit声明为友元，以便访问connections成员。它还将操作符<{}<声明为友元，以便该函数可以访问connections和name私有成员。有关模板及其朋友的更多信息，请参阅第4章的相关章节。输出流操作符的实现如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -419,7 +419,7 @@ base_unit<T>& object)
 }
 \end{lstlisting}
 
-Having all this defined, we can write code as follows:
+定义了所有这些之后，可以编写如下代码:
 
 \begin{lstlisting}[style=styleCXX]
 hero k1("Arthur");
@@ -444,7 +444,7 @@ std::cout << p1 << '\n';
 std::cout << p2 << '\n';
 \end{lstlisting}
 
-We can see from this that we are able to ally a hero with both another hero and a hero\_party, as well as a hero\_party with either a hero or another hero\_party. That was the proposed goal, and we were able to do it without duplicating the code between hero and hero\_party. The output of executing the previous snippet is the following:
+这里可以看到，可以让一个英雄与另一个hero和一个hero\_party结盟，也可以让一个hero\_party与一个hero或另一个hero\_party结盟。这就是我们的目标，并且能够在不复制hero和hero\_party之间的代码的情况下做到。执行上一段代码的输出如下所示:
 
 \begin{tcblisting}{commandshell={}}
 Arthur --> [Sir Lancelot]
@@ -462,13 +462,13 @@ Cador --> [Bors]
 Constantine --> [Bors]
 \end{tcblisting}
 
-After seeing how the CRTP helps achieve different goals, let’s look at the use of the CRTP in the C++ standard library.
+了解了CRTP如何帮助实现不同的目标之后，再来看看CRTP在C++标准库中的使用。
 
-\subsubsubsection{7.2.4\hspace{0.2cm}The CRTP in the standard library}
+\subsubsubsection{7.2.4\hspace{0.2cm}标准库中的CRTP}
 
-The standard library contains a helper type called std::enabled\_shared\_from\_this (in the <memory> header) that enables objects managed by a std::shared\_ptr to generate more std::shared\_ptr instances in a safe manner. The std::enabled\_shared\_from\_this class is the base class in the CRTP pattern. However, the previous description may sound abstract, so let’s try to understand it with examples.
+标准库包含一个名为std::enabled\_shared\_from\_this的辅助类型(在<memory>头文件中)，允许由std::shared\_ptr管理的对象以安全的方式生成更多std::shared\_ptr实例。std::enabled\_shared\_from\_this类是CRTP模式中的基类。前面的描述可能听起来很抽象，所以让我们通过例子来理解它。
 
-Let’s suppose we have a class called building and we are creating std::shared\_ptr objects in the following manner:
+假设有一个叫做building的类，正在以以下方式创建std::shared\_ptr对象:
 
 \begin{lstlisting}[style=styleCXX]
 struct building {};
@@ -478,9 +478,9 @@ std::shared_ptr<building> p1{ b }; // [1]
 std::shared_ptr<building> p2{ b }; // [2] bad
 \end{lstlisting}
 
-We have a raw pointer and, on line [1], we instantiate a std::shared\_ptr object to manage its lifetime. However, on line [2], we instantiate a second std::shared\_ptr object for the same pointer. Unfortunately, the two smart pointers know nothing of each other, so upon getting out of scope, they will both delete the building object allocated on the heap. Deleting an object that was already deleted is undefined behavior and will likely result in a crash of the program.
+我们有一个原始指针[1]，实例化了一个std::shared\_ptr对象来管理其生命周期。但在[2]行，我们为同一个指针实例化了第二个std::shared\_ptr对象。不幸的是，两个智能指针对彼此一无所知，因此一旦超出作用域，它们都会删除堆上分配的构建对象。删除已经删除的对象是未定义的行为，可能会导致程序崩溃。
 
-The std::enable\_shared\_from\_this class helps us create more shared\_ptr objects from an existing one in a safe manner. First, we need to implement the CRTP pattern as follows:
+std::enable\_shared\_from\_this类以安全的方式从现有的shared\_ptr对象创建更多的shared\_ptr对象。首先，需要实现CRTP模式，如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 struct building : std::enable_shared_from_this<building>
@@ -488,7 +488,7 @@ struct building : std::enable_shared_from_this<building>
 };
 \end{lstlisting}
 
-Having this new implementation, we can call the member function shared\_from\_this to create more std::shared\_ptr instances from an object, which all refer to the same instance of the object:
+有了这个新的实现，可以调用成员函数shared\_from\_this来从一个对象创建更多的std::shared\_ptr实例，这些实例都引用了该对象的同一个实例:
 
 \begin{lstlisting}[style=styleCXX]
 building* b = new building();
@@ -497,7 +497,7 @@ std::shared_ptr<building> p2{
 	b->shared_from_this()}; // [2] OK
 \end{lstlisting}
 
-The interface of the std::enable\_shared\_from\_this is as follows:
+std::enable\_shared\_from\_this的接口实现如下:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -513,9 +513,9 @@ class enable_shared_from_this
 };
 \end{lstlisting}
 
-The previous example shows how enable\_shared\_from\_this works but does not help understand when it is appropriate to use it. Therefore, let’s modify the example to show a realistic example.
+前面的例子展示了enable\_shared\_from\_this是如何工作的，但并不有助于理解什么时候使用它合适。因此，让我们修改示例，展示一个实际的示例。
 
-Let’s consider that the buildings we have can be upgraded. This is a process that takes some time and involves several steps. This task, as well as other tasks in the game, are executed by a designated entity, which we will call executor. In its simplest form, this executor class has a public member function called execute that takes a function object and executes it on a different thread. The following listing is a simple implementation:
+试想现有的建筑可以升级，这是一个需要一些时间和几个步骤的过程。这个任务，以及游戏中的其他任务，都是由一个指定的实体执行的，我们称之为executor。最简单的形式中，这个executor类有一个名为execute的公共成员函数，该函数接受一个函数对象，并在不同的线程上执行它。下面的代码是一种简单的实现:
 
 \begin{lstlisting}[style=styleCXX]
 struct executor
@@ -539,7 +539,7 @@ private:
 };
 \end{lstlisting}
 
-The building class has a pointer to an executor, which is passed from the client. It also has a member function called upgrade that kicks off the execution process. However, the actual upgrade occurs in a different, private, function called do\_upgrade. This is called from a lambda expression that is passed to the execute member function of the executor. All these are shown in the following listing:
+building类有一个指向executor的指针，该指针从调用端传递过来。其还有一个名为upgrade的成员函数，用于启动执行过程。然而，实际的升级发生在一个不同的、私有的、名为do\_upgrade的函数中。这是从传递给executor的execute成员函数的Lambda表达式中调用的。所有这些都显示在下面的代码中:
 
 \begin{lstlisting}[style=styleCXX]
 struct building
@@ -575,7 +575,7 @@ private:
 };
 \end{lstlisting}
 
-The client code is relatively simple: create an executor, create a building managed by a shared\_ptr, set the executor reference, and run the upgrade process:
+调用端代码相对简单:创建一个executor，创建一个shared\_ptr管理的建筑，设置executor引用，并进行升级:
 
 \begin{lstlisting}[style=styleCXX]
 int main()
@@ -590,7 +590,7 @@ int main()
 }
 \end{lstlisting}
 
-If you run this program, you get the following output:
+若运行这个程序，会得到以下输出:
 
 \begin{tcblisting}{commandshell={}}
 building created
@@ -600,9 +600,9 @@ upgrading
 building is functional
 \end{tcblisting}
 
-What we can see here is that the building is destroyed before the upgrade process begins. This incurs undefined behavior and, although this program didn’t crash, a real-world program would certainly crash.
+这里看到的是，在升级过程开始之前，建筑就摧毁了。这会导致了未定义的行为，尽管这个程序没有崩溃，但实际的程序肯定会崩溃。
 
-The culprit for this behavior is this particular line in the upgrading code:
+这种行为的罪魁祸首是升级代码中的这一行:
 
 \begin{lstlisting}[style=styleCXX]
 exec->execute([self = this]() {
@@ -610,7 +610,7 @@ exec->execute([self = this]() {
 });
 \end{lstlisting}
 
-We are creating a lambda expression that captures the this pointer. The pointer is later used after the object it points to has been destroyed. To avoid this, we would need to create and capture a shared\_ptr object. The safe way to do that is with the help of the std::enable\_shared\_from\_this class. There are two changes that need to be done. The first is to actually derive the building class from the std::enable\_shared\_from\_this class:
+正在创建一个Lambda表达式来捕获this指针，该指针稍后在所指向的对象销毁后使用。为了避免这种情况，需要创建并捕获一个shared\_ptr对象。安全的方法是借助std::enable\_shared\_from\_this类。有两个改变需要做。第一个是实际从std::enable\_shared\_from\_this类中派生构建类:
 
 \begin{lstlisting}[style=styleCXX]
 struct building : std::enable_shared_from_this<building>
@@ -619,7 +619,7 @@ struct building : std::enable_shared_from_this<building>
 };
 \end{lstlisting}
 
-The second change requires us to call shared\_from\_this in the lambda capture:
+第二个变化是要在Lambda捕获中调用shared\_from\_this:
 
 \begin{lstlisting}[style=styleCXX]
 exec->execute([self = shared_from_this()]() {
@@ -627,7 +627,7 @@ exec->execute([self = shared_from_this()]() {
 });
 \end{lstlisting}
 
-These are two slight changes to our code but the effect is significant. The building object is no longer destroyed before the lambda expression gets executed on a separate thread (because there is now an extra shared pointer that refers to the same object as the shared pointer created in the main function). As a result, we get the output we expected (without any changes to the client code):
+这对代码的两个小更改，但效果非常显著。L'ambda表达式在单独的线程上执行之前，构建对象不再销毁(因为现在有一个的共享指针，引用与主函数中创建的共享指针相同的对象)。结果，得到了我们期望的输出(没有对调用端代码进行更改):
 
 \begin{tcblisting}{commandshell={}}
 building created
@@ -637,9 +637,9 @@ building is functional
 building destroyed
 \end{tcblisting}
 
-You could argue that after the main function finishes, we shouldn’t care what happens. Mind that this is just a demo program, and in practice, this happens in some other function and the program continues to run long after that function returns.
+你可以争辩说，主函数完成后，不应该关心发生了什么。注意，这只是一个演示程序，在实践中，这会发生在其他一些函数中，并且在该函数返回后，程序会继续运行很长时间。
 
-With this, we conclude the discussion around the curiously recurring template pattern. Next, we will look at a technique called mixins that is often mixed with the CRTP pattern.
+至此，我们结束了关于奇怪的重复模板模式的讨论。接下来，我们将研究一种称为混入(Mixins)的技术，它经常与CRTP模式混合使用。
 
 
 

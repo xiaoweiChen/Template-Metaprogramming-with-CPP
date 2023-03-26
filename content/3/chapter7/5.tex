@@ -1,27 +1,27 @@
 
-Tag dispatching is a technique that enables us to select one or another function overload at compile time. It is an alternative to std::enable\_if and SFINAE and is simple to understand and use. The term tag describes an empty class that has no members (data), or functions (behavior). Such a class is only used to define a parameter (usually the last) of a function to decide whether to select it at compiletime, depending on the supplied arguments. To better understand this, let’s consider an example.
+标记分派是一种技术，能够在编译时选择一个或另一个函数重载，是std::enable\_if和SFINAE的替代方案，易于理解和使用。术语标记描述了一个没有成员(数据)或函数(行为)的空类。这样的类仅用于定义函数的形参(通常是最后一个)，以决定是否在编译时选择它，这取决于提供的参数。为了更好地理解这一点，来看一个例子。
 
-The standard library contains a utility function called std::advance that looks as follows:
+标准库包含一个名为std::advance的实用函数，如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename InputIt, typename Distance>
 void advance(InputIt& it, Distance n);
 \end{lstlisting}
 
-Notice that in C++17, this is also constexpr (more about this, shortly). This function increments the given iterator by n elements. However, there are several categories of iterators (input, output, forward, bidirectional, and random access). That means such an operation can be computed differently:
+C++17中，这也是constexpr(稍后会详细介绍)。该函数将给定的迭代器增加n个元素。但迭代器有几种类型(输入、输出、向前、双向和随机访问)，所以这样的操作可以以不同的方式计算:
 
 \begin{itemize}
 \item
-For input iterators, it could call operator++ a number of n times.
+对于输入迭代器，可以调用operator++ n次。
 
 \item
-For bidirectional iterators, it could call either operator++ a number of n times (if n is a positive number) or operator-- a number of n times (if n is a negative number).
+对于双向迭代器，可以调用operator++ n次(若n是一个正数)或运算符-n次(若n是一个负数)。
 
 \item
-For random-access iterators, it can use the operator+= to increment it directly with n elements.
+对于随机访问迭代器，它可以使用operator+=直接增加n个元素。
 \end{itemize}
 
-This implies there can be three different implementations, but it should be possible to select at compile-time which one is the best match for the category of the iterator it is called for. A solution for this is tag dispatching. And the first thing to do is define the tags. As mentioned earlier, tags are empty classes. Therefore, tags that correspond to the five iterator types can be defined as follows:
+所以，可以有三种不同的实现，但应该可以在编译时选择与所调用迭代器的类别最匹配的实现。一种解决方案是标签调度，首先要做的是定义标签。如前所述，标记是空类。因此，对应于这5种迭代器类型的标签可以定义如下:
 
 \begin{lstlisting}[style=styleCXX]
 struct input_iterator_tag {};
@@ -33,7 +33,7 @@ struct random_access_iterator_tag :
 	bidirectional_iterator_tag {};
 \end{lstlisting}
 
-This is exactly how they are defined in the C++ standard library, in the std namespace. These tags will be used to define an additional parameter for each overload of std::advance, as shown next:
+这正是C++标准库中std名称空间中定义它们的方式，这些标记将用于为std::advance的每次重载定义一个附加参数:
 
 \begin{lstlisting}[style=styleCXX]
 namespace std
@@ -74,9 +74,9 @@ namespace std
 }
 \end{lstlisting}
 
-These overloads are defined in a separate (inner) namespace of the std namespace so that the standard namespace is not polluted with unnecessary definitions. You can see here that each of these overloads has three parameters: a reference to an iterator, a number of elements to increment (or decrement), and a tag.
+这些重载定义在std名称空间的单独(内部)名称空间中，这样标准名称空间就不会被不必要的定义所污染。这里可以看到，每个重载都有三个参数:对迭代器的引用、要递增(或递减)的元素数量和标记。
 
-The last thing to do is provide a definition of an advance function that is intended for direct use. This function does not have a third parameter but calls one of these overloads by determining the category of the iterator it is called with. Its implementation may look as follows:
+最后要做的是提供一个用于直接使用的高级函数的定义。这个函数没有第三个形参，但是通过确定调用迭代器的类别来调用这些重载中的一个。其实现可能如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 namespace std
@@ -91,7 +91,7 @@ namespace std
 }
 \end{lstlisting}
 
-The std::iterator\_traits class seen here defines a sort of interface for iterator types. For this purpose, it contains several member types, one of them being iterator\_category. This resolves to one of the iterator tags defined earlier, such as std::input\_iterator\_tag for input iterators or std::random\_access\_iterator\_tag for random access iterators. Therefore, based on the category of the supplied iterator, it instantiates one of these tag classes, determining the selection at compile-time of the appropriate overloaded implementation from the details namespace. We can invoke the std::advance function as follows:
+std::iterator\_traits类为迭代器类型定义了一种接口，包含几个成员类型，其中一个是迭代器\_category。这将解析为前面定义的一个迭代器标记，例如std::input\_iterator\_tag用于输入迭代器，std::random\_access\_iterator\_tag用于随机访问迭代器。因此，基于所提供的迭代器的类别，其实例化这些标记类之一，在编译时从details命名空间确定适当的重载实现的选择。我们可以像下面这样调用std::advance函数:
 
 \begin{lstlisting}[style=styleCXX]
 std::vector<int> v{ 1,2,3,4,5 };
@@ -103,19 +103,19 @@ auto sl = std::begin(l);
 std::advance(sl, 2);
 \end{lstlisting}
 
-The category type of the std::vector’s iterators is random access. On the other hand, the iterator category type for std::list is bidirectional. However, we can use a single function that relies on different optimized implementations by leveraging the technique of tag dispatching.
+std::vector迭代器的类别类型是随机访问。另一方面，std::list的迭代器类别类型是双向的。但可以利用标记调度技术使用依赖于不同优化实现的单个函数。
 
-\subsubsubsection{7.5.1\hspace{0.2cm}Alternatives to tag dispatching}
+\subsubsubsection{7.5.1\hspace{0.2cm}标签分派的替代方案}
 
-Prior to C++17, the only alternative to tag dispatching was SFINAE with enable\_if. We have discussed this topic in Chapter 5, Type Traits and Conditional Compilation. This is a rather legacy technique that has better alternatives in modern C++. These alternatives are constexpr if and concepts. Let’s discuss them one at a time.
+C++17之前，标记分派的唯一替代方案是SFINAE和enable\_if，我们已经在第5章中讨论了这个主题。这是一种相当传统的技术，在现代C++中有更好的替代方案。这些替代方案是constexpr if和概念。
 
 \noindent
 \hspace*{\fill} \\ %插入空行
-\textbf{Using constexpr if}
+\textbf{constexpr if}
 
-C++11 introduced the concept of constexpr values, which are values known at compile-time but also constexpr functions that are functions that could be evaluated at compile-time (if all inputs are compile-time values). In C++14, C++17, and C++20, many standard library functions or member functions of standard library classes have been changed to be constexpr. One of these is std::advance, whose implementation in C++17 is based on the constexpr if feature, also added in C++17 (which was discussed in Chapter 5, Type Traits and Conditional Compilation).
+C++11引入了constexpr值的概念，其是编译时已知的值，也是可以在编译时求值的函数(弱所有输入都是编译时的值)。C++14、C++17和C++20中，许多标准库函数或标准库类的成员函数更改为constexpr。其中之一是std::advance，它在C++17中的实现基于constexpr if特性，也在C++17中添加的。
 
-The following is a possible implementation in C++17:
+下面是C++17中的可能实现:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename It, typename Distance>
@@ -154,29 +154,29 @@ constexpr void advance(It& it, Distance n)
 }
 \end{lstlisting}
 
-Although this implementation still uses the iterator tags that we saw earlier, they are no longer used to invoke different overloaded functions but to determine the value of some compile-time expressions. The std::is\_base\_of type trait (through the std::is\_base\_of\_v variable template) is used to determine the type of the iterator category at compile-time.
+虽然这个实现仍然使用前面看到的迭代器标记，但不再用于调用不同的重载函数，而是用于确定一些编译时表达式的值。std::is\_base\_of类型特性(通过std::is\_base\_of\_v变量模板)用于在编译时确定迭代器类别的类型。
 
-This implementation has several advantages:
+这个实现有几个优点:
 
 \begin{itemize}
 \item
-Has a single implementation of the algorithm (in the std namespace)
+具有算法的单一实现(std命名空间中)
 
 \item
-Does not require multiple overloads with implementation details defined in a separate namespace
+不需要多个重载，实现细节定义在一个单独的命名空间中
 \end{itemize}
 
-The client code is unaffected. Therefore, library implementors were able to replace the previous version based on tag dispatching with the new version based on constexpr if, without affecting any line of code calling std::advance.
+调用端代码不受影响，所以标准库实现者能够用基于constexpr if的新版本替换基于标记分派的旧版本，而不会影响调用std::advance的代码。
 
-However, in C++20 there is an even better alternative. Let’s explore it next.
+然而，在C++20中有一个更好的选择。接下来让我们来探索一下。
 
 \noindent
 \hspace*{\fill} \\ %插入空行
-\textbf{Using concepts}
+\textbf{概念}
 
-The previous chapter was dedicated to constraints and concepts, introduced in C++20. We have seen not only how these features work but also some of the concepts that the standard library defines in several headers such as <concepts> and <iterator>. Some of these concepts specify that a type is some iterator category. For instance, std::input\_iterator specifies that a type is an input iterator. Similarly, the following concepts are also defined: std::output\_iterator, std::forward\_iterator, std::bidirectional\_iterator, std::random\_access\_iterator, and std::contiguous\_iterator (the last one indicating that an iterator is a randomaccess iterator, referring to elements that are stored contiguously in memory).
+前一章专门介绍C++20中引入的约束和概念，不仅看到了这些特性是如何工作的，还看到了标准库在几个头文件中定义的一些概念，如<concepts>和<iterator>。其中一些概念指定类型是某个迭代器类别。例如，std::input\_iterator指定类型为输入迭代器。类似地，还定义了以下概念:std::output\_iterator、std::forward\_iterator、std::bidirectional\_iterator、std::random\_access\_iterator和std::contiguous\_iterator(最后一个表示迭代器是随机访问迭代器，指的是连续存储在内存中的元素)。
 
-The std::input\_iterator concept is defined as follows:
+std::input\_iterator概念的定义如下:
 
 \begin{lstlisting}[style=styleCXX]
 template<class I>
@@ -188,17 +188,17 @@ template<class I>
 						  std::input_iterator_tag>;
 \end{lstlisting}
 
-Without getting into too many details, it is worth noting that this concept is a set of constraints that verify the following:
+值得注意的是，这个概念是一组约束，用于验证以下内容:
 
 \begin{itemize}
 \item
-The iterator is dereferenceable (supports *i) and is incrementable (supports ++i and i++)
+迭代器是可解引用的(支持*i)和可递增的(支持++i和i++)
 
 \item
-The iterator category is derived from std::input\_iterator\_tag.
+迭代器类别派生自std::input\_iterator\_tag。
 \end{itemize}
 
-This means that the category check is performed within the constraint. Therefore, these concepts are still based on the iterator tags, but the technique is significantly different than tag dispatching. As a result, in C++20, we could have yet another implementation for the std::advance algorithm, as follows:
+类别检查是在约束内执行的，所以这些概念仍然基于迭代器标记，但技术上与标记调度有很大不同。因此，在C++20中可以有std::advance算法的另一个实现，如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template <std::random_access_iterator Iter, class Distance>
@@ -230,20 +230,20 @@ void advance(Iter& it, Distance n)
 }
 \end{lstlisting}
 
-There are a couple of things to notice here:
+这里有几点需要注意:
 
 \begin{itemize}
 \item
-There are yet again three different overloads of the advanced function.
+advanced函数还有三种不同的重载。
 
 \item
-These overloads are defined in the std namespace and do not require a separate namespace to hide implementation details.
+这些重载定义在std命名空间中，不需要单独的命名空间来隐藏实现细节。
 \end{itemize}
 
-Although we explicitly wrote several overloads again, this solution is arguably easier to read and understand than the one based on constexpr if because the code is nicely separated into different units (functions), making it easier to follow.
+尽管再次显式地编写了几个重载，但这种解决方案可以说比基于constexpr if的解决方案更容易阅读和理解，因为代码被很好地分离到不同的单元(函数)中，因此更容易理解。
 
-Tag dispatching is an important technique for selecting between overloads at compiletime. It has its trade-offs but also better alternatives if you are using C++17 or C++20. If your compiler supports concepts, you should prefer this alternative for the reasons mentioned earlier.
+标记分派是在编译时进行重载选择的一项重要技术。其有它的利弊，但若使用C++17或C++20，也有更好的选择。若编译器支持概念，出于前面提到的原因，应该选择这种替代方案。
 
-The next pattern we will look at in this chapter is expression templates.
+下一节讨论的模式是表达式模板。
 
 

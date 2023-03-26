@@ -1,9 +1,8 @@
-The term type erasure describes a pattern in which type information is removed, allowing types that are not necessarily related to be treated in a generic way. This is not something specific to the C++ language. This concept exists in other languages with better support than in C++ (such as Python and Java). There are different forms of type erasure such as polymorphism and using void pointers (a legacy of the C language, which is to be avoided), but true type erasure is achieved with templates. Before we discuss this, let’s briefly look at the others.
+类型擦除描述了一种模式，其中删除类型信息，允许以通用方式处理不一定相关的类型。这不是C++语言特有的东西，这个概念也存在于其他语言中(如Python和Java)。有不同形式的类型擦除，如多态性和使用void指针(C语言的使用方式，需要避免)，但真正的类型擦除是通过模板实现的。讨论这个问题之前，先简要地看一下其他问题。
 
-The most rudimentary form of type erasure is the use of void pointers. This is typical of C and although possible in C++, it is in no way recommended. It is not type-safe and, therefore, error-prone. However, for the sake of the discussion, let’s have a look at such an approach.
+类型擦除的最基本形式是使用void指针。这是典型的C语言方式，尽管在C++中可以，但绝不推荐这样做。这样做不是类型安全的，因此很容易出错。但为了便于讨论，来看看这种方法。
 
-Let’s say we again have knight and mage types and they both have an attack function (a behavior), and we want to treat them in a common way to exhibit this behavior.
-Let’s see the classes first:
+再次假设我们有knight和mage类型，他们都有攻击功能(行为)，我们希望以一种共同的方式来对待他们，以展示这种行为。先看看这些类:
 
 \begin{lstlisting}[style=styleCXX]
 struct knight
@@ -17,7 +16,7 @@ struct mage
 };
 \end{lstlisting}
 
-In a C-like implementation, we could have a function for each of these types, taking a void* to an object of the type, casting it to the expected type of pointer, and then invoking the attack member function:
+类C语言的实现中，可以为每一种类型都创建一个函数，对该类型的对象使用void*，将其转换为预期的指针类型，然后调用attack成员函数:
 
 \begin{lstlisting}[style=styleCXX]
 void fight_knight(void* k)
@@ -31,12 +30,12 @@ void fight_mage(void* m)
 }
 \end{lstlisting}
 
-These have a similar signature; the only thing that differs is the name. So, we can define a function pointer and then associate an object (or more precisely a pointer to an object) with a pointer to the right function handling it. Here is how:
+它们有相似的特征，唯一不同的是名字。可以定义一个函数指针，然后将一个对象(或者更准确地说，一个指向对象的指针)与一个指向处理它的正确函数的指针关联起来。以下是具体实现:
 
 \begin{lstlisting}[style=styleCXX]
 using fight_fn = void(*)(void*);
 void fight(
-std::vector<std::pair<void*, fight_fn>> const& units)
+	std::vector<std::pair<void*, fight_fn>> const& units)
 {
 	for (auto& u : units)
 	{
@@ -45,7 +44,7 @@ std::vector<std::pair<void*, fight_fn>> const& units)
 }
 \end{lstlisting}
 
-There is no information about types in this last snippet. All that has been erased using void pointers. The fight function can be invoked as follows:
+最后一个代码片段中没有关于类型的信息，所有这些都已使用void指针擦除。fight函数可以按如下方式调用:
 
 \begin{lstlisting}[style=styleCXX]
 knight k;
@@ -59,9 +58,9 @@ std::vector<std::pair<void*, fight_fn>> units {
 fight(units);
 \end{lstlisting}
 
-From a C++ perspective, this will probably look odd. It should. In this example, I have combined C techniques with C++ classes. Hopefully, we will not see snippets of code like this in production. Things will go wrong by a simple typing error if you pass a mage to the fight\_knight function or the other way around. Nevertheless, it’s possible and is a form of type erasure. An obvious alternative solution in C++ is using polymorphism through inheritance.
+C++的角度来看，这可能看起来很奇怪。这个示例中，我将C技术与C++类相结合，希望不会在生产环境中看到这样的代码片段。若将一个mage传递给fight\_knight函数或者相反，就会因为一个简单的输入错误而出错。然而，这是可能的，并且是类型擦除的一种形式。C++中一个明显的替代解决方案是通过继承使用多态性。
 
-This is the very first solution we saw at the beginning of this chapter. For convenience, I’ll reproduce it here again:
+这是在本章开头看到的第一个解决方案：
 
 \begin{lstlisting}[style=styleCXX]
 struct game_unit
@@ -88,11 +87,11 @@ void fight(std::vector<game_unit*> const & units)
 }
 \end{lstlisting}
 
-The fight function can handle knight and mage objects homogenously. It knows nothing of the actual objects whose addresses were passed to it (within a vector). However, it can be argued that types have not been completely erased. Both knight and mage are game\_unit and the fight function handles anything that is a game\_unit. For another type to be handled by this function, it needs to derive from the game\_unit pure abstract class.
+fight功能可以同时处理knight和mage的对象，它不知道传递给它地址的实际对象(在vector内)。然而，可以说类型并没有完全删除。knight和mage都是game\_unit，而fight函数处理任何game\_unit。对于这个函数要处理的另一种类型，需要派生自game\_unit纯抽象类。
 
-And sometimes that’s not possible. Perhaps we want to treat unrelated types in a similar matter (a process called duck typing) but we are not able to change those types. For instance, we do not own the source code. The solution to this problem is true type erasure with templates.
+有时候这是不可能的。我们想在类似的事情中处理不相关的类型(鸭子类型的过程)，但不能改变这些类型。例如，我们并不拥有源代码。这个问题的解决方案，就是使用模板进行真正的类型擦除。
 
-Before we get to see what this pattern looks like, let’s take it step by step to understand how the pattern developed, starting with the unrelated knight and mage, and the premise that we cannot modify them. However, we can write wrappers around them that would provide a uniform interface to the common functionality (behavior):
+看到这个模式是什么样子之前，来一步一步来理解这个模式是如何发展的，从不相关的knight和mage开始，以及不能修改他们的实现作为前提。但我们可以围绕它们编写包装器，为公共功能(行为)提供统一的接口:
 
 \begin{lstlisting}[style=styleCXX]
 struct knight
@@ -136,7 +135,7 @@ void fight(std::vector<game_unit*> const & units)
 }
 \end{lstlisting}
 
-We do not need to call the attack member function in game\_unit the same as it was in knight and mage. It can have any name. This choice was purely made on the grounds of mimicking the original behavior name. The fight function takes a collection of pointers to game\_unit, therefore being able to handle both knight and mage objects homogenously, as shown next:
+我们不需要像在knight和mage中那样调用game\_unit中的attack成员函数，其名称可以随意，这种选择纯粹是基于模仿原始行为名称。fight函数接受一个指向game\_unit的指针集合，因此能够同时处理knight和mage对象:
 
 \begin{lstlisting}[style=styleCXX]
 knight k;
@@ -149,7 +148,7 @@ std::vector<game_unit*> v{ &ku, &mu };
 fight(v);
 \end{lstlisting}
 
-The trouble with this solution is that there is a lot of duplicate code. The knight\_unit and mage\_unit classes are mostly the same. And when other classes need to be handled similarly, this duplication increases more. The solution to code duplication is using templates. We replace knight\_unit and mage\_unit with the following class template:
+这个解决方案的问题是有很多重复的代码，knight\_unit和mage\_unit基本上是一样的。当其他类需要类似地处理时，这种重复会增加更多。代码复制的解决方案是使用模板。我们用下面的职业模板替换knight\_unit和mage\_unit:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -163,7 +162,7 @@ private:
 };
 \end{lstlisting}
 
-There is only one copy of this class in our source code but the compiler will instantiate multiple specializations based on its usage. Any type information has been erased, with the exception of some type restrictions—the T type must have a member function called attack that takes no arguments. Notice that the fight function didn’t change at all. The client code needs to be slightly changed though:
+这个类在源代码中只有一个副本，但是编译器会使用实例化多个特化。除某些类型限制外，类型信息都会擦除——T类型必须有一个名为attack的成员函数，该函数不接受参数。注意，fight函数根本没有改变。调用端代码需要稍作修改:
 
 \begin{lstlisting}[style=styleCXX]
 knight k;
@@ -176,7 +175,7 @@ std::vector<game_unit*> v{ &ku, &mu };
 fight(v);
 \end{lstlisting}
 
-This leads us to the form of the type erasure pattern by putting the abstract base class and wrapper class template within another class:
+这将我们引向类型擦除模式的形式，将抽象基类和包装器类模板放在另一个类中:
 
 \begin{lstlisting}[style=styleCXX]
 struct game
@@ -214,7 +213,7 @@ private:
 };
 \end{lstlisting}
 
-The game class contains a collection of game\_unit objects and has a method for adding new wrappers to any game unit (that has an attack member function). It also has a member function, fight, to invoke the common behavior. The client code is, this time, the following:
+game类包含game\_unit对象的集合，并有一个向游戏单元(具有attack成员函数)添加新包装器的方法。还有一个成员函数fight，用于调用常见的行为。这次的调用端代码如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 knight k;
@@ -227,7 +226,7 @@ g.addUnit(m);
 g.fight();
 \end{lstlisting}
 
-In the type erasure pattern, the abstract base class is called a concept and the wrapper that inherits from it is called a model. If we were to implement the type erasure pattern in the established formal manner it would look as follows:
+类型擦除模式中，抽象基类称为概念，继承的包装器称为模型。若要以既定的正式方式实现类型擦除模式，可以进行如下实现:
 
 \begin{lstlisting}[style=styleCXX]
 struct unit
@@ -270,9 +269,9 @@ void fight(std::vector<unit>& units)
 }
 \end{lstlisting}
 
-In this snippet, game\_unit was renamed as unit\_concept and game\_unit\_wrapper was renamed as unit\_model. There is no other change to them apart from the name. They are members of a new class called unit that stores a pointer to an object that implements unit\_concept; that could be unit\_model<knight> or unit\_model<mage>. The unit class has a template constructor that enables us to create such model objects from knight and mage objects.
+这个代码片段中，game\_unit重命名为unit\_concept, game\_unit\_wrapper重命名为unit\_model，除了名字没有其他变化。它们是名为unit的新类的成员，该类存储一个指针，指向实现unit\_concept的对象;这可以是unit\_model<knight>或unit\_model<mage>。单元类有一个模板构造函数，使我们能够从knight和mage对象中创建这样的模型对象。
 
-It also has a public member function, attack (again, this can have any name). On the other hand, the fight function handles unit objects and invokes their attack member function. The client code may look as follows:
+其还有一个公共成员函数attack(同样，它可以有任何名称)。另一方面，fight函数处理unit对象，并调用它们的fight成员函数。调用端代码可能如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 knight k;
@@ -283,11 +282,11 @@ std::vector<unit> v{ unit(k), unit(m) };
 fight(v);
 \end{lstlisting}
 
-If you’re wondering where this pattern is used in real-world code, there are two examples in the standard library itself:
+若想知道这个模式在实际代码中现在哪里使用，标准库中就有两个例子:
 
 \begin{itemize}
 \item
-std::function: This is a general-purpose polymorphic function wrapper that enables us to store, copy, and invoke anything that is callable, such as functions, lambda expressions, bind expressions, function objects, pointers to member functions, and pointers to data members. Here is an example of using std::function:
+std::function: 这是一个通用的多态函数包装器，它使我们能够存储、复制和调用可调用的东西，例如函数、Lambda表达式、绑定表达式、函数对象、指向成员函数的指针和指向数据成员的指针。下面是一个使用std::function的例子:
 
 \begin{lstlisting}[style=styleCXX]
 class async_bool
@@ -318,7 +317,7 @@ if (b3) { std::cout << "b3 is true\n"; }
 \end{lstlisting}
 
 \item
-std::any: This is a class that represents a container to any value of a type that is copy-constructible. An example is used in the following snippet:
+std::any: 这是一个将容器表示为可复制构造类型值的类。下面的代码段中使用了一个例子:
 
 \begin{lstlisting}[style=styleCXX]
 std::any u;
@@ -333,9 +332,9 @@ if (u.has_value())
 \end{lstlisting}
 \end{itemize}
 
-Type erasure is an idiom that combines inheritance from object-oriented programming with templates to create wrappers that can store any type. In this section, we have seen how the pattern looks and how it works, as well as some real-world implementations of the pattern.
+类型擦除是一种习语，将面向对象编程的继承与模板结合起来，以创建可以存储任何类型的包装器。本节中，我们了解了模式的表现形式和工作方式，以及该模式的一些实际实现。
 
-Next in this chapter, we will discuss a technique called tag dispatching.
+下一节中，我们将讨论一种称为标记分派的技术。
 
 
 

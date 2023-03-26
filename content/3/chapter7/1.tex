@@ -1,31 +1,30 @@
-When you learn about object-oriented programming, you learn about its fundamental principles, which are abstraction, encapsulation, inheritance, and polymorphism. C++ is a multi-paradigm programming language that supports object-oriented programming too. Although a broader discussion on the principles of object-oriented programming is beyond the scope of this chapter and this book, it is worth discussing at least some aspects related to polymorphism.
+学习面向对象编程时，需要了解其基本原则，即抽象、封装、继承和多态性。c++是一种支持面向对象编程的多范式编程语言。不过关于面向对象编程原理的更广泛的讨论超出了本章和本书的范畴，但至少值得讨论与多态相关的一些方面。
 
-So, what is polymorphism? The term is derived from the Greek words for “many forms”. In programming, it’s the ability of objects of different types to be treated as if they were of the same type. The C++ standard actually defines a polymorphic class as follows (see C++20 standard, paragraph 11.7.2, Virtual functions):
-
-\begin{center}
-\textit{
-A class that declares or inherits a virtual function is called a polymorphic class.
-}
-\end{center}
-
-It also defines polymorphic objects based on this definition, as follows (see C++20 standard, paragraph 6.7.2, Object model):
+那么，什么是多态性?这个词来源于希腊语，意思是“多种形式”。在编程中，它是一种将不同类型的对象视为相同类型的能力。C++标准实际定义了一个多态类，如下所示(见C++20标准，第11.7.2段，虚函数):
 
 \begin{center}
 \textit{
-Some objects are polymorphic (11.7.2); the implementation generates information associated with each such object that makes it possible to determine that object’s type during program execution.
+声明或继承虚函数的类称为多态类。
 }
 \end{center}
 
-However, this actually refers to what is called dynamic polymorphism (or late binding), but there is yet another form of polymorphism, called static polymorphism (or early binding). Dynamic polymorphism occurs at runtime with the help of interfaces and virtual functions, while static polymorphism occurs at compile-time with the help of overloaded functions and templates. This is described in Bjarne Stroustrup’s glossary of terms for the C++ language (see \url{https://www.stroustrup.com/glossary.
-html}):
+还基于此定义定义了多态对象，如下所示(参见C++20标准，第6.7.2段，对象模型):
 
 \begin{center}
 \textit{
-polymorphism - providing a single interface to entities of different types. virtual functions provide dynamic (run-time) polymorphism through an interface provided by a base class. Overloaded functions and templates provide static (compile-time) polymorphism.
+一些对象是多态的(11.7.2);该实现生成与每个此类对象相关的信息，从而可以在程序执行期间确定该对象的类型。
 }
 \end{center}
 
-Let’s look at an example of dynamic polymorphism. The following is a hierarchy of classes representing different units in a game. These units may attack others, so there is a base class with a pure virtual function called attack, and several derived classes implementing specific units that override this virtual function doing different things (of course, for simplicity, here we just print a message to the console). It looks as follows:
+然而，这实际上指的是所谓的动态多态(或后期绑定)，但还有另一种形式的多态，称为静态多态(或早期绑定)。动态多态性在运行时借助接口和虚函数发生，而静态多态性则在编译时借助重载函数和模板发生。这在Bjarne Stroustrup的C++语言术语表中有所描述(参见\url{https://www.stroustrup.com/glossary.html}):
+
+\begin{center}
+\textit{
+多态性——为不同类型的实体提供单一接口。虚函数通过基类提供的接口提供动态(运行时)多态性。重载函数和模板提供了静态(编译时)多态性。
+}
+\end{center}
+
+来看一个动态多态性的例子。以下是代表游戏中不同单位的类的结构。这些单元可能会攻击其他单元，因此有一个基类，带有一个称为attack的纯虚函数，还有几个派生类实现了特定的单元，这些单元覆盖了这个虚函数，做不同的事情(当然，为了简单起见，这里只将消息输出到控制台)。如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 struct game_unit
@@ -46,7 +45,7 @@ struct mage : game_unit
 };
 \end{lstlisting}
 
-Based on this hierarchy of classes (which according to the standard are called polymorphic classes), we can write the function fight shown as follows. This takes a sequence of pointers to objects of the base game\_unit type and calls the attack member function. Here is its implementation:
+基于这种类的层次结构(根据标准称为多态类)，我们可以编写如下所示的函数fight。这接受一个指向基本game\_unit类型对象的指针序列，并调用attack成员函数。下面是它的实现:
 
 \begin{lstlisting}[style=styleCXX]
 void fight(std::vector<game_unit*> const & units)
@@ -58,7 +57,7 @@ void fight(std::vector<game_unit*> const & units)
 }
 \end{lstlisting}
 
-This function does not need to know the actual type of each object because due to dynamic polymorphism, it can handle them as if they were of the same (base) type. Here is an example of using it:
+这个函数不需要知道每个对象的实际类型，因为由于动态多态性，可以像处理相同(基本)类型一样处理。下面是一个用例:
 
 \begin{lstlisting}[style=styleCXX]
 knight k;
@@ -66,14 +65,14 @@ mage m;
 fight({&k, &m});
 \end{lstlisting}
 
-But now let’s say you could combine a mage and a knight and create a new unit, a knight mage with special abilities from both these units. C++ enables us to write code as follows:
+但是现在让我们假设你可以结合一个法师和一个骑士，并创造一个新的单位，一个拥有特殊能力的骑士法师。C++使我们能够编写如下代码:
 
 \begin{lstlisting}[style=styleCXX]
 knight_mage km = k + m;
 km.attack();
 \end{lstlisting}
 
-This does not come out of the box, but the language supports overloading operators, and we could do that for any user-defined types. To make the preceding line possible, we need the following:
+这不是现成的，但是语言支持重载操作符，可以对用户定义的类型这样做。为了使上一行成为可能，需要以下内容:
 
 \begin{lstlisting}[style=styleCXX]
 struct knight_mage : game_unit
@@ -88,9 +87,9 @@ knight_mage operator+(knight const& k, mage const& m)
 }
 \end{lstlisting}
 
-Keep in mind these are just some simple snippets without any complex code. But the ability to add a knight and a mage together to create a knight\_mage is nothing short of the ability to add two integers together, or a double and an int, or two std::string objects. This happens because there are many overloads of the + operator (both for built-in types and user-defined types) and based on the operands, the compiler is selecting the appropriate overload. Therefore, it can be said there are many forms of this operator. This is true for all the operators that can be overloaded; the + operator is just a typical example since it is ubiquitous. And this is the compile-time version of polymorphism, called static polymorphism.
+这些只是一些简单的代码片段，没有任何复杂的代码。但是把一个knight和一个mage加在一起来创建一个knight\_mage的能力就像把两个整数加在一起一样，或者一个double和一个int，或者两个std::string对象。这是因为加法运算符有很多重载(内置类型和用户定义类型都有)，编译器会根据操作数选择适当的重载，所以这个算子可以有很多种形式。对于所有可以重载的操作符都是如此，加法运算符只是一个典型的例子。这是多态性的编译时版本，称为静态多态性。
 
-Operators are not the only functions that can be overloaded. Any function can be overloaded. Although we have seen many examples in the book, let’s take another one:
+运算符并不是唯一可以重载的函数，任何函数都可以重载。来再看一个例子:
 
 \begin{lstlisting}[style=styleCXX]
 struct attack { int value; };
@@ -100,7 +99,7 @@ void increment(attack& a) { a.value++; }
 void increment(defense& d) { d.value++; }
 \end{lstlisting}
 
-In this snippet, the increment function is overloaded for both the attack and defense types, allowing us to write code as follows:
+这个代码片段中，increment函数对attack和defense类型都进行了重载，所以可以编写如下代码:
 
 \begin{lstlisting}[style=styleCXX]
 attack a{ 42 };
@@ -110,18 +109,18 @@ increment(a);
 increment(d);
 \end{lstlisting}
 
-We can replace the two overloads of increment with a function template. The changes are minimal, as shown in the next snippet:
+可以用一个函数模板替换这两个增量重载。更改是最小的，如下面的代码片段所示:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
 void increment(T& t) { t.value++; }
 \end{lstlisting}
 
-The previous code continues to work, but there is a significant difference: in the former example, we had two overloads, one for attack and one for defense, so you could call the function with objects of these types but nothing else. In the latter, we have a template that defines a family of overloaded functions for any possible type T that has a data member called value whose type supports the post-increment operator. We can define constraints for such a function template, which is something we have seen in the previous two chapters of the book. However, the key takeaway is that overloaded functions and templates are the mechanisms to implement static polymorphism in the C++ language.
+前面的代码继续工作，但有一个显著的区别:前面的示例中，有两个重载，一个用于attack，一个用于defense，因此可以使用这些类型的对象调用函数，但不能使用其他类型的对象。在后者中有一个模板，可为任何可能的类型T定义了一组重载函数，该类型T有一个名为value的数据成员，其类型支持后增量操作符。我们可以为这样的函数模板定义约束，这是我们在本书前两章中看到的内容。然而，关键是重载函数和模板是C++中实现静态多态的一种机制。
 
-Dynamic polymorphism incurs a performance cost because in order to know what functions to call, the compiler needs to build a table of pointers to virtual functions (and also a table of pointers to virtual base classes in case of virtual inheritance). So, there is some level of indirection when calling virtual functions polymorphically. Moreover, the details of virtual functions are not made available to the compiler who cannot optimize them.
+动态多态性会导致性能损失，为了知道要调用什么函数，编译器需要构建一个指向虚函数的指针表(若存在虚继承，还需要构建一个指向虚基类的指针表)。因此，当以多态方式调用虚函数时，存在某种程度的间接调用。此外，虚拟函数的细节不会提供给编译器，因为编译器不能优化它们。
 
-When these things can be validated as performance issues, we could raise the question: can we get the benefits of dynamic polymorphism at compile time? The answer is yes and there is one way to achieve this: the Curiously Recurring Template Pattern, which we will discuss next.
+当这些事情可以作为性能问题进行验证时，可以提出这样的问题:我们能在编译时获得动态多态性的好处吗?答案是肯定的，有一种方法可以实现:奇异递归模板模式。
 
 
 
