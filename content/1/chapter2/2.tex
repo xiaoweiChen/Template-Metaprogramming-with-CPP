@@ -1,4 +1,4 @@
-类模板将template关键字和template参数列表放在类声明之前，我们在引言一章看到了第一个例子。下一个代码片段显示了一个称为wrapper的类模板。它只有一个模板形参，类型为T，用作数据成员、形参和函数返回类型的类型:
+类模板将template关键字和template参数列表放在类声明之前。下面的代码展示了wrapper类模板，其只有一个模板形参(类型为T)，用作数据成员、形参和函数返回类型的类型:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -9,12 +9,13 @@ public:
 	{ }
 	
 	T const& get() const { return value; }
+	
 private:
 	T value;
 };
 \end{lstlisting}
 
-只要在源代码中没有使用类模板，编译器就不会生成代码。为此，类模板必须实例化，并且它的所有形参必须由用户显式地匹配，或由编译器隐式地匹配。实例化这个类模板的例子如下:
+只要源码中没有使用类模板，编译器就不会生成代码。所以类模板必须实例化，并且其所有形参必须由用户显式地匹配，或由编译器隐式地匹配。实例化这个类模板的例子如下:
 
 \begin{lstlisting}[style=styleCXX]
 wrapper a(42); // wraps an int
@@ -24,9 +25,9 @@ wrapper<double> d(42.0); // wraps a double
 wrapper e("42"); // wraps a char const *
 \end{lstlisting}
 
-这段代码中的a和e的定义只在C++17及以后的版本中有效，这要归功于一个称为\textbf{类模板参数推导}的特性。这个特性使我们可以使用类模板而不指定任何模板参数，编译器能够进行推导即可(将在第4章中讨论)。在此之前，所有引用类模板的示例都将显式列出参数，如wrapper<int>或wrapper<char const*>。
+这段代码中的a和e的定义只在C++17及以后的版本中有效，这要归功于\textbf{类模板参数推导}特性。这个特性使我们可以使用类模板，而不指定任何模板参数，编译器能够进行推导即可(在第4章中讨论)。在此之前，所有引用类模板的示例都将显式列出参数，如wrapper<int>或wrapper<char const*>。
 
-类模板可以在不定义的情况下声明，并在允许不完整类型的上下文中使用，例如函数的声明，如下所示:
+类模板可以在不定义的情况下声明，并在允许不完整类型的上下文中使用，例如函数的声明:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -35,7 +36,7 @@ class wrapper;
 void use_foo(wrapper<int>* ptr);
 \end{lstlisting}
 
-然而，类模板必须在模板实例化发生的地方定义;否则，编译器将生成一个错误。下面的代码段说明了这一点:
+类模板必须在模板实例化发生的地方定义;否则，编译器将报错。
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -61,9 +62,9 @@ void use_wrapper(wrapper<int>* ptr)
 }
 \end{lstlisting}
 
-声明use\_wrapper函数时，只声明了类模板wrapper，而没有定义。但是，在此上下文中允许使用不完整类型，因此可以使用wrapper<T>。但在main函数中，我们正在实例化wrapper类模板的对象。因为类模板的定义必须可用，所以这将生成编译器错误。要修复这个特定的示例，必须将main函数的定义移到末尾，在wrapper和use\_wrapper定义之后。
+声明use\_wrapper函数时，只声明了类模板wrapper，而没有定义。但在此上下文中允许使用不完整类型，因此可以使用wrapper<T>。但在main函数中，正在实例化wrapper类模板的对象。因为类模板的定义必须可用，所以这将生成编译器错误。要修复这个特定的示例，必须将main函数的定义移到末尾，在wrapper和use\_wrapper定义之后。
 
-本例中，类模板是使用class关键字定义的。C++中，用class或struct关键字声明类之间几乎没什么区别:
+本例中，类模板是使用class关键字定义的。C++中，使用class或struct关键字声明类之间几乎没什么区别:
 
 \begin{itemize}
 \item 
@@ -73,9 +74,9 @@ void use_wrapper(wrapper<int>* ptr)
 对于struct，基类继承的默认访问说明符是public，而使用class是private。
 \end{itemize}
 
-可以使用struct关键字定义类模板，就像在这里使用class关键字一样。对于用struct或class关键字定义的类模板，也可以观察到用struct或class关键字定义的类之间的差异。
+可以使用struct关键字定义类模板，就像使用class关键字一样。对于用struct或class关键字定义的类模板，也可以观察到用struct或class关键字定义的类之间的差异。
 
-类，不管它们是不是模板，也可以包含成员函数模板。下一节将讨论如何定义这些成员函数。
+类，不管是不是模板，都可以包含成员函数模板。下一节将讨论如何定义这些成员函数。
 
 
 
