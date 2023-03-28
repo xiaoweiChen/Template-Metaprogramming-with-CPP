@@ -1,51 +1,51 @@
-Containers are types that represent collections of elements. These collections can be implemented based on a variety of data structures, each with different semantics: lists, queues, trees, and so on. The standard library provides three categories of containers:
+容器是表示元素集合的类型。这些集合可以基于各种数据结构实现，每种结构都具有不同的语义:列表、队列、树等等。标准库提供了三类容器:
 
 \begin{itemize}
 \item
-Sequence containers: vector, deque, list, array, and forward\_list
+序列容器:vector、deque、list、array和forward\_list
 
 \item
-Associative containers: set, map, multiset, and multimap
+关联容器:set、map、multiset和multimap
 
 \item
-Unordered associative containers: unordered\_set, unordered\_map, unordered\_multiset, and unordered\_multimap
+无序关联容器:unordered\_set、unordered\_map、unordered\_multiset和unordered\_multimap
 \end{itemize}
 
-In addition to this, there are also container adaptors that provide a different interface for sequence containers. This category includes the stack, queue, and priority\_queue classes. Finally, there is a class called span that represents a non-owning view over a contiguous sequence of objects.
+除此之外，还有为序列容器提供不同接口的容器适配器。这个类别包括堆stack、queue和priority\_queue类。最后，还有一个名为span的类，表示连续对象序列上的非所属视图。
 
-The rationale for these containers to be templates was presented in Chapter 1, Introduction to Templates. You don’t want to write the same implementation again and again for each different type of element that you need to store in a container. Arguably, the most used containers from the standard library are the following:
+将这些容器作为模板的基本原理，已经在第1章模板介绍中介绍过。因为不希望为需要存储在容器中，每种不同类型的元素一次又一次地编写相同的实现。标准库中最常用的容器如下:
 
 \begin{itemize}
 \item
-vector: This is a variable-size collection of elements stored contiguously in memory. It’s the default container you would choose, provided no special requirements are defined. The internal storage expands or shrinks automatically as needed to accommodate the stored elements. The vector allocates more memory than needed so that the risk of having to expand is low. The expansion is a costly operation because new memory needs to be allocated, the content of the current storage needs to be copied to the new one, and lastly, the previous storage needs to be discarded. Because elements are stored contiguously in memory, they can be randomly accessed by an index in constant time.
+vector: 一个连续存储在内存中的可变大小的元素集合。是您选择的默认容器，前提是没有定义特殊需求。内部存储器根据需要自动扩展或收缩以容纳存储的元素。vector分配的内存比需要的多，因此必须进行扩展的风险很低。扩展是一项开销很大的操作，因为需要分配新的内存，需要将当前存储的内容复制到新存储中，最后需要丢弃之前的存储。因为元素连续地存储在内存中，所以索引可以在常数时间内随机访问。
 
 \item
-array: This is a fixed-size collection of elements stored contiguously in memory. The size must be a compile-time constant expression. The semantics of the array class is the same as a structure holding a C-style array (T[n]). Just like the vector type, the elements of the array class can be accessed randomly in constant time.
+array: 连续存储在内存中的固定大小的元素集合。size必须是编译时常量表达式。数组类的语义与保存C风格数组(T[n])的结构相同。就像vector类型一样，数组类的元素可以在常数时间内随机访问。
 
 \item
-map: This is a collection that associates a value to a unique key. Keys are sorted with a comparison function and the map class is typically implemented as a red-black tree. The operations to search, insert, or remove elements have logarithmic complexity.
+map: 将值关联到唯一键的集合。键用比较函数排序，map类通常实现为红黑树。搜索、插入或删除元素的操作具有对数(log(n))复杂度。
 
 \item
-set: This is a collection of unique keys. The keys are the actual values stored in the container; there are no key-value pairs as in the case of the map class. However, just like in the case of the map class, set is typically implemented as a red-black tree that has logarithmic complexity for searching, inserting, and the removing of elements.
+set: 唯一键的集合。键是容器中存储的实际值，map类中没有键值对。然而，就像map类一样，set通常也使用红黑树实现，在搜索、插入和删除元素时具有对数(log(n))复杂度。
 \end{itemize}
 
-Regardless of their type, the standard containers have a few things in common:
+不管它们的类型是什么，标准容器有一些共同点:
 
 \begin{itemize}
 \item
-Several common member types
+几种常见成员类型
 
 \item
-An allocator for storage management (with the exception of the std::array class)
+存储管理的分配器(除了std::array类)
 
 \item
-Several common member functions (some of them are missing from one or another container)
+几个公共成员函数(其中一些在一个或另一个容器中缺失)
 
 \item
-Access to the stored data with the help of iterators
+迭代器可访问存储的数据
 \end{itemize}
 
-The following member types are defined by all standard containers:
+以下成员类型由所有标准容器定义:
 
 \begin{lstlisting}[style=styleCXX]
 using value_type = /* ... */;
@@ -59,32 +59,32 @@ using iterator = /* ... */;
 using const_iterator = /* ... */;
 \end{lstlisting}
 
-The actual types these names are aliasing may differ from container to container.
+这些别名的实际类型可能因容器而异。例如，对于std::vector, value\_type是模板参数T，但是对于std::map, value\_type是std::pair<const Key, T>类型。这些成员类型的目的是帮助进行泛型编程。
 
-For instance, for std::vector, value\_type is the template argument T, but for std::map, value\_type is the std::pair<const Key, T> type. The purpose of these member types is to help with generic programming. Except for the std::array class, which represents an array of a size known at compile time, all the other containers allocate memory dynamically. This is controlled with the help of an object called an allocator. Its type is specified as a type template parameter, but all containers default it to std::allocator if none is specified. This standard allocator uses the global new and delete operators for allocating and releasing memory. All constructors of standard containers (including copy and move constructors) have overloads that allow us to specify an allocator.
+除了std::array类(表示编译时已知大小的数组)，其他所有容器都是动态分配内存的。这是通过一个叫做分配器的对象来控制的。其类型指定为类型模板形参，但若没有指定，则所有容器默认为std::allocator。这个标准分配器使用全局的new和delete操作符来分配和释放内存。标准容器的所有构造函数(包括复制和移动构造函数)都具有允许我们指定分配器的重载。
 
-There are also common member functions defined in the standard containers. Here are some examples:
+标准容器中还定义了一些常用的成员函数。下面是一些例子:
 
 \begin{itemize}
 \item
-size, which returns the number of elements (not present in std::forward\_list).
+size, 返回元素的数量(std::forward\_list没有)。
 
 \item
-empty, which checks whether the container is empty.
+empty, 检查容器是否为空。
 
 \item
-clear, which clears the content of the container (not present in std::array, std::stack, std::queue, and std::priority\_queue).
+clear, 清除容器的内容(std::array，std::stack，std::queue和std::priority\_queue中没有)。
 
 \item
-swap, which swaps the content of the container objects.
+swap, 交换容器对象的内容。
 
 \item
-begin and end methods, which return iterators to the beginning and end of the container (not present in std::stack, std::queue, and std::priority\_queue, although these are not containers but container adaptors).
+begin和end方法，返回到容器的开始和结束的迭代器(std::stack, std::queue和std::priority\_queue中没有，尽管这些不是容器，而是容器适配器)。
 \end{itemize}
 
-The last bullet mentions iterators. These are types that abstract the details of accessing elements in a container, providing a uniform way to identify and traverse the elements of containers. This is important because a key part of the standard library is represented by general-purpose algorithms. There are over one hundred such algorithms, ranging from sequence operations (such as count, count\_if, find, and for\_each) to modifying operations (such as copy, fill, transform, rotate, and reverse) to partitioning and sorting (partition, sort, nth\_element, and more) and others. Iterators are key for ensuring they work generically. If each container had different ways to access its elements, writing generic algorithms would be virtually impossible.
+最后提到了迭代器。这些类型抽象了容器中访问元素的细节，提供了一种统一的方法来标识和遍历容器中的元素。这很重要，因为标准库的关键部分是由通用算法表示的。有超过一百种这样的算法，从序列操作(如count、count\_if、find和for\_each)到修改操作(如复制、填充、转换、旋转和反向)到分区和排序(分区、排序、nth\_element)等。迭代器是确保它们一般性工作的关键。若每个容器都有不同的方式访问其元素，那么编写泛型算法几乎是不可能的。
 
-Let’s consider the simple operation of copying elements from one container to another. For instance, we have a std::vector object and we want to copy its elements to a std::list object. This could look as follows:
+这里考虑将元素从一个容器复制到另一个容器的简单操作。例如，有一个std::vector对象，希望将其元素复制到std::list对象:
 
 \begin{lstlisting}[style=styleCXX]
 std::vector<int> v {1, 2, 3};
@@ -94,7 +94,7 @@ for (std::size_t i = 0; i < v.size(); ++i)
 	l.push_back(v[i]);
 \end{lstlisting}
 
-What if we want to copy from a std::list to a std::set, or from a std::set to a std::array? Each case would require different kinds of code. However, generalpurpose algorithms enable us to do this in a uniform way. The following snippet shows such an example:
+若想从std::list复制到std::set，或者从std::set复制到std::array呢?每种情况都需要不同类型的代码。通用算法使我们能够以统一的方式完成:
 
 \begin{lstlisting}[style=styleCXX]
 std::vector<int> v{ 1, 2, 3 };
@@ -112,7 +112,7 @@ std::set<int> s;
 std::copy(l.begin(), l.end(), std::inserter(s, s.begin()));
 \end{lstlisting}
 
-Here we have a std::vector object and we copy its content to another std::vector, but also to a std::list object. Consequently, the content of the std::list object is then copied to a std::set object. For all cases, the std::copy algorithm is used. This algorithm has several arguments: two iterators that define the beginning and end of the source, and an iterator that defines the beginning of the destination. The algorithm copies one element at a time from the input range to the element pointer by the output iterator and then increments the output iterator. Conceptually, it can be implemented as follows:
+这里有一个std::vector对象，将其内容复制到另一个std::vector对象，也复制到std::list对象。因此，std::list对象的内容随后复制到std::set对象。对于所有情况，都使用std::copy算法。该算法有几个参数:两个迭代器定义源的开始和结束，一个迭代器定义目标的开始。该算法通过输出迭代器每次从输入范围复制一个元素到元素指针，然后对输出迭代器进行递增。从原理上讲，可以实现的方式如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename InputIt, class OutputIt>
@@ -127,35 +127,35 @@ OutputIt copy(InputIt first, InputIt last,
 }
 \end{lstlisting}
 
-\begin{tcolorbox}[breakable,enhanced jigsaw,colback=blue!5!white,colframe=blue!75!black,title={Important Note}]
-This algorithm was discussed in Chapter 5, Type Traits and Conditional Compilation, when we looked at how its implementation can be optimized with the help of type traits.
+\begin{tcolorbox}[breakable,enhanced jigsaw,colback=blue!5!white,colframe=blue!75!black,title={重要的Note}]
+该算法在第5章中讨论过，当时我们研究了如何利用类型特征优化其实现。
 \end{tcolorbox}
 
-Considering the previous example, there are cases when the destination container does not have its content already allocated for the copying to take place. This is the case with copying to the list and to the set. In this case, iterator-like types, std::back\_insert\_iterator and std:insert\_iterator, are used—indirectly through the std::back\_inserter and std::inserter helper functions, for inserting elements into a container. The std::back\_insert\_iterator class uses the push\_back function and std::insert\_iterator uses the insert function.
+考虑到前面的例子，有些情况下，目标容器的内容还没有分配以便进行复制。这是复制到列表和复制到集合的情况。这种情况下，类似迭代器的类型std::back\_insert\_iterator和std:insert\_iterator将通过std::back\_inserter和std::inserter辅助函数间接使用，用于将元素插入容器中。std::back\_insert\_iterator类使用push\_back函数，std::insert\_iterator类使用insert函数。
 
-There are six iterator categories in C++:
+C++中有六种迭代器类型:
 
 \begin{itemize}
 \item
-Input iterator
+输入迭代器
 
 \item
-Output iterator
+输出迭代器
 
 \item
-Forward iterator
+前向迭代器
 
 \item
-Bidirectional iterator
+双向迭代器
 
 \item
-Random access iterator
+随机迭代器
 
 \item
-Contiguous iterator
+连续迭代器
 \end{itemize}
 
-The contiguous iterator category was added in C++17. All operators can be incremented with the prefix or postfix increment operator. The following table shows the additional operations that each category defines:
+连续迭代器是在C++17中添加的。所有操作符都可以使用前缀或后缀增量操作符进行递增。下表显示了每个类别定义的操作:
 
 % Please add the following required packages to your document preamble:
 % \usepackage{multirow}
@@ -163,101 +163,101 @@ The contiguous iterator category was added in C++17. All operators can be increm
 \centering
 	\begin{tabular}{|l|l|l|}
 		\hline
-		\textbf{Category}       & \textbf{Properties}               & \textbf{Expressions}                                           \\ \hline
-		\multirow{3}{*}{Input}  & Increment single-pass             & \begin{tabular}[c]{@{}l@{}}i++\\ ++i\end{tabular}              \\ \cline{2-3} 
-		& Equality/inequality cmparison     & \begin{tabular}[c]{@{}l@{}}i == j\\ i != j\end{tabular}        \\ \cline{2-3} 
-		& Can be dereferenced(as an rvalue) & \begin{tabular}[c]{@{}l@{}}*i\\ i-\textgreater{}m\end{tabular} \\ \hline
-		Forward                 & Increment multi-pass              & i = j, *j++, *i                                                \\ \hline
-		Bidirectional           & Decrement                         & \begin{tabular}[c]{@{}l@{}}--i\\ i--\end{tabular}              \\ \hline
-		\multirow{4}{*}{Random-access} &
-		Arithmetic operators + and - &
+		\textbf{类别}       & \textbf{属性}               & \textbf{表达式}                                           \\ \hline
+		\multirow{3}{*}{输入}  & 单次增加             & \begin{tabular}[c]{@{}l@{}}i++\\ ++i\end{tabular}              \\ \cline{2-3} 
+		& 相等/不相等的比较     & \begin{tabular}[c]{@{}l@{}}i == j\\ i != j\end{tabular}        \\ \cline{2-3} 
+		& 可以解引用(作为右值) & \begin{tabular}[c]{@{}l@{}}*i\\ i-\textgreater{}m\end{tabular} \\ \hline
+		前向                 & 多次增加              & i = j, *j++, *i                                                \\ \hline
+		双向           & 可减                         & \begin{tabular}[c]{@{}l@{}}--i\\ i--\end{tabular}              \\ \hline
+		\multirow{4}{*}{随机} &
+		算术运算符+和- &
 		\begin{tabular}[c]{@{}l@{}}i + n\\ n + i\\ i - n\\ n - i\end{tabular} \\ \cline{2-3} 
 		&
-		Inequality comparsion(with iterators) &
+		不等式比较(使用迭代器) &
 		\begin{tabular}[c]{@{}l@{}}i \textless j\\ i \textgreater j\\ i \textless{}= j\\ i \textgreater{}= j\end{tabular} \\ \cline{2-3} 
-		& Compound assignment               & \begin{tabular}[c]{@{}l@{}}i += n\\ i -= n\end{tabular}        \\ \cline{2-3} 
-		& Offset dereference operator       & i{[}n{]}                                                       \\ \hline
-		Contiguous &
-		\begin{tabular}[c]{@{}l@{}}Logically adjacent elements are physically\\ adjacent in memory.\end{tabular} &
+		& 复合赋值              & \begin{tabular}[c]{@{}l@{}}i += n\\ i -= n\end{tabular}        \\ \cline{2-3} 
+		& 偏移解引用操作符       & i{[}n{]}                                                       \\ \hline
+		连续 &
+		\begin{tabular}[c]{@{}l@{}}逻辑上相邻的元素，在内存中是物理 上相邻的。\end{tabular} &
 		\\ \hline
-		\multirow{2}{*}{Output} & Increment signle-pass             & \begin{tabular}[c]{@{}l@{}}i++\\ ++i\end{tabular}              \\ \cline{2-3} 
-		& Can be dereferenced(as an lvalue) & \begin{tabular}[c]{@{}l@{}}*i = v\\ *i++ = v\end{tabular}      \\ \hline
+		\multirow{2}{*}{输出} & 单次增加             & \begin{tabular}[c]{@{}l@{}}i++\\ ++i\end{tabular}              \\ \cline{2-3} 
+		& 可以解引用(作为左值) & \begin{tabular}[c]{@{}l@{}}*i = v\\ *i++ = v\end{tabular}      \\ \hline
 	\end{tabular}
 \end{table}
 
 \begin{center}
-Table 8.1
+表 8.1
 \end{center}
 
-With the exception of the output category, each category includes everything about it. That means a forward iterator is an input iterator, a bidirectional iterator is a forward iterator, a random-access iterator is a bidirectional iterator, and, lastly, a contiguous iterator is a random-access iterator. However, iterators in any of the first five categories can also be output iterators at the same time. Such an iterator is called a mutable iterator. Otherwise, they are said to be constant iterators.
+除了输出类别外，每个类别都有相关的内容。所以前向迭代器是输入迭代器，双向迭代器是前向迭代器，随机访问迭代器是双向迭代器。最后，连续迭代器是随机访问迭代器。前五种类型的迭代器，也可以同时是输出迭代器。这样的迭代器称为可变迭代器。否则，称为常量迭代器。
 
-The C++20 standard has added support for concepts and a concepts library. This library defines standard concepts for each of these iterator categories. The following table shows the correlation between them:
+C++20标准增加了对概念和概念库的支持。这个标准库为每个迭代器类别定义了标准概念。它们之间的相关性如下表所示:
 
 \begin{table}[H]
 \centering
 	\begin{tabular}{|l|l|}
 		\hline
-		\textbf{Iterator category} & \textbf{Concept}              \\ \hline
-		Input iterator             & std::input\_iterator          \\ \hline
-		Forward iterator           & std::output\_iterator         \\ \hline
-		Bidirectional iterator     & std::bidirectional\_iterator  \\ \hline
-		Random-access iterator     & std::random\_access\_iterator \\ \hline
-		Contiguous iterator        & std::contiguous\_iterator     \\ \hline
-		Output iterator            & std::output\_iterator         \\ \hline
+		\textbf{迭代器类型} & \textbf{概念}              \\ \hline
+		输入迭代器             & std::input\_iterator          \\ \hline
+		前向迭代器           & std::output\_iterator         \\ \hline
+		双向迭代器     & std::bidirectional\_iterator  \\ \hline
+		随机迭代器     & std::random\_access\_iterator \\ \hline
+		连续迭代器        & std::contiguous\_iterator     \\ \hline
+		输出迭代器            & std::output\_iterator         \\ \hline
 	\end{tabular}
 \end{table}
 
 \begin{center}
-Table 8.2
+表 8.2
 \end{center}
 
-\begin{tcolorbox}[breakable,enhanced jigsaw,colback=blue!5!white,colframe=blue!75!black,title={Important Note}]
-Iterator concepts were briefly discussed in Chapter 6, Concepts and Constraints.
+\begin{tcolorbox}[breakable,enhanced jigsaw,colback=blue!5!white,colframe=blue!75!black,title={重要的Note}]
+迭代器的概念在第6章中简要讨论过。
 \end{tcolorbox}
 
-All containers have the following members:
+所有容器都有以下成员:
 
 \begin{itemize}
 \item
-begin: It returns an iterator to the beginning of the container.
+begin: 返回一个指向容器开头的迭代器。
 
 \item
-end: It returns an iterator to the end of the container.
+end: 返回一个指向容器末尾的迭代器。
 
 \item
-cbegin: It returns a constant iterator to the beginning of the container.
+cbegin: 返回一个指向容器开头的常量迭代器。
 
 \item
-cend: It returns a constant iterator to the end of the container.
+cend: 返回一个指向容器末端的常量迭代器。
 \end{itemize}
 
-Some containers also have members that return reverse iterators:
+一些容器也有返回反向迭代器的成员:
 
 \begin{itemize}
 \item
-rbegin: It returns a reverse iterator to the beginning of the reversed container.
+rbegin: 返回一个指向反向容器开头的反向迭代器。
 
 \item
-rend: It returns a reverse iterator to the end of the reversed container.
+rend: 返回一个指向反向容器末尾的反向迭代器。
 
 \item
-rcbegin: It returns a constant reverse iterator to the beginning of the reversed container.
+rcbegin: 返回一个指向反向容器开头的常量反向迭代器。
 
 \item
-rcend: It returns a constant reverse iterator to the end of the reversed container.
+rcend: 返回一个常量反向迭代器，指向反向容器的末尾。
 \end{itemize}
 
-There are two things that must be well understood to be able to work with containers and iterators:
+要使用容器和迭代器，需要理解两点:
 
 \begin{itemize}
 \item
-The end of a container is not the last element of the container but the one past the last.
+容器的末尾不是容器的最后一个元素，而是在最后一个元素之后的元素。
 
 \item
-Reversed iterators provide access to the elements in reverse order. A reversed iterator to the first element of a container is actually the last element of the non-reversed container.
+反向迭代器以相反的顺序提供对元素的访问，指向容器第一个元素的反向迭代器实际上是非反向容器的最后一个元素。
 \end{itemize}
 
-To better understand these two points, let’s look at the following example:
+为了更好地理解这两点，来看看下面的例子:
 
 \begin{lstlisting}[style=styleCXX]
 std::vector<int> v{ 1,2,3,4,5 };
@@ -271,24 +271,24 @@ std::copy(v.rbegin(), v.rend(),
 		  std::ostream_iterator<int>(std::cout, " "));
 \end{lstlisting}
 
-The first call to std::copy prints the elements of the container in their given order. On the other hand, the second call to std::copy prints the elements in their reversed order.
+对std::copy的第一个调用以给定的顺序打印容器的元素。另一方面，对std::copy的第二次调用以相反的顺序打印元素。
 
-The following diagram illustrates the relationship between iterators and container elements:
+对std::copy的第一个调用以给定的顺序打印容器的元素。另一方面，对std::copy的第二次调用以相反的顺序打印元素。
 
 \begin{center}
-\includegraphics[width=0.3\textwidth]{content/3/chapter8/images/1.png}\\
-Figure 8.1
+\includegraphics[width=0.4\textwidth]{content/3/chapter8/images/1.png}\\
+图 8.1
 \end{center}
 
-A sequence of elements (regardless of what kind of data structure they are stored in memory) delimited by two iterators (a begin and an end, which is the one past the last element) is called a range. This term is used extensively in the C++ standard (especially with algorithms) and in literature. It is also the term that gave the name to the ranges library in C++20, which will be discussed in Chapter 9, The Ranges Library.
+两个迭代器(begin和end，即最后一个元素后面的那个)分隔的元素序列(不管它们在内存中存储的是什么样的数据结构)称为范围。这个术语在C++标准(尤其是算法)和文献中被广泛使用，也是C++20中范围库的名称，该库将在第9章中讨论。
 
-Apart from the set of the begin/end member functions of the standard containers, there are also stand-alone functions with the same name. Their equivalence is presented in the following table:
+除了标准容器的begin/end成员函数集合外，还有同名的独立函数。它们的等价性如下表所示:
 
 \begin{table}[H]
 \centering
 	\begin{tabular}{|l|l|}
 		\hline
-		\textbf{Member functions}                                    & \textbf{Free functions}                                              \\ \hline
+		\textbf{成员函数}                                    & \textbf{独立函数}                                              \\ \hline
 		\begin{tabular}[c]{@{}l@{}}c.begin()\\ c.cbegin()\end{tabular}   & \begin{tabular}[c]{@{}l@{}}std::begin(c)\\ std::cbegin(c)\end{tabular}   \\ \hline
 		\begin{tabular}[c]{@{}l@{}}c.end()\\ c.cend()\end{tabular}   & \begin{tabular}[c]{@{}l@{}}std::end(c)\\ std::cend(c)\end{tabular}   \\ \hline
 		\begin{tabular}[c]{@{}l@{}}c.rbegin()\\ c.crbegin()\end{tabular} & \begin{tabular}[c]{@{}l@{}}std::rbegin(c)\\ std::crbegin(c)\end{tabular} \\ \hline
@@ -297,10 +297,10 @@ Apart from the set of the begin/end member functions of the standard containers,
 \end{table}
 
 \begin{center}
-Table 8.3
+表 8.3
 \end{center}
 
-Although these free functions do not bring much benefit when working with standard containers, they help us in writing generic code that can handle both standard containers and C-like arrays, since all these free functions are overloaded for static arrays. Here is an example:
+尽管这些独立函数在使用标准容器时没有带来太多好处，但因为所有这些独立函数对于静态数组都是重载的，它们有助于我们编写既可以处理标准容器，又可以处理类C数组的泛型代码为。这里有一个例子:
 
 \begin{lstlisting}[style=styleCXX]
 std::vector<int> v{ 1,2,3,4,5 };
@@ -312,7 +312,7 @@ std::copy(std::begin(a), std::end(a),
 		  std::ostream_iterator<int>(std::cout, " "));
 \end{lstlisting}
 
-Without these functions, we would have to write std::copy(a, a + 5, …). Perhaps a big benefit of these functions is that they enable us to use arrays with range-based for loops, as follows:
+若没有这些函数，将要写成std::copy(a, a + 5，…)，也许这些函数的好处是，使我们能够使用基于范围的for循环的数组:
 
 \begin{lstlisting}[style=styleCXX]
 std::vector<int> v{ 1,2,3,4,5 };
@@ -324,7 +324,7 @@ for (auto const& e : a)
 	std::cout << e << ' ';
 \end{lstlisting}
 
-It is not the purpose of this book to teach you how to use each container or the many standard algorithms. However, it should be helpful for you to learn how to create containers, iterators, and algorithms. This is what we will do next.
+本书的目的不是教你如何使用每个容器或许多标准算法，但学习如何创建容器、迭代器和算法应该是有帮助的。这就是我们接下来要做的。
 
 
 

@@ -1,63 +1,63 @@
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Question 1}
+\textbf{习题 1}
 
-What are typical problems for which the Curiously Recuring Template Pattern is used?
-
-\hspace*{\fill} \\ %插入空行
-\noindent
-\textbf{Answer}
-
-The Curiously Recurring Template Pattern (CRTP) is typically used for solving problems such as adding common functionality to types and avoiding code duplication, limiting the number of times a type can be instantiated, or implementing the composite design pattern.
-
+CRTP可以解决哪些问题?
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Question 2}
+\textbf{参考答案}
 
-What are mixins and what is their purpose?
+奇异迭代模板模式(CRTP)通常用于解决，诸如向类型添加公共功能和避免代码重复、限制类型可以实例化的次数或实现复合设计模式等问题。
 
-\hspace*{\fill} \\ %插入空行
-\noindent
-\textbf{Answer}
-
-Mixins are small classes that are designed to add functionality to other classes, by inheriting from the classes they are supposed to complement. This is the opposite of the CRTP pattern.
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Question 3}
+\textbf{习题 2}
 
-What is type erasure?
-
-\hspace*{\fill} \\ %插入空行
-\noindent
-\textbf{Answer}
-
-Type erasure is the term used to describe a pattern that removes information from types, making it possible for types that are not related to be treated in a generic way. Although forms of type erasure can be achieved with void pointers or polymorphism, the true type erasure pattern is achieved in C++ with templates.
+什么是Mixins?其的目的是什么?
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Question 4}
+\textbf{参考答案}
 
-What is tag dispatching and what are its alternatives?
-
-\hspace*{\fill} \\ %插入空行
-\noindent
-\textbf{Answer}
-
-Tag dispatching is a technique that enables us to select one or another function overload at compile time. Although tag dispatching itself is an alternative to std::enable\_if and SFINAE, it also has its own alternatives. These are constexpr if in C++17 and concepts in C++20.
+Mixins是一些小的类，通过从它们应该补充的类继承来为其他类添加功能。这与CRTP模式相反。
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Question 5}
+\textbf{习题 3}
 
-What are expression templates and where are they used?
+什么是类型擦除?
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Answer}
+\textbf{参考答案}
 
-Expression templates are a metaprogramming technique that enables a lazy evaluation of a computation at compile-time. The benefit of this technique is that it avoids performing inefficient operations at runtime at the expense of more complex code that could be difficult to comprehend. Expression templates are typically used to implement linear algebra libraries.
+类型擦除是用于描述从类型中删除信息的模式的术语，从而使不相关的类型能够以通用的方式进行处理。虽然类型擦除的形式可以通过void指针或多态性实现，但真正的类型擦除模式是通过模板实现的(C++中)。
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{习题 4}
+
+什么是标签分派，它的替代方案是什么?
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{参考答案}
+
+标记分派是一种技术，使我们能够在编译时选择一个或另一个函数重载。尽管标记调度本身是std::enable\_if和SFINAE的替代方案，但它也有自己的替代方案。在C++17中是constexpr if，在C++20中是概念。
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{习题 5}
+
+表达式模板是什么?在哪里使用它们?
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{参考答案}
+
+表达式模板是一种元编程技术，支持在编译时对计算进行惰性计算。这种技术的好处是，可避免在运行时执行低效的操作，代价是代码更加复杂，难以理解。表达式模板通常用于实现线性代数库。
 
 
 

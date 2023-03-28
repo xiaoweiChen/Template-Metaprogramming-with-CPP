@@ -1,72 +1,72 @@
 
-The best way to understand how containers and iterators work is to experience them first-hand by creating your own. To avoid implementing something that already exists in the standard library, we will consider something different – more precisely, a circular buffer. This is a container that, when full, overwrites existing elements. We can think of different ways such a container could work; therefore, it’s important that we first define the requirements for it. These are as follows:
+理解容器和迭代器如何工作的最好方法是，通过创建自己的容器和迭代器来亲身体验。为了避免实现标准库中已经存在的东西，将考虑一些不同的东西——更准确地说，是循环缓冲区。这是一个容器，当它满时，将覆盖现有的元素。可以想象这样一个容器的不同工作方式;因此，首先定义它的需求是很重要的。具体如下:
 
 \begin{itemize}
 \item
-The container should have a fixed capacity that is known at compile-time. Therefore, there would be no runtime memory management.
+容器应该有一个在编译时已知的固定容量。因此，不存在运行时内存管理。
 
 \item
-The capacity is the number of elements the container can store, and the size is the number of elements it actually contains. When the size equals the capacity, we say the container is full.
+容量是容器可以存储的元素数量，大小是容器实际包含的元素数量。当大小等于容量时，我们说容器满了。
 
 \item
-When the container is full, adding a new element will overwrite the oldest element in the container.
+容器满时，添加一个新元素将覆盖容器中最旧的元素。
 
 \item
-Adding new elements is always done at the end; removing existing elements is always done at the beginning (the oldest element in the container).
+添加新元素总是在最后完成，删除现有元素总是在开头(容器中最旧的元素)完成。
 
 \item
-There should be random access to the elements of the container, both with the subscript operator and with iterators.
+可以通过下标操作符和迭代器对容器的元素进行随机访问。
 \end{itemize}
 
-Based on these requirements, we can think of the following implementation details:
+基于这些需求，可以想到以下实现细节:
 
 \begin{itemize}
 \item
-The elements could be stored in an array. For convenience, this could be the std::array class.
+元素可以存储在数组中。方便起见，这可以是std::array类。
 
 \item
-We need two variables, which we call head and tail, to store the index of the first and last elements of the container. This is needed because due to the circular nature of the container, the beginning
+需要两个变量(head和tail)来存储容器的第一个和最后一个元素的索引。这是必需的，因为容器的循环性质，开始和结束会随着时间的推移而变化。
 
 \item
-A third variable will store the number of elements in the container. This is useful because otherwise, we would not be able to differentiate whether the container is empty or has one element only from the values of the head and tail indexes.
+第三个变量将存储容器中的元素数量。没有的话，我们将无法从头和尾索引的值区分容器是空，还是只有一个元素。
 
-\begin{tcolorbox}[breakable,enhanced jigsaw,colback=blue!5!white,colframe=blue!75!black,title={Important Note}]
-The implementation shown here is provided for teaching purposes only and is not intended as a production-ready solution. The experienced reader will find different aspects of the implementation that could be optimized. However, the purpose here is to learn how to write a container and not how to optimize the implementation.
+\begin{tcolorbox}[breakable,enhanced jigsaw,colback=blue!5!white,colframe=blue!75!black,title={重要的Note}]
+这里展示的实现仅用于教学目的，并不是用于生产的解决方案。有经验的读者会发现实现的不同方面可以优化。但这里的目的是学习如何编写容器，而不是如何优化实现。
 \end{tcolorbox}
 
 \end{itemize}
 
-The following diagram shows a visual representation of such a circular buffer, with a capacity of eight elements with different states:
+下图显示了这样一个循环缓冲区的可视化表示，容量为八个不同状态的元素:
 
 \begin{center}
 \includegraphics[width=0.8\textwidth]{content/3/chapter8/images/2.png}\\
-Figure 8.2
+图 8.2
 \end{center}
 
-What we can see in this diagram is the following:
+从这张图中可以看到:
 
 \begin{itemize}
 \item
-Figure A: This is an empty buffer. The capacity is 8, the size is 0, and the head and tail both point to index 0.
+图A:这是一个空缓冲区。容量为8，大小为0，头部和尾部都指向索引0。
 
 \item
-Figure B: This buffer contains one element. The capacity is still 8, the size is 1, and the head and tail both still point to index 0.
+图B:这个缓冲区包含一个元素。容量仍然是8，大小是1，头部和尾部都指向索引0。
 
 \item
-Figure C: This buffer contains two elements. The size is 2, the head contains index 0, and the tail contains index 1.
+图C:这个缓冲区包含两个元素。大小为2，头部包含索引0，尾部包含索引1。
 
 \item
-Figure D: This buffer is full. The size is 8, which is equal to the capacity, and the head contains index 0 and the tail contains index 7.
+图D:缓冲区已满。大小为8，等于容量，头部包含索引0，尾部包含索引7。
 
 \item
-Figure E: This buffer is still full, but an additional element has been added, triggering the overwriting of the oldest element in the buffer. The size is 8, the head contains index 1, and the tail contains index 0.
+图E:缓冲区仍然是满的，但是添加了一个额外的元素，触发了缓冲区中最旧元素的覆盖。大小为8，头部包含索引1，尾部包含索引0。
 \end{itemize}
 
-Now that we have looked at the semantics of the circular buffer, we can start writing the implementation. We will begin with the container class.
+现在已经了解了循环缓冲区的语义，可以开始编写实现了。我们将从容器类开始。
 
-\subsubsubsection{8.2.1\hspace{0.2cm}Implementing a circular buffer container}
+\subsubsubsection{8.2.1\hspace{0.2cm}实现循环缓冲区容器}
 
-The code for the container class would be too long to be put in a single listing, so we’ll break it up into multiple snippets. The first is as follows:
+容器类的代码太长，所以我们将它分成多个片段。首先是:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T, std::size_t N>
@@ -81,9 +81,9 @@ class circular_buffer
 };
 \end{lstlisting}
 
-There are two things here: the forward declaration of a class template called circular\_buffer\_iterator, and a class template called circular\_buffer. Both have the same template arguments, a type template parameter T, representing the type of the elements, and a non-type template parameter, representing the capacity of the buffer. A constraint is used to ensure that the provided value for capacity is always positive. If you are not using C++20, you can replace the constraint with a static\_assert statement or enable\_if to enforce the same restriction. The following snippets are all part of the circular\_buffer class.
+这里有两件事:一个是类模板circular\_buffer\_iterator的前向声明，另一个是类模板circular\_buffer。两者都有相同的模板实参，一个类型模板形参T，表示元素的类型，一个非类型模板形参，表示缓冲区的容量。使用约束来确保提供的容量值总是正的。若没有使用C++20，可以用static\_assert替换这个约束，或者enable\_if来执行相同的限制。下面的代码段是circular\_buffer类的一部分。
 
-First, we have a series of member type definitions that provide aliases to different types that are relevant to the circular\_buffer class template. These will be used in the implementation of the class. They are shown next:
+首先，有一系列成员类型定义，为与circular\_buffer类模板相关的不同类型提供别名。这些将在类的实现中使用:
 
 \begin{lstlisting}[style=styleCXX]
 	public:
@@ -99,7 +99,7 @@ First, we have a series of member type definitions that provide aliases to diffe
 	circular_buffer_iterator<T const, N>;
 \end{lstlisting}
 
-Second, we have the data members that store the buffer state. The actual elements are stored in a std::array object. The head, tail, and size are all stored in a variable of the size\_type data type. These members are all private:
+其次，有存储缓冲区状态的数据成员。实际的元素存储在std::array对象中。head、tail和size都存储在size\_type数据类型的变量中。这些成员都是私有的:
 
 \begin{lstlisting}[style=styleCXX]
 private:
@@ -109,7 +109,7 @@ private:
 	size_type size_ = 0;
 \end{lstlisting}
 
-Third, we have the member functions that implement the functionality described earlier. All the following members are public. The first to list here are the constructors:
+第三，有实现前面描述的功能的成员函数。以下所有成员都是公开的。首先是构造函数:
 
 \begin{lstlisting}[style=styleCXX]
 constexpr circular_buffer() = default;
@@ -126,7 +126,7 @@ constexpr circular_buffer(const_reference v):
 }
 \end{lstlisting}
 
-There are three constructors defined here (although we can think of additional ones). These are the default constructor (which is also defaulted) that initializes an empty buffer, a constructor from a C-like array of size N, which initializes a full buffer by copying the array elements, and, finally, a constructor that takes a single value and initializes a full buffer by copying that value into each element of the buffer. These constructors allow us to create circular buffers in any of the following ways:
+这里定义了三个构造函数(可以考虑其他的构造函数)，是初始化空缓冲区的默认构造函数(也是默认构造函数)，大小为N的类C数组的构造函数，通过复制数组元素初始化完整缓冲区，最后是接受单个值的构造函数，通过将该值复制到缓冲区的每个元素来初始化完整缓冲区。这些构造函数允许以以下任何一种方式创建循环缓冲区:
 
 \begin{lstlisting}[style=styleCXX]
 circular_buffer<int, 1> b1; // {}
@@ -134,7 +134,7 @@ circular_buffer<int, 3> b2({ 1, 2, 3 }); // {1, 2, 3}
 circular_buffer<int, 3> b3(42); // {42, 42, 42}
 \end{lstlisting}
 
-Next, we define several member functions that describe the state of the circular buffer:
+接下来，定义了几个成员函数来描述循环缓冲区的状态:
 
 \begin{lstlisting}[style=styleCXX]
 constexpr size_type size() const noexcept
@@ -153,9 +153,9 @@ constexpr void clear() noexcept
 { size_ = 0; head_ = 0; tail_ = 0; };
 \end{lstlisting}
 
-The size function returns the number of elements in the buffer, the capacity function the number of elements that the buffer can hold, the empty function to check whether the buffer has no elements (the same as size() == 0), and the full function to check whether the buffer is full (the same as size() == N). There is also a function called clear that puts the circular buffer in the empty state. Beware that this function doesn't destroy any element (does not release memory or call destructors) but only resets the values defining the state of the buffer.
+size函数返回缓冲区中的元素数量，capacity函数返回缓冲区中可以容纳的元素数量，empty函数检查缓冲区中是否没有元素(与size() == 0相同)，full函数检查缓冲区是否已满(与size() == N相同)。还有一个名为clear的函数将循环缓冲区置于空状态。注意，此函数不销毁任何元素(不释放内存或调用析构函数)，而只是重置定义缓冲区状态的值。
 
-We need to access the elements of the buffer; therefore, the following functions are defined for this purpose:
+需要访问缓冲区中的元素，为此定义了以下函数:
 
 \begin{lstlisting}[style=styleCXX]
 constexpr reference operator[](size_type const pos)
@@ -209,23 +209,23 @@ constexpr const_reference back() const
 }
 \end{lstlisting}
 
-Each of these members has a const overload that is called for constant instances of the buffer. The constant member returns a constant reference; the non-const member returns a normal reference. These methods are as follows:
+每个成员都有一个const重载，用于缓冲区的常量实例。常量成员返回一个常量引用，非const成员返回一个正常的引用:
 
 \begin{itemize}
 \item
-The subscript operator that returns a reference to the element specified by its index, without checking the value of the index
+下标操作符，返回由其索引指定的元素的引用，而不检查索引的值
 
 \item
-The at method that works similarly to the subscript operator, except that it checks that the index is smaller than the size and, if not, throws an exception
+at方法的工作原理与下标操作符类似，只是它检查索引是否小于大小，若小于则抛出异常
 
 \item
-The front method that returns a reference to the first element; if the buffer is empty, it throws an exception
+front方法，返回对第一个元素的引用；若缓冲区为空，则抛出异常
 
 \item
-The back method that returns a reference to the last element; if the buffer is empty, it throws an exception
+back方法，返回对最后一个元素的引用；若缓冲区为空，则抛出异常
 \end{itemize}
 
-We have members to access the elements, but we need members for adding and removing elements to/from the buffer. Adding new elements always happens at the end, so we’ll call this push\_back. Removing existing elements always happens at the beginning (the oldest element), so we’ll call this pop\_front. Let’s look first at the former:
+可以使用成员函数来访问元素，也需要成员来向缓冲区中添加和删除元素。添加新元素总是发生在最后，因此称为push\_back。删除现有元素总是发生在最开始(最古老的元素)，因此称为pop\_front。让我们先来看看前者:
 
 \begin{lstlisting}[style=styleCXX]
 constexpr void push_back(T const& value)
@@ -249,20 +249,20 @@ constexpr void push_back(T const& value)
 }
 \end{lstlisting}
 
-This works based on the defined requirements and the visual representations from Figure 8.2:
+这基于已定义的需求和图8.2中的可视化表示:
 
 \begin{itemize}
 \item
-If the buffer is empty, copy the value to the element pointed by the tail\_ index and increment the size.
+若缓冲区为空，则将该值复制到tail\_索引所指向的元素，并增加其大小。
 
 \item
-If the buffer is neither empty nor full, do the same but also increment the value of the tail\_ index.
+若缓冲区既不空也不满，执行同样的操作，但也增加tail\_索引的值。
 
 \item
-If the buffer is full, increment both the head\_ and the tail\_ and then copy the value to the element pointed by the tail\_ index.
+若缓冲区已满，则同时增加head\_和tail\_，然后将值复制到tail\_索引所指向的元素。
 \end{itemize}
 
-This function copies the value argument to a buffer element. However, this could be optimized for temporaries or objects that are no longer needed after pushing to the buffer. Therefore, an overload that takes an rvalue reference is provided. This moves the value to the buffer, avoiding an unnecessary copy. This overload is shown in the following snippet:
+该函数将值参数复制到缓冲区元素，也可以针对推送到缓冲区后不再需要的临时对象或对象进行优化。因此，提供了接受右值引用的重载。这会将值移动到缓冲区，避免不必要的复制。这个重载显示在下面的代码段中:
 
 \begin{lstlisting}[style=styleCXX]
 constexpr void push_back(T&& value)
@@ -286,7 +286,7 @@ constexpr void push_back(T&& value)
 }
 \end{lstlisting}
 
-A similar approach is used for implementing the pop\_back function to remove elements from the buffer. Here is the implementation:
+类似的方法用于实现pop\_back函数来从缓冲区中删除元素:
 
 \begin{lstlisting}[style=styleCXX]
 constexpr T pop_front()
@@ -302,30 +302,30 @@ constexpr T pop_front()
 }
 \end{lstlisting}
 
-This function throws an exception if the buffer is empty. Otherwise, it increments the value of the head\_ index and returns the value of the element from the previous position of the head\_. This is described visually in the following diagram:
+若缓冲区为空，此函数将抛出异常。否则，它将head\_索引的值加1，并返回head\_之前位置的元素的值。下图直观地描述了这一点:
 
 \begin{center}
 \includegraphics[width=0.7\textwidth]{content/3/chapter8/images/3.png}\\
-Figure 8.3
+图 8.3
 \end{center}
 
-What we can see here is the following:
+在这里看到的是:
 
 \begin{itemize}
 \item
-Figure A: The buffer has 3 elements (1, 2, and 3), head is at index 0, and tail is at index 2.
+图A:缓冲区有3个元素(1、2和3)，头在索引0，尾在索引2。
 
 \item
-Figure B: An element has been removed from the front, which was index 0. Therefore, head is now index 1 and tail is still index 2. The buffer now has two elements.
+图B:前面删除了一个索引为0的元素。头部现在是指数1，尾部仍然是指数2。缓冲区现在有两个元素。
 
 \item
-Figure C: The buffer has eight elements, which is its maximum capacity, and an element has been overwritten. The head is at index 1 and the tail is at index 0.
+图C:缓冲区有8个元素，这是其最大容量，一个元素已经覆盖。头部在索引1，尾部在索引0。
 
 \item
-Figure D: An element has been removed from the front, which was index 1. The head is now at index 2 and the tail is still at index 0. The buffer now has seven elements.
+图D:前面删除了一个元素，即索引1。头部现在在索引2，尾部仍然在索引0。缓冲区现在有7个元素。
 \end{itemize}
 
-An example of using both the push\_back and the pop\_front member functions is shown in the next snippet:
+下面的代码段显示了同时使用push\_back和pop\_front成员函数的例子:
 
 \begin{lstlisting}[style=styleCXX]
 circular_buffer<int, 4> b({ 1, 2, 3, 4 });
@@ -341,7 +341,7 @@ assert(b[1] == 5);
 assert(b[2] == 6);
 \end{lstlisting}
 
-Finally, we have the member functions begin and end that return iterators to the first and one-past-the-last elements of the buffer. Here is their implementation:
+最后，成员函数begin和end返回指向缓冲区中第一个和倒数一个元素的迭代器。以下是它们的实现:
 
 \begin{lstlisting}[style=styleCXX]
 iterator begin()
@@ -365,18 +365,18 @@ const_iterator end() const
 }
 \end{lstlisting}
 
-To understand these, we need to see how the iterator class is actually implemented. We will explore this in the next section.
+为了理解这些，需要了解迭代器类实际上是如何实现的。我们将在下一节中对此进行探讨。
 
-\subsubsubsection{8.2.2\hspace{0.2cm}Implementing an iterator type for the circular buffer container}
+\subsubsubsection{8.2.2\hspace{0.2cm}为循环缓冲区容器实现迭代器类型}
 
-We declared the iterator class template at the beginning of the previous section when we started with the circular\_buffer container. However, we need to define its implementation too. Yet, there is one more thing we must do: in order for the iterator class to be able to access the private members of the container it needs to be declared as a friend. This is done as follows:
+上一节开始使用circular\_buffer容器时声明了迭代器类模板，但也需要定义它的实现。然而，还有一件事我们必须做:为了使迭代器类能够访问容器的私有成员，它需要声明为友元:
 
 \begin{lstlisting}[style=styleCXX]
 private:
 	friend circular_buffer_iterator<T, N>;
 \end{lstlisting}
 
-Let’s look now at the circular\_buffer\_iterator class, which actually has similarities with the container class. This includes the template parameters, the constraints, and the set of member types (some of them being common to those in circular\_buffer). Here is a snippet of the class:
+来看看circular\_buffer\_iterator类，它实际上与容器类有相似之处。这包括模板参数、约束和成员类型集(其中一些与circular\_buffer中的成员类型相同)。下面是这个类的一个代码段:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T, std::size_t N>
@@ -403,7 +403,7 @@ private:
 };
 \end{lstlisting}
 
-The circular\_buffer\_iterator class has a reference to a circular buffer and an index to the element in the buffer that it points to. The reference to circular\_buffer<T, N> is wrapped inside a std::reference\_wrapper object. The reason for this will be unveiled shortly. Such an iterator can be explicitly created by providing these two arguments. Therefore, the only constructor looks as follows:
+circular\_buffer\_iterator类有一个对循环缓冲区的引用，以及其所指向的缓冲区中元素的索引。circular\_buffer<T, N>的引用包装在std::reference\_wrapper对象中。可以通过提供这两个参数显式地创建这样的迭代器，所以构造函数如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 explicit circular_buffer_iterator(
@@ -413,11 +413,11 @@ explicit circular_buffer_iterator(
 { }
 \end{lstlisting}
 
-If we now look back at the definitions of the begin and end member functions of circular\_buffer, we can see that the first argument was *this, and the second was 0 for the begin iterator and size\_ for the end iterator. The second value is the offset from the head of the element pointed by the iterator. Therefore, 0 is the first element, and size\_ is the one-past-the-last element in the buffer.
+若现在回顾circular\_buffer的begin和end成员函数的定义，可以看到第一个参数是*this，第二个参数是0 (begin迭代器)，size\_ (end迭代器)。第二个值是迭代器指向的元素头部的偏移量。因此，0是第一个元素，而size\_是缓冲区中最后一个元素。
 
-We have decided that we need random access to the elements of the buffer; therefore, the iterator category is random-access. The member type iterator\_category is an alias for std::random\_access\_iterator\_tag. This implies that we need to provide all the operations supported for such an iterator. In the previous section of this chapter, we discussed the iterator categories and the required operations for each category. We will implement all the required ones next.
+这里，我们需要随机访问缓冲区的元素，所以迭代器类别是随机迭代器。成员类型iterator\_category是std::random\_access\_iterator\_tag的别名。因此，需要提供这样一个迭代器所支持的所有操作。本章的前一节中，讨论了迭代器类别，以及每个类别所需的操作。接下来我们将实现所有需要的。
 
-We start with the requirements for an input iterator, which are as follows:
+从输入迭代器的要求开始:
 
 \begin{lstlisting}[style=styleCXX]
 self_type& operator++()
@@ -469,7 +469,7 @@ const_reference operator->() const
 }
 \end{lstlisting}
 
-We have implemented here incrementing (both pre- and post-fix), checking for equality/ inequality, and dereferencing. The * and -> operators throw an exception if the element cannot be dereferenced. The cases when this happens are when the buffer is empty, or the index is not within bounds (between head\_ and tail\_). We used two helper functions (both private), called compatible and is\_bounds. These are shown next:
+这里实现了递增(前缀和后缀)、检查相等/不相等，以及解引用。*和->操作符在无法解引用元素时抛出异常。这种情况发生在缓冲区为空时，或者索引不在边界内(在head\_和tail\_之间)。使用了两个辅助函数(都是私有的)，分别称为compatible和is\_bounds:
 
 \begin{lstlisting}[style=styleCXX]
 bool compatible(self_type const& other) const
@@ -487,20 +487,20 @@ bool in_bounds() const
 }
 \end{lstlisting}
 
-A forward iterator is an input iterator that is also an output iterator. The requirements for output iterators will be discussed toward the end of this section. Those for the input iterators we have seen previously. Apart from those, forward iterators can be used in multi-pass algorithms, which is possible because performing an operation on a dereferenceable forward iterator does not make its iterator value non-dereferenceable. That means if a and b are two forward iterators and they are equal, then either they are non-dereferenceable, otherwise, their iterator values, *a and *b, refer to the same object. The opposite is also true, meaning that if *a and *b are equal, then a and b are also equal. This is true for our implementation.
+前向迭代器是一个输入迭代器，同时也是一个输出迭代器。对输出迭代器的要求将在本节的最后讨论。之前看到的那些用于输入迭代器的迭代器，因为对可解引用的前向迭代器执行操作会使其迭代器值解引用，所以前向迭代器可以用于多遍算法。拖a和b是两个前向迭代器并且它们相等，要么不可解引用，否则，其迭代器值*a和*b指向同一个对象。反之亦然，弱*a和*b相等，那么a和b也相等。这对于我们的实现来说是正确的。
 
-The other requirement for forward iterators is that they are swappable. That means if a and b are two forward iterators, then swap(a, b) should be a valid operation. This leads us back to using a std::reference\_wrapper object to hold a reference to a circular\_buffer<T, N>. References are not swappable, which would have made circular\_buffer\_iterator not swappable either. However, std::reference\_wrapper is swappable, and that also makes our iterator type swappable. That can be verified with a static\_assert statement, such as the following:
+前向迭代器的另一个要求是它们是可交换的。若a和b是两个前向迭代器，那么swap(a, b)应该是一个有效的操作。回到使用std::reference\_wrapper对象来保存对循环\_buffer<T, N>的引用。引用是不可交换的，所以circular\_buffer\_iterator也不可交换。然而，std::reference\_wrapper是可交换的，这也使得我们的迭代器类型可交换。可以使用static\_assert语句进行验证:
 
 \begin{lstlisting}[style=styleCXX]
 static_assert(
 	std::is_swappable_v<circular_buffer_iterator<int, 10>>);
 \end{lstlisting}
 
-\begin{tcolorbox}[breakable,enhanced jigsaw,colback=blue!5!white,colframe=blue!75!black,title={Important Note}]
-An alternative to using std::reference\_wrapper is to use a raw pointer to a circular\_buffer class, since pointers can be assigned values and are, therefore swappable. It is a matter of style and personal choice which one to use. In this example, I preferred the solution that avoided the raw pointer.
+\begin{tcolorbox}[breakable,enhanced jigsaw,colback=blue!5!white,colframe=blue!75!black,title={重要的Note}]
+std::reference\_wrapper的另一种替代方法是使用指向circular\_buffer类的原始指针，因为指针可以赋值，因此是可交换的。使用哪一种是风格和个人的选择。本例中，我倾向于避免使用原始指针的解决方案。
 \end{tcolorbox}
 
-For fulfilling the requirements for the bidirectional iterator category, we need to support decrementing. In the next snippet, you can see the implementation of both pre- and post-fix decrement operators:
+为了满足双向迭代器类别的要求，需要支持递减。在下一个代码段中，可以看到前缀和后缀递减操作符的实现:
 
 \begin{lstlisting}[style=styleCXX]
 self_type& operator--()
@@ -521,7 +521,7 @@ self_type operator--(int)
 }
 \end{lstlisting}
 
-Finally, we have the requirements of the random-access iterators. The first requirements to implement are arithmetic (+ and -) and compound (+= and -=) operations. These are shown next:
+最后，因为有随机访问迭代器的要求。首先要实现的需求是算术(+和-)和复合(+=和-=)操作:
 
 \begin{lstlisting}[style=styleCXX]
 self_type operator+(difference_type offset) const
@@ -559,7 +559,7 @@ self_type& operator -=(difference_type const offset)
 }
 \end{lstlisting}
 
-Random-access iterators must support inequality comparison with other operations. That means, we need to overload the <, <=, >, and >= operators. However, the <=, >, and >= operators can be implemented based on the < operator. Therefore, their definition can be as follows:
+随机访问迭代器必须支持与其他操作的不相等比较。所以，需要重载<、<=、>和>=操作符。但是，<=、>和>=操作符可以基于<操作符实现。因此，其定义如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 bool operator<(self_type const& other) const
@@ -583,7 +583,7 @@ bool operator>=(self_type const& other) const
 }
 \end{lstlisting}
 
-Last, but not least, we need to provide access to elements with the subscript operator ([]). A possible implementation is the following: 
+最后，但同样重要的是，需要使用下标操作符([])提供对元素的访问。可能的实现如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 value_type& operator[](difference_type const offset)
@@ -598,7 +598,7 @@ const
 }
 \end{lstlisting}
 
-With this, we have completed the implementation of the iterator type for the circular buffer. If you had trouble following the multitude of code snippets for these two classes, you can find the complete implementation in the GitHub repository for the book. A simple example for using the iterator type is shown next:
+至此，我们已经完成了循环缓冲区迭代器类型的实现。若在理解这两个类的大量代码片段时遇到困难，可以在本书的GitHub存储库中找到完整的实现。下面是一个使用迭代器类型的简单示例:
 
 \begin{lstlisting}[style=styleCXX]
 circular_buffer<int, 3> b({1, 2, 3});
@@ -609,7 +609,7 @@ for (auto it = b.begin(); it != b.end(); ++it)
 }
 \end{lstlisting}
 
-This code can be actually simplified with range-based for loops. In this case, we don’t use iterators directly, but the compiler-generated code does. Therefore, the following snippet is equivalent to the previous one:
+这段代码实际上可以通过基于范围的for循环来简化。这里，我们不直接使用迭代器，但编译器生成的代码可以。因此，下面的代码段相当于前面的代码段:
 
 \begin{lstlisting}[style=styleCXX]
 circular_buffer<int, 3> b({ 1, 2, 3 });
@@ -620,7 +620,7 @@ for (auto const e : b)
 }
 \end{lstlisting}
 
-However, the implementation provided here for circular\_buffer\_iterator does not allow the following piece of code to compile:
+但是，这里为circular\_buffer\_iterator提供的实现，不能让以下代码段编译通过:
 
 \begin{lstlisting}[style=styleCXX]
 circular_buffer<int, 3> b({ 1,2,3 });
@@ -629,7 +629,7 @@ circular_buffer<int, 3> b({ 1,2,3 });
 assert(b.front() == 0);
 \end{lstlisting}
 
-This requires that we are able to write elements through iterators. However, our implementation doesn’t meet the requirements for the output iterator category. This requires that expressions such as *it = v, or *it++ = v are valid. To do so, we need to provide non-const overloads of the * and -> operators that return non-const reference types. This can be done as follows:
+这要求我们能够通过迭代器写入元素，但我们的实现不满足输出迭代器类别的要求。这要求表达式如*it = v，或*it++ = v是有效的。为此，需要提供返回非const引用类型的*和->操作符的非const重载方式:
 
 \begin{lstlisting}[style=styleCXX]
 reference operator*()
@@ -655,7 +655,7 @@ reference operator->()
 }
 \end{lstlisting}
 
-More examples for using the circular\_buffer class with and without iterators can be found in the GitHub repository. Next, we will focus our attention on implementing a general-purpose algorithm that works for any range, including the circular\_buffer container we defined here.
+GitHub库中可以找到更多带迭代器和不带迭代器的circular\_buffer类的示例。接下来，我们将把注意力集中在实现一个适用于任何范围的通用算法上，包括在这里定义的circular\_buffer容器。
 
 
 

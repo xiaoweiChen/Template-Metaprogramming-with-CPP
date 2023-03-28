@@ -1,63 +1,63 @@
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Question 1}
+\textbf{习题 1}
 
-What is a range?
-
-\hspace*{\fill} \\ %插入空行
-\noindent
-\textbf{Answer}
-
-A range is an abstraction for a sequence of elements, defined with a beginning and end iterator. The beginning iterator points to the first element in the sequence. The end iterator points to the one-past-last element of the sequence.
-
+什么是范围?
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Question 2}
+\textbf{参考答案}
 
-What is a view in the ranges library?
+范围是元素序列的抽象，用开始迭代器和结束迭代器定义。开始迭代器指向序列中的第一个元素。end迭代器指向序列的倒数第一个元素。
 
-\hspace*{\fill} \\ %插入空行
-\noindent
-\textbf{Answer}
-
-A view in the C++ ranges library, also called a range adaptor, is an object that implements an algorithm that takes one or more ranges as input and perhaps other arguments and returns an adapted range. Views are lazy-evaluated, meaning they do not perform the adaptation until their elements are iterated.
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Question 3}
+\textbf{习题 2}
 
-What are constrained algorithms?
-
-\hspace*{\fill} \\ %插入空行
-\noindent
-\textbf{Answer}
-
-Constrained algorithms are implementations of the existing standard library algorithms but in the C++20 ranges library. They are called constrained because their template arguments are constrained using C++20 concepts. In these algorithms, instead of requiring a begin-end pair of iterators for specifying, a range of values accepts a single range argument. However, overloads that accept an iterator-sentinel pair also exist.
+什么是范围库中的视图?
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Question 4}
+\textbf{参考答案}
 
-What is a sentinel?
-
-\hspace*{\fill} \\ %插入空行
-\noindent
-\textbf{Answer}
-
-A sentinel is an abstraction for an end iterator. This makes it possible for the end iterator to have a different type than the range iterator. Sentinels cannot be dereferenced or incremented. Sentinels are useful when the test for the end of a range depends on some variable (dynamic) condition and you don’t know you are at the end of the range until something happens (for instance, a condition becomes false).
+C++范围库中的视图，也称为范围适配器，是实现一种算法的对象，该算法以一个或多个范围作为输入。可能还有其他参数，并返回一个经过调整的范围。视图是惰性求值的，所以可以直到其元素迭代时，才进行适配。
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Question 5}
+\textbf{习题 3}
 
-How can you check that a sentinel type corresponds to an iterator type?
+什么是约束算法?
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Answer}
+\textbf{参考答案}
 
-You can check that a sentinel type can be used with an iterator type by using the std::sentinel\_for concept from the <iterator> header.
+约束算法是现有标准库算法的实现，但在C++20范围库中，其之所以“受约束”，是因为它们的模板参数使用C++20的概念进行约束。这些算法中，值范围接受单个范围参数，而不是需要begin-end迭代器对进行指定。但是，也存在接受迭代器-哨兵对的重载。
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{习题 4}
+
+什么是哨兵?
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{参考答案}
+
+哨点是对结束迭代器的抽象。这使得结束迭代器的类型可能与范围迭代器的类型不同，哨兵不能解除引用或增加。当对范围尽头的测试依赖于某些可变(动态)条件，并且直到某些事情发生(条件变为假)时，才知道自己处于范围末尾时，哨兵是有用的。
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{习题 5}
+
+如何检查哨兵类型是否与迭代器类型相对应?
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{参考答案}
+
+可以使用<iterator>头文件中的std::sentinel\_for概念来检查哨兵类型是否可以与迭代器类型一起使用。
 
 
 

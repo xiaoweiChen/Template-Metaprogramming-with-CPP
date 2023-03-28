@@ -1,4 +1,4 @@
-We have used the term range many times in the previous chapter. A range is an abstraction of a sequence of elements, delimited by two iterators (one to the first element of the sequence, and one to the one-past-the-last element). Containers such as std::vector, std::list, and std::map are concrete implementations of the range abstraction. They have ownership of the elements and they are implemented using various data structures, such as arrays, linked-lists, or trees. The standard algorithms are generic. They are container-agnostic. They know nothing about std::vector, std::list, or std::map. They handle range abstractions with the help of iterators. However, this has a shortcoming: we always need to retrieve a beginning and end iterator from a container. Here are some examples:
+前一章中，已经多次使用范围这个术语。范围是一个元素序列的抽象，由两个迭代器分隔(一个指向序列的第一个元素，一个指向最后一个元素)。容器如std::vector、std::list和std::map都是范围抽象的具体实现，其拥有元素的所有权，并且使用各种数据结构(如数组、链表或树)实现。标准算法是通用的，可以对std::vector、std::list或std::map的内部实现一无所知，在迭代器的帮助下可以进行范围抽象。然而，这有一个缺点:需要从容器中检索开始迭代器和结束迭代器:
 
 \begin{lstlisting}[style=styleCXX]
 // sorts a vector
@@ -12,7 +12,7 @@ auto even = std::count_if(
 	[](int const n) {return n % 2 == 0; });
 \end{lstlisting}
 
-There are few cases when you need to process only a part of the container’s elements. In the vast majority of cases, you just have to write v.begin() and v.end() over and over again. This includes variations such as calls to cbegin()/cend(), rbegin()/rend(), or the stand-alone functions std::begin()/std::end(), and so on. Ideally, we would prefer to shorten all this and be able to write the following:
+极少数情况下，只需要处理容器元素的一部分。大多数情况下，需要一遍又一遍地写v.begin()和v.end()。这包括对cbegin()/cend()、rbegin()/rend()或独立函数std::begin()/std::end()的调用。理想情况下，我们更愿意缩短所有这些，并能够编写如下代码:
 
 \begin{lstlisting}[style=styleCXX]
 // sorts a vector
@@ -26,7 +26,7 @@ auto even = std::count_if(
 	[](int const n) {return n % 2 == 0; });
 \end{lstlisting}
 
-On the other hand, we often need to compose operations. Most of the time that involves many operations and code that is too verbose even when using standard algorithms. Let’s consider the following example: given a sequence of integers, we want to print to the console the square of all even numbers, except the first two, in descending order of their value (not their position in the sequence). There are multiple ways to solve the problem. The following is a possible solution:
+另一方面，我们经常需要组合操作。大多数情况下，即使使用标准算法，也会涉及许多操作和过于冗长的代码。考虑下面的例子:给定一个整数序列，希望将除前两个以外的所有偶数的平方按它们的值降序(而不是在序列中的位置)输出到控制台。有多种方法可以解决这个问题，以下是一个可能的解决方案:
 
 \begin{lstlisting}[style=styleCXX]
 std::vector<int> v{ 1, 5, 3, 2, 8, 7, 6, 4 };
@@ -54,7 +54,7 @@ std::for_each(temp.begin(), temp.end(),
 				[](int const n) {std::cout << n << '\n'; });
 \end{lstlisting}
 
-I believe most people would agree that, although anyone familiar with the standard algorithms can easily read this code, it’s still a lot to write. It also requires a temporary container and repetitive calls to begin/end. Therefore, I also expect most people would more easily understand the following version of the previous code, and probably prefer to write it as such:
+相信大多数人都会同意，尽管任何熟悉标准算法的人都可以轻松地阅读这段代码，但仍然有很多东西需要编写，还需要一个临时容器和重复的开始/结束调用。因此，我也希望大多数人会更容易理解前面代码的以下版本，并且喜欢这样进行书写:
 
 \begin{lstlisting}[style=styleCXX]
 std::vector<int> v{ 1, 5, 3, 2, 8, 7, 6, 4 };
@@ -68,15 +68,15 @@ auto r = v
 for_each(r, [](int const n) {std::cout << n << '\n'; });
 \end{lstlisting}
 
-This is what the C++20 standard provides with the help of the ranges library. This has two main components:
+这是C++20标准在范围库的帮助下提供的功能。这有两个主要组成部分:
 
 \begin{itemize}
 \item
-Views or range adaptors, which represent non-owning iterable sequences. They enable us to compose operations more easily such as in the last example.
+视图或范围适配器，表示非拥有的可迭代序列。使我们能够更容易地组合操作，例如在最后一个示例中。
 
 \item
-Constrained algorithms, which enable us to operate on concrete ranges (standard containers or ranges) and not on abstract ranges delimited with a pair of iterators (although that’s possible too).
+约束算法，能够操作具体的范围(标准容器或范围)，而不是使用一对迭代器分隔的抽象范围(尽管这也是可能的)。
 \end{itemize}
 
-We will explore these two offerings of the ranges library in the next sections, and we will begin with ranges.
+下一节中，我们将探讨范围库的这两种功能，先从范围开始。
 

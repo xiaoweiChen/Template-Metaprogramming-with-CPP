@@ -1,24 +1,24 @@
-The previous chapter was dedicated to understanding the three main pillars of the standard library: containers, iterators, and algorithms. Throughout that chapter, we used the abstract concept of range to represent a sequence of elements delimited by two iterators. The C++20 standard makes it easier to work with ranges by providing a ranges library, consisting of two main parts: on one hand, types that define non-owning ranges and adaptations of ranges, and on the other hand, algorithms that work with these range types and do not require iterators to define a range of elements.
+前一章致力于理解标准库的三个主要核心:容器、迭代器和算法。我们使用了抽象的范围概念来表示由两个迭代器分隔的元素序列。C++20标准提供了一个范围库，使范围变得更容易使用，其主要由两部分组成:一方面，定义非归属范围和自适应范围的类型；另一方面，处理这些范围类型的算法，这些算法不需要迭代器来定义元素范围。
 
-In this final chapter, we will address the following topics:
+最后一章中，我们将讨论以下主题:
 
 \begin{itemize}
 \item
-Moving from abstract ranges to the ranges library
+从抽象范围到范围库
 
 \item
-Understanding range concepts and views
+范围和视图
 
 \item
-Understanding the constrained algorithms
+约束算法
 
 \item
-Writing your own range adaptor
+编写范围适配器
 \end{itemize}
 
-By the end of this chapter, you will have a good understanding of the content of the ranges library and you will be able to write your own range adaptor.
+在本章结束时，将对范围库的内容有一个很好的理解，你将能够编写自己的范围适配器。
 
-Let’s begin the chapter with a transition from the abstract concept of a range to the C++20 ranges library.
+让我们从范围的抽象概念过渡到C++20范围库开始吧。
 
 
 

@@ -1,91 +1,91 @@
 
-The term range refers to an abstraction that defines a sequence of elements bounded by start and end iterators. A range, therefore, represents an iterable sequence of elements. However, such a sequence can be defined in several ways:
+术语范围指的是，由开始迭代器和结束迭代器限定的元素序列的抽象。因此，范围表示元素的可迭代序列。然而，这样的序列可以用几种方式定义:
 
 \begin{itemize}
 \item
-With a begin iterator and an end sentinel. Such a sequence is iterated from the beginning to the end. A sentinel is an object that indicates the end of the sequence. It can have the same type as the iterator type or it can be of a different type.
+一个开始迭代器和一个结束哨，这样的序列从开始迭代到结束。哨兵是表示序列结束的对象。可以具有与迭代器类型相同的类型，也可以具有不同的类型。
 
 \item
-With a start object and a size (number of elements), representing a so-called counted sequence. Such a sequence is iterated N times (where N represents the size) from the start.
+一个开始对象和一个大小(元素的数量)，表示一个所谓的计数序列。这样的序列从一开始就要迭代N次(其中N表示大小)。
 
 \item
-With a start and a predicate, representing a so-called conditionally terminated sequence. Such a sequence is iterated from the start until the predicate returns false.
+有一个开始和一个谓词，表示所谓的有条件终止序列。这样的序列从开始迭代，直到谓词返回false为止。
 
 \item
-With only a start value, representing a so-called unbounded sequence. Such a sequence can be iterated indefinitely.
+只有一个开始值，表示所谓的无界序列。这样的序列可以无限迭代。
 \end{itemize}
 
-All these kinds of iterable sequences are considered ranges. Because a range is an abstraction, the C++20 library defines a series of concepts to describe requirements for range types. These are available in the <ranges> header and the std::ranges namespace. The following table presents the list of range concepts:
+所有这些类型的可迭代序列都被认为是范围。因为范围是一种抽象，C++20标准库定义了一系列概念来描述范围类型的需求，其可以在<ranges>头文件和std::ranges命名空间中使用。下表列出了范围概念的列表:
 
 \begin{table}[H]
 \centering
 	\begin{tabular}{|l|l|}
 		\hline
-		\textbf{Name} &
-		\textbf{Description} \\ \hline
+		\textbf{名称} &
+		\textbf{描述} \\ \hline
 		range &
-		\begin{tabular}[c]{@{}l@{}}Defines the requirements for a type R to be a range by\\ providing a begin iterator and an end sentinel. The iterator\\ and sentinel can be of different types.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}通过提供开始迭代器和结束前哨，定义类型R为范围的需求。\\ 迭代器和哨兵可以是不同的类型。\end{tabular} \\ \hline
 		bgorrowed\_range &
-		\begin{tabular}[c]{@{}l@{}}Defines the requirements for a type R so that a function\\ can take an object of this type by value and return iterators,\\ obtained from this object without the danger of dangling.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}定义R类型的要求，以便函数可以按值接受该类型的对象\\ 并返回从该对象获得的迭代器，而不会出现悬空的危险。\end{tabular} \\ \hline
 		sized\_range &
-		\begin{tabular}[c]{@{}l@{}}Defines the requirements for a type R to be a range that\\ knows it s size in constant time.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}将类型R的要求定义为在常数时间内知道其大小的范围。\end{tabular} \\ \hline
 		common\_range &
-		\begin{tabular}[c]{@{}l@{}}Defines the requirements for a type R to be a range whose\\ iterator and sentinal types are identical.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}将类型R的要求定义为迭代器类型和前哨类型相同的范围。\end{tabular} \\ \hline
 		view &
-		\begin{tabular}[c]{@{}l@{}}Defines the requirements for a type R that is a range to\\ have constant time copy, move, and assignment operations.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}定义类型R的需求，该类型R是一个具有固定时间\\ 复制、移动和赋值操作的范围。\end{tabular} \\ \hline
 		viewable\_range &
-		\begin{tabular}[c]{@{}l@{}}Defines the requirements for a range type R to be convertible\\ to a view.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}定义可转换为视图的范围类型R的需求。\end{tabular} \\ \hline
 		input\_range &
-		\begin{tabular}[c]{@{}l@{}}Requires that a range type has the iterator type satisfy the\\ input\_iterator concept.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}要求范围类型具有满足input\_iterator概念的迭代器类型。\end{tabular} \\ \hline
 		output\_range &
-		\begin{tabular}[c]{@{}l@{}}Requires that a range type has the iterator type satisfy the \\ output\_iterator concept.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}要求范围类型具有满足output\_iterator概念的迭代器类型。\end{tabular} \\ \hline
 		forward\_range &
-		\begin{tabular}[c]{@{}l@{}}Requires that a range type has the iterator type satisfy the\\ forward\_iterator concept.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}要求范围类型具有满足\\ forward\_iterator概念的迭代器类型。\end{tabular} \\ \hline
 		\begin{tabular}[c]{@{}l@{}}bidirectional\_\\ range\end{tabular} &
-		\begin{tabular}[c]{@{}l@{}}Requires that a range type has the iterator type satisfy the\\ bidirectional\_iterator concept.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}要求范围类型具有满足bidirectional\_iterator概念的迭代器类型。\end{tabular} \\ \hline
 		\begin{tabular}[c]{@{}l@{}}random\_access\_\\ range\end{tabular} &
-		\begin{tabular}[c]{@{}l@{}}Requires that a range type has the iterator type satisfy the\\ random\_access\_iterator concept.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}要求范围类型具有满足random\_access\_iterator概念的迭代器类型。\end{tabular} \\ \hline
 		contiguous\_range &
-		\begin{tabular}[c]{@{}l@{}}Requires that a range type has the iterator type satisfy the\\ contiguous\_iterator concept.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}要求范围类型具有满足contiguous\_iterator概念的迭代器类型。\end{tabular} \\ \hline
 	\end{tabular}
 \end{table}
 
 \begin{center}
-Table 9.1
+表 9.1
 \end{center}
 
-The standard library defines a series of access functions for containers and arrays. These include std::begin and std::end instead of member functions begin and end, std::size instead of member function size, and so on. These are called range access functions. Similarly, the ranges library defines a set of range access functions. These are designed for ranges and are available in the <ranges> and <iterator> headers and the std::ranges namespace. They are listed in the next table:
+标准库为容器和数组定义了一系列访问函数。这包括std::begin和std::end代替成员函数begin和end, std::size代替成员函数size等，这些称为范围访问函数。类似地，范围库定义了一组范围访问函数。它们是为范围设计的，可以在<ranges>和<iterator>头文件和std::ranges命名空间中使用。下表列出了它们:
 
 \begin{table}[H]
 \centering
 	\begin{tabular}{|l|l|l|}
 		\hline
-		\textbf{Rnage access for ranges} &
-		\textbf{\begin{tabular}[c]{@{}l@{}}Equivalent\\ range access for\\ containers/arrays\end{tabular}} &
-		\textbf{Description} \\ \hline
+		\textbf{Rnage的访问范围} &
+		\textbf{\begin{tabular}[c]{@{}l@{}}容器/数组的\\ 等效范围访问\end{tabular}} &
+		\textbf{描述} \\ \hline
 		\begin{tabular}[c]{@{}l@{}}begin/end\\ cbegin/cend\end{tabular} &
 		\begin{tabular}[c]{@{}l@{}}begin/end\\ cbegin/cend\end{tabular} &
-		\begin{tabular}[c]{@{}l@{}}Returns an iterator and constant iterator\\ respectively to the beginning/end of a range.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}返回一个迭代器和一个常量迭代器，分别指向\\ 范围的开始/结束。\end{tabular} \\ \hline
 		\begin{tabular}[c]{@{}l@{}}rbegin/rend\\ crbegin/crend\end{tabular} &
 		\begin{tabular}[c]{@{}l@{}}rbegin/rend\\ crbegin/crend\end{tabular} &
-		\begin{tabular}[c]{@{}l@{}}Returns a reverse iterator and constant\\ reverse iterator respectively, to the\\ beginning/end of a range.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}分别返回一个指向范围开始/结束的反向迭代器\\ 和常量反向迭代器。\end{tabular} \\ \hline
 		size/ssize &
 		size/ssize &
-		\begin{tabular}[c]{@{}l@{}}Returns the size of a range as an integral\\ or signed integral value.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}将范围的大小返回为整数或带符号的整数值。\end{tabular} \\ \hline
 		empty &
 		empty &
-		\begin{tabular}[c]{@{}l@{}}Returns a Boolean value, indicating whether\\ the range is empty.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}返回一个布尔值，指示范围是否为空。\end{tabular} \\ \hline
 		data/cdata &
 		data &
-		\begin{tabular}[c]{@{}l@{}}Returns a pointer to the beginning of a\\ contiguous range and a read-only contiguous\\ ranges respectively.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}分别返回指向连续范围和只读连续范围开头的指针。\end{tabular} \\ \hline
 	\end{tabular}
 \end{table}
 
 \begin{center}
-Table 9.2
+表 9.2
 \end{center}
 
-The use of some of these functions is demonstrated in the following snippet:
+下面的代码段演示了其中一些函数的使用:
 
 \begin{lstlisting}[style=styleCXX]
 std::vector<int> v{ 8, 5, 3, 2, 4, 7, 6, 1 };
@@ -108,9 +108,9 @@ std::cout << "rbegin(r)=" << *std::ranges::rbegin(r)
 std::cout << "data(v)=" << *std::ranges::data(v) << '\n';
 \end{lstlisting}
 
-In this snippet, we used a type called std::views::iota. As the namespace implies, this is a view. A view is a range with additional restrictions. Views are lightweight objects with non-owning semantics. They present a view of an underlying sequence of elements (a range) in a way that does not require copying or mutating the sequence. The key feature is lazy evaluation. That means that regardless of the transformation they apply, they perform it only when an element is requested (iterated) and not when the view is created.
+这段代码中，使用了一个名为std::views::iota的类型。正如命名空间所示，这是一个视图。视图是带有附加限制的范围，视图是具有非所有语义的轻量级对象，以一种不需要复制或改变序列的方式呈现底层元素序列(范围)的视图。关键特征是惰性求值。所以不管它们应用了什么转换，它们只在请求(迭代)元素时执行，而不是在创建视图时执行。
 
-There is a series of views provided with C++20, and new views have been also included in C++23. Views are available in the <ranges> header and std::ranges namespace in the form, std::ranges::abc\_view, such as std::ranges::iota\_view. However, for convenience of use, in the std::views namespace, a variable template of the form, std::views::abc, such as std::views::iota, also exists. This is what we saw in the previous example. Here are two equivalent examples for using iota:
+C++20中提供了一系列视图，C++23中也包含了新的视图。视图可以在<ranges>头文件和std::ranges命名空间的形式中使用，std::ranges::abc\_view，例如std::ranges::iota\_view。但为了使用方便，在std::views命名空间中，还存在一个形式为std::views::abc的变量模板，例如std::views::iota。这就是我们在前面的例子中看到的。下面是两个使用iota的等效示例:
 
 \begin{lstlisting}[style=styleCXX]
 // using the iota_view type
@@ -122,35 +122,35 @@ for (auto i : std::views::iota(1, 10))
 	std::cout << i << '\n';
 \end{lstlisting}
 
-The iota view is part of a special category of views called factories. These factories are views over newly generated ranges. The following factories are available in the ranges library:
+iota视图是称为工厂的特殊视图类别的一部分。这些工厂是新生成范围的视图，范围库中有以下工厂:
 
 \begin{table}[H]
 \centering
 	\begin{tabular}{|l|l|l|}
 		\hline
-		\textbf{Type} &
-		\textbf{Variable} &
-		\textbf{Description} \\ \hline
+		\textbf{类型} &
+		\textbf{变量} &
+		\textbf{描述} \\ \hline
 		\begin{tabular}[c]{@{}l@{}}ranges::empty\_\\ view\end{tabular} &
 		ranges::views::empty &
-		\begin{tabular}[c]{@{}l@{}}Generates a view with no\\ elements of a T type.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}生成不包含T类型元素的视图。\end{tabular} \\ \hline
 		\begin{tabular}[c]{@{}l@{}}ranges::single\_\\ view\end{tabular} &
 		ranges::views::single &
-		\begin{tabular}[c]{@{}l@{}}Generates a view with a\\ single element of a T type.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}生成具有单个T类型元素的视图。\end{tabular} \\ \hline
 		\begin{tabular}[c]{@{}l@{}}ranges::iota\_\\ view\end{tabular} &
 		ranges::views::iota &
-		\begin{tabular}[c]{@{}l@{}}Generates a view of a\\ sequence of consecutive\\ elements, from a start value\\ to an end value(a bounded\\ view) or indefinitely(an \\ unbounded view).\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}生成一个连续元素序列的视图，从\\开始值到结束值(有界视图)或无限(无界视图)。\end{tabular} \\ \hline
 		\begin{tabular}[c]{@{}l@{}}ranges::basic\_\\ iostream\_view\end{tabular} &
 		ranges::views::istream &
-		\begin{tabular}[c]{@{}l@{}}Generates a view of a \\ sequence of elements by\\ applying the operator \textgreater{}\textgreater\\ repeatedly.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}通过反复应用操作符\textgreater{}\textgreater\\ 生成一个元素序列的视图。\end{tabular} \\ \hline
 	\end{tabular}
 \end{table}
 
 \begin{center}
-Table 9.3
+表 9.3
 \end{center}
 
-If you are wondering why empty\_view and single\_view are useful, the answer should not be hard to find. These are useful in template code that handles ranges where empty ranges or ranges with one element are valid inputs. You don’t want multiple overloads of a function template for handling these special cases; instead, you can pass an empty\_view or single\_view range. The following snippets show several examples of using these factories. These snippets should be self-explanatory:
+若想知道为什么empty\_view和single\_view有用，答案应该不难找到。这在模板代码中很有用，这些代码处理空范围或只有一个元素的范围是有效输入的范围。不希望一个函数模板多次重载来处理这些特殊情况；反之，可以传递一个empty\_view或single\_view范围。下面的代码片段展示了使用这些工厂的几个示例。这些代码段应该不言自明:
 
 \begin{lstlisting}[style=styleCXX]
 constexpr std::ranges::empty_view<int> ev;
@@ -164,7 +164,7 @@ static_assert(std::ranges::size(sv) == 1);
 static_assert(*std::ranges::data(sv) == 42);
 \end{lstlisting}
 
-For iota\_view, we have already seen a couple of examples with a bounded view. The next snippet shows again an example not only using a bounded view generated with iota but also an unbounded view, also generated with iota:
+对于iota\_view，我们已经看到了一些有界视图的例子。下面的代码段再次展示了一个例子，不仅使用了由iota生成的有界视图，还使用了同样由iota生成的无界视图:
 
 \begin{lstlisting}[style=styleCXX]
 auto v1 = std::ranges::views::iota(1, 10);
@@ -179,25 +179,25 @@ std::ranges::for_each(
 	[](int const n) {std::cout << n << '\n'; });
 \end{lstlisting}
 
-This last example utilizes another view called take\_view. This produces a view of the first N elements (in our example, 9) of another view (in our case, the unbounded view produced with iota). We will discuss more about this shortly. But first, let’s take an example using the fourth view factory, basic\_iostream\_view. Let’s consider we have a list of article prices in a text, separated by a space. We need to print the total sum of these prices. There are different ways to solve it, but a possible solution is given here:
+最后一个示例使用了另一个名为take\_view的视图。这将生成另一个视图(我们的示例中是iota生成的无界视图)的前N个元素(我们的示例中是9)的视图。首先，让我们举一个使用第四个视图工厂basic\_iostream\_view的例子。假设在文本中有一个商品价格列表，用空格分隔，需要输出这些价格的总和。有不同的解决方法，但这里给出了一个可能的解决方案:
 
 \begin{lstlisting}[style=styleCXX]
 auto text = "19.99 7.50 49.19 20 12.34";
 auto stream = std::istringstream{ text };
 std::vector<double> prices;
 
-double price;
-while (stream >> price)
-{
-	prices.push_back(price);
-}
+double price; // 高亮显示
+while (stream >> price) // 高亮显示
+{ // 高亮显示
+	prices.push_back(price); // 高亮显示
+} // 高亮显示
 
 auto total = std::accumulate(prices.begin(), prices.end(),
 							 0.0);
 std::cout << std::format("total: {}\n", total);
 \end{lstlisting}
 
-The highlighted part can be replaced with the following two lines of code that use basic\_iostream\_view or, more precisely, the istream\_view alias template:
+高亮显示的部分可以用以下两行代码替换，使用basic\_iostream\_view，或者更准确地说，使用istream\_view别名模板:
 
 \begin{lstlisting}[style=styleCXX]
 for (double const price :
@@ -207,7 +207,7 @@ for (double const price :
 }
 \end{lstlisting}
 
-What the istream\_view range factory is doing is applying the operator >{}> repeatedly on the istringstream object and producing a value each time it is applied. You cannot specify a delimiter; it only works with whitespaces. If you prefer to use standard algorithms rather than handcrafted loops, you can use the ranges::for\_each constrained algorithm to produce the same result, as follows:
+istream\_view范围工厂所做的是在istringstream对象上重复应用操作符>{}>，并在每次应用时产生一个值。不能指定分隔符,只适用于空格。若喜欢使用标准算法而不是手工循环，可以使用range::for\_each约束算法来产生相同的结果:
 
 \begin{lstlisting}[style=styleCXX]
 std::ranges::for_each(
@@ -216,139 +216,117 @@ std::ranges::for_each(
 		prices.push_back(price); });
 \end{lstlisting}
 
-The examples given so far in this chapter included views such as filter, take, drop, and reverse. These are just a few of the standard views available in C++20. More are being added to C++23, and probably even more to future standard versions. The entire set of standard views is listed in the following table:
+到目前为止，本章给出的示例包括filter, take, drop和reverse等视图。这些只是C++20中可用的一些标准视图，C++23中添加了更多，未来的标准版本中可能还会添加更多。下表列出了整个标准视图集:
 
 \begin{table}[H]
 \centering
 	\begin{tabular}{|l|l|l|l|}
 		\hline
-		\textbf{\begin{tabular}[c]{@{}l@{}}Type\\ (in namespace\\ ranges)\end{tabular}} &
-		\textbf{\begin{tabular}[c]{@{}l@{}}Variable\\ (in namespace\\ ranges::view)\end{tabular}} &
-		\textbf{\begin{tabular}[c]{@{}l@{}}C++\\ version\end{tabular}} &
-		\textbf{Description} \\ \hline
+		\textbf{\begin{tabular}[c]{@{}l@{}}类型\\ (ranges\\ 命名空间中)\end{tabular}} &
+		\textbf{\begin{tabular}[c]{@{}l@{}}变量\\ (ranges::view\\ 命名空间中)\end{tabular}} &
+		\textbf{\begin{tabular}[c]{@{}l@{}}C++版本\end{tabular}} &
+		\textbf{描述} \\ \hline
 		fileter\_view &
 		fileter &
 		C++20 &
-		\begin{tabular}[c]{@{}l@{}}A type that represents a range adaptor\\ that provides a view of an underling\\ range, which only includes the elements\\ that satisfy a predicate.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}表示范围适配器的类型，该范围适配器提供下\\ 级范围的视图，该范围仅包括满足谓词的元素。\end{tabular} \\ \hline
 		\begin{tabular}[c]{@{}l@{}}transform\_\\ view\end{tabular} &
 		transform &
 		C++20 &
-		\begin{tabular}[c]{@{}l@{}}A type that represents a range adaptor\\ that provides a view of an underlying\\ range, with a transformation applied\\ to each element of the range.\end{tabular} \\ \hline
-	\end{tabular}
-\end{table}
-
-\begin{table}[H]
-\centering
-	\begin{tabular}{|l|l|l|l|}
-		\hline
-		\textbf{\begin{tabular}[c]{@{}l@{}}Type\\ (in namespace\\ ranges)\end{tabular}} &
-		\textbf{\begin{tabular}[c]{@{}l@{}}Vaiable\\ (in namespace\\ ranges::view)\end{tabular}} &
-		\textbf{\begin{tabular}[c]{@{}l@{}}C++\\ version\end{tabular}} &
-		\textbf{Description} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}一种类型，表示提供底层范围视图的范围适配\\ 器，并将转换应用到范围的每个元素。\end{tabular} \\ \hline
 		split\_view &
 		split &
 		C++20 &
-		\begin{tabular}[c]{@{}l@{}}A type that represents a range adaptor\\ that provides a view of a sequence of\\ ranges produced from splitting a range\\ on a specified delimited. The range\\ cannot be a input range and the lazy\\ semantics of views are not observed.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}表示范围适配器的类型，该类型提供通过在指\\ 定分隔符上分割范围而产生的范围序列的视图。\\ 该范围不能是输入范围，并且视图的惰性语义\\ 不会被观察到。\end{tabular} \\ \hline
 		\begin{tabular}[c]{@{}l@{}}lazy\_split\_\\ view\end{tabular} &
 		lazy\_split &
 		C++20 &
-		\begin{tabular}[c]{@{}l@{}}Same as split\_view, except that it also\\ works with input ranges and observes the\\ lazy mechanism of ranges.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}与split\_view相同，还适用于输入范围，并观\\ 察范围的惰性机制。\end{tabular} \\ \hline
 		reverse\_view &
 		reverse &
 		C++20 &
-		\begin{tabular}[c]{@{}l@{}}A type that represents a range adaptor\\ that provides a view of the elements of\\ an underlying range in reverse order.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}一种类型，表示范围适配器，该适配器以相反\\ 的顺序提供基础范围元素的视图。\end{tabular} \\ \hline
 		keys\_view &
 		keys &
 		C++20 &
-		\begin{tabular}[c]{@{}l@{}}A type that represents a range adaptor\\ that provides a view projected from the\\ first element of tuple-like values(\\ std::pari and std::tuple) of an underlying\\ view.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}表示范围适配器的类型，提供从底层视图的类\\ 元组值(std::pari和std::tuple)的第一个元素投\\ 影的视图。\end{tabular} \\ \hline
 		values\_view &
 		values &
 		C++20 &
-		\begin{tabular}[c]{@{}l@{}}A type that represents a range adaptor\\ that provides a view projected from the \\ second element of tuple-like values(\\ std::pair and std::tuple) of an underlying\\ view.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}表示范围适配器的类型，提供从底层视图的类\\ 元组值(std::pair和std::tuple)的第二个元素投\\ 影出来的视图。\end{tabular} \\ \hline
 		elements\_view &
 		elements &
 		C++20 &
-		\begin{tabular}[c]{@{}l@{}}A type that represent a range adaptor \\ that provides a view projected from the\\ Nth element of tuple-like values of an\\ unferlying view.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}表示范围适配器的类型，该范围适配器提供从\\ 非视图类元组值的第n个元素投影的视图。\end{tabular} \\ \hline
 		zip\_view &
 		zip &
 		C++23 &
-		\begin{tabular}[c]{@{}l@{}}A type that represent a range adaptor\\ that provides a view built from one or\\ more underlying views, projecting the Nth\\ element from each view into a tuple.\end{tabular} \\ \hline
-	\end{tabular}
-\end{table}
-
-\begin{table}[H]
-\centering
-	\begin{tabular}{|l|l|l|l|}
-		\hline
-		\textbf{\begin{tabular}[c]{@{}l@{}}Type\\ (in namespace\\ ranges)\end{tabular}} &
-		\textbf{\begin{tabular}[c]{@{}l@{}}Variable\\ (in namespace\\ ranges::view)\end{tabular}} &
-		\textbf{\begin{tabular}[c]{@{}l@{}}C++\\ version\end{tabular}} &
-		\textbf{Description} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}一种表示范围适配器的类型，提供一个由一个\\ 或多个底层视图构建的视图，将每个视图的第\\ n个元素投影到一个元组中。\end{tabular} \\ \hline
 		\begin{tabular}[c]{@{}l@{}}zip\_\\ transform\_\\ view\end{tabular} &
 		\begin{tabular}[c]{@{}l@{}}zip\_\\ transform\end{tabular} &
 		C++23 &
-		\begin{tabular}[c]{@{}l@{}}A type that represents a range adaptor\\ that provides a view built from one or\\ more underlying views and an invocable\\ object, whose elements are computed by\\ applying the invocable object to the\\ Nth element of each underlying view.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}一种类型，表示一个范围适配器，该适配器提\\ 供一个由一个或多个底层视图和一个可调用对\\ 象构建的视图，其元素是通过将可调用对象应\\ 用于每个底层视图的第n个元素来计算的。\end{tabular} \\ \hline
 		\begin{tabular}[c]{@{}l@{}}adjacent\_\\ view\end{tabular} &
 		adjacent &
 		C++23 &
-		\begin{tabular}[c]{@{}l@{}}A type that represents a range adaptor\\ that provides a view of tuple-like values,\\ projected by taking N consecutive elements\\ of an underlying view.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}一种表示范围适配器的类型，该范围适配器提\\ 供类似元组值的视图，通过获取底层视图的N\\ 个连续元素进行投影。\end{tabular} \\ \hline
 		\begin{tabular}[c]{@{}l@{}}adjacent\_\\ transform\_\\ view\end{tabular} &
 		\begin{tabular}[c]{@{}l@{}}adjacent\_\\ transform\end{tabular} &
 		C++23 &
-		\begin{tabular}[c]{@{}l@{}}A type that represents a range adaptor\\ that provides a view of values projected\\ by applying an invocable object to N \\ consecutive elements of an underlying view.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}表示范围适配器的类型，该类型通过将可调用\\ 对象应用到底层视图的N个连续元素来提供投\\ 影值的视图。\end{tabular} \\ \hline
 	\end{tabular}
 \end{table}
 
 \begin{center}
-Table 9.4
+表 9.4
 \end{center}
 
-Apart from the views (range adaptors) listed in the previous table, there are a few more that can be useful in some particular scenarios. For completeness, these are listed in the next table:
+除了上表中列出的视图(范围适配器)之外，还有一些在某些特定场景中可能有用的视图。为了完整起见，下表将列出了这些参数:
 
 \begin{table}[H]
 \centering
 	\begin{tabular}{|l|l|l|l|}
 		\hline
-		\textbf{\begin{tabular}[c]{@{}l@{}}Type\\ (in namespace\\ ranges)\end{tabular}} &
-		\textbf{\begin{tabular}[c]{@{}l@{}}Variable\\ (in namespace\\ ranges::view)\end{tabular}} &
-		\textbf{\begin{tabular}[c]{@{}l@{}}C++\\ version\end{tabular}} &
-		\textbf{Description} \\ \hline
+		\textbf{\begin{tabular}[c]{@{}l@{}}类型\\ (ranges\\ 命名空间中)\end{tabular}} &
+		\textbf{\begin{tabular}[c]{@{}l@{}}变量\\ (ranges::view\\ 命名空间中)\end{tabular}} &
+		\textbf{\begin{tabular}[c]{@{}l@{}}C++版本\end{tabular}} &
+		\textbf{描述} \\ \hline
 		&
 		all &
 		C++20 &
-		\begin{tabular}[c]{@{}l@{}}An object that creates a view that\\ includes all the elements of the range\\ argument.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}一个对象，创建一个包含范围参数的所有元素\\ 的视图。\end{tabular} \\ \hline
 		&
 		all\_t &
 		C++20 &
-		\begin{tabular}[c]{@{}l@{}}An alias template for the view type of\\ a range that can be safely converted to\\ a view.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}可以安全转换为视图的范围的视图类型的别名\\ 模板。\end{tabular} \\ \hline
 		&
 		counted &
 		C++20 &
-		\begin{tabular}[c]{@{}l@{}}An object that creates a view with N\\ elements of a range, starting with the\\ one represented by a given iterator.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}一个对象，创建一个包含N个范围元素的视\\ 图，从给定迭代器所表示的元素开始。\end{tabular} \\ \hline
 		ref\_view &
 		&
 		C++20 &
-		\begin{tabular}[c]{@{}l@{}}A view type that wraps a reference to\\ another range.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}将引用封装到另一个范围的视图类型。\end{tabular} \\ \hline
 		owning\_view &
 		&
 		C++20 &
-		\begin{tabular}[c]{@{}l@{}}A view type that stores a given range.\\ It has sole ownership of the stored\\ range and move-only semantics.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}存储给定范围的视图类型，拥有存储范围和\\ 移动语义的唯一所有权。\end{tabular} \\ \hline
 		common\_view &
 		common &
 		C++20 &
-		\begin{tabular}[c]{@{}l@{}}A type that adapts aview with different\\ types for the iterator and sentinel pair,\\ with a view that uses the same type for \\ both iterator and sentinel types.\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}一种对迭代器和哨兵类型对采用不同类型的\\ 视图的类型，对迭代器和哨兵类型使用相同\\ 类型的视图。\end{tabular} \\ \hline
 	\end{tabular}
 \end{table}
 
 \begin{center}
-Table 9.5
+表 9.5
 \end{center}
 
-Now that we have enumerated all the standard range adaptors, let’s take a look at more examples using some of them.
+我们已经列举了所有标准范围适配器，来看一下使用其中一些适配器的更多示例。
 
-\subsubsubsection{9.2.1\hspace{0.2cm}Exploring more examples}
+\subsubsubsection{9.2.1\hspace{0.2cm}更多的例子}
 
-Previously, in this section, we saw the following example (this time with explicit namespaces):
+本节之前，我们看到了以下示例(这次使用显式命名空间):
 
 \begin{lstlisting}[style=styleCXX]
 namespace rv = std::ranges::views;
@@ -360,7 +338,7 @@ auto r = v
 		| rv::transform([](int const n) {return n * n; });
 \end{lstlisting}
 
-This is actually the shorter and more readable version of the following:
+这实际上是以下内容的短而易读版本:
 
 \begin{lstlisting}[style=styleCXX]
 std::ranges::sort(v);auto r =
@@ -374,11 +352,11 @@ std::ranges::sort(v);auto r =
 		[](int const n) {return n * n; });
 \end{lstlisting}
 
-The first version is possible because the pipe operator (|) is overloaded to simplify the composition of views in a more human-readable form. Some range adaptors take one argument, and some may take multiple arguments. The following rules apply:
+第一个版本是可能的，因为管道操作符(|)可重载，以更易于阅读的形式简化视图的组合。有些范围适配器接受一个参数，有些可能接受多个参数。适用规则如下:
 
 \begin{itemize}
 \item
-If a range adaptor A takes one argument, a view V, then A(V) and V|A are equivalent. Such a range adaptor is reverse\_view, and an example is shown here:
+若一个范围适配器a有一个参数，一个视图V，那么a (V)和v| a是等价的。这样的范围适配器是reverse\_view，示例如下:
 
 \begin{lstlisting}[style=styleCXX]
 std::vector<int> v{ 1, 5, 3, 2, 8, 7, 6, 4 };
@@ -388,7 +366,7 @@ auto r2 = v | rv::reverse;
 \end{lstlisting}
 
 \item
-If a range adaptor A takes multiple arguments, a view V and args…, then A(V, args…), A(args…)(V), and V|A(args…) are equivalent. Such a range adaptor is take\_view, and an example is shown here:
+若一个范围适配器a有多个参数，一个视图V和args…，那么a (V, args…)，a (args…)(V)和V| a (args…)是等价的。这样的范围适配器是take\_view，示例如下:
 
 \begin{lstlisting}[style=styleCXX]
 std::vector<int> v{ 1, 5, 3, 2, 8, 7, 6, 4 };
@@ -400,11 +378,11 @@ auto r3 = v | rv::take(2);
 
 \end{itemize}
 
-So far, we have seen the likes of filter, transform, reverse, and drop put to use. To complete this part of the chapter, let’s take a series of examples to demonstrate the use of the views from Table 8.7. In all the following examples, we will consider rv as an alias for the std::ranges::views namespace:
+目前为止，已经看到了使用过滤器、变换、反转和删除。为了完成本章的这一部分，我们通过一系列例子来演示表8.7中的视图的使用。以下所有示例中，我们将把rv视为std::ranges::views命名空间的别名:
 
 \begin{itemize}
 \item
-Print the last two odd numbers from a sequence, in reverse order:
+输出序列中最后两个奇数，顺序相反:
 
 \begin{lstlisting}[style=styleCXX]
 std::vector<int> v{ 1, 5, 3, 2, 4, 7, 6, 8 };
@@ -418,7 +396,7 @@ for (auto i : v |
 \end{lstlisting}
 
 \item
-Print the subsequence of consecutive numbers smaller than 10 from a range that does not include the first consecutive odd numbers:
+从不包括第一个连续奇数的范围中打印小于10的连续数的子序列:
 
 \begin{lstlisting}[style=styleCXX]
 std::vector<int> v{ 1, 5, 3, 2, 4, 7, 16, 8 };
@@ -431,7 +409,7 @@ for (auto i : v |
 \end{lstlisting}
 
 \item
-Print the first elements, the second elements, and, respectively, the third elements from a sequence of tuples:
+分别输出元组序列中的第一个元素、第二个元素和第三个元素:
 
 \begin{lstlisting}[style=styleCXX]
 std::vector<std::tuple<int,double,std::string>> v =
@@ -452,7 +430,7 @@ for (auto i : v | rv::elements<2>)
 \end{lstlisting}
 
 \item
-Print all the elements from a vector of vectors of integers:
+输出一个由整数组成的向量的所有元素:
 
 \begin{lstlisting}[style=styleCXX]
 std::vector<std::vector<int>> v {
@@ -464,7 +442,7 @@ for (int const i : v | rv::join)
 \end{lstlisting}
 
 \item
-Print all the elements from a vector of vectors of integers but insert a 0 between the elements of each vector. The range adaptor join\_with is new to C++23 and may not be supported yet by compilers:
+打印一个由整数组成的向量的所有元素，但在每个vector的元素之间插入一个0。范围适配器join\_with是C++23的新功能，编译器可能还不支持:
 
 \begin{lstlisting}[style=styleCXX]
 std::vector<std::vector<int>> v{
@@ -475,7 +453,7 @@ for(int const i : v | rv::join_with(0))
 \end{lstlisting}
 
 \item
-Print the individual words from a sentence, where the delimited is a space:
+打印句子中的单个单词，其中分隔符为空格:
 
 \begin{lstlisting}[style=styleCXX]
 std::string text{ "this is a demo!" };
@@ -489,7 +467,7 @@ for (auto const word : text | rv::split(delim))
 \end{lstlisting}
 
 \item
-Create a view of tuples from the elements of an array of integers and a vector of doubles:
+从一个整数数组的元素和一个双精度数组的vector创建一个元组视图:
 
 \begin{lstlisting}[style=styleCXX]
 std::array<int, 4> a {1, 2, 3, 4};
@@ -500,7 +478,7 @@ auto z = rv::zip(a, v)
 \end{lstlisting}
 
 \item
-Create a view with the multiplied elements of an array of integers and a vector of doubles:
+创建一个包含整数数组的相乘元素和双精度vector的视图:
 
 \begin{lstlisting}[style=styleCXX]
 std::array<int, 4> a {1, 2, 3, 4};
@@ -512,7 +490,7 @@ auto z = rv::zip_transform(
 \end{lstlisting}
 
 \item
-Print the pairs of adjacent elements of a sequence of integers:
+打印整数序列的相邻元素对:
 
 \begin{lstlisting}[style=styleCXX]
 std::vector<int> v {1, 2, 3, 4};
@@ -525,7 +503,7 @@ for (auto i : v | rv::adjacent<2>)
 \end{lstlisting}
 
 \item
-Print the values obtained from multiplying each three consecutive values from a sequence of integers:
+打印从一个整数序列中每三个连续值相乘得到的值:
 
 \begin{lstlisting}[style=styleCXX]
 std::vector<int> v {1, 2, 3, 4, 5};
@@ -538,7 +516,7 @@ for (auto i : v | rv::adjacent_transform<3>(
 
 \end{itemize}
 
-These examples will hopefully help you understand the possible use cases for each of the available views. You can find more examples in the source code accompanying the book, as well as in the articles mentioned in the Further reading section. In the next section, we will discuss the other part of the ranges library, the constrained algorithms.
+这些示例希望能够帮助理解每个可用视图的可能用例，可以在本书附带的源代码中找到更多示例，也可以在扩展阅读部分提到的文章中找到更多示例。下一节中，我们将讨论范围库的另一部分，约束算法。
 
 
 

@@ -1,22 +1,22 @@
-By reaching this point of the book, you have learned everything about the syntax and the mechanism of templates in C++, up to the latest version of the standard, C++20. This has equipped you with the necessary knowledge to write templates from simple forms to complex ones. Templates are the key to writing generic libraries. Even though you might not write such a library yourself, you’d still be using one or more. In fact, the everyday code that you’re writing in C++ uses templates. And the main reason for that is that as a modern C++ developer, you’re using the standard library, which is a library based on templates.
+读到这里，您已经学习了C++中模板的所有语法和机制，直到最新版本的标准C++20。为您提供了编写从简单表单到复杂表单的模板所需的知识。模板是编写泛型库的关键，即使自己没有编写这样的库，仍然会使用一个或多个库。事实上，每天用C++写的代码都使用模板。主要原因是作为一个现代C++开发者，都会使用标准库，标准库就是一个基于模板的库。
 
-However, the standard library is a collection of many libraries, such as the containers library, iterators library, algorithms library, numeric library, input/output library, filesystem library, regular expressions library, thread support library, utility libraries, and others. Overall, it’s a large library that could make the topic of at least an entire book. However, it is worth exploring some key parts of the library to help you get a better understanding of some of the concepts and types you are or could be using regularly.
+然而，标准库是许多库的集合，例如容器库、迭代器库、算法库、数值库、输入/输出库、文件系统库、正则表达式库、线程支持库、工具库等。总的来说，这是一个很大的库，这个主题至少可以写成一本书。但值得探索库的一些关键部分，以帮助读者们更好地理解正在或可能经常使用的一些概念和类型。
 
-Because addressing this topic in a single chapter would lead to a significantly large chapter, we will split the discussion into two parts. In this chapter, we will address the following topics:
+因为在一个章节中讨论这个主题会导致一个相当大的章节，我们将把讨论分为两个部分。本章中，我们将讨论以下主题:
 
 \begin{itemize}
 \item
-Understanding the design of containers, iterators, and algorithms
+容器、迭代器和算法的设计
 
 \item
-Creating a custom container and iterator
+自定义容器和迭代器
 
 \item
-Writing a custom general-purpose algorithm
+自定义通用算法
 \end{itemize}
 
-By the end of this chapter, you will have a good understanding of the three main pillars of the standard template library, which are containers, iterators, and algorithms.
+本章结束时，会很好地了解标准模板库的三个主要核心，即容器、迭代器和算法。
 
-We will begin this chapter with an overview of what the standard library has to offer in this respect.
+本章开始时，我们将概述标准库在这方面所提供的功能。
 
 

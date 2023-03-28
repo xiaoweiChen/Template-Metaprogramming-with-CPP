@@ -1,40 +1,40 @@
 
-In the first section of this chapter, we saw why abstracting access to container elements with iterators is key for building general-purpose algorithms. However, it should be useful for you to practice writing such an algorithm because it can help you better understand the use of iterators. Therefore, in this section, we will write a general-purpose algorithm.
+本章的第一节中，了解了为什么使用迭代器抽象对容器元素的访问是构建通用算法的关键。但练习编写这样的算法是有用的，有助于更好地理解迭代器的使用。所以在本节中，我们将编写一个通用算法。
 
-The standard library features many such algorithms. One that is missing is a zipping algorithm. What zipping means is actually interpreted or understood differently by different people. For some, zipping means taking two or more input ranges and creating a new range with the elements from the input ranges intercalated. This is exemplified in the following diagram:
+标准库具有许多这样的算法，但其中缺失的就有压缩算法。实际上，不同的人对zip的理解是不同的。对于某些人来说，压缩意味着获取两个或多个输入范围，并用插入输入范围中的元素创建一个新范围。如下图所示:
 
 \begin{center}
 \includegraphics[width=0.6\textwidth]{content/3/chapter8/images/4.png}\\
-Figure 8.4
+图 8.4
 \end{center}
 
-For others, zipping means taking two or more input ranges and creating a new range, with elements being tuples formed from the elements of the input ranges. This is shown in the next diagram:
+对于其他人来说，压缩意味着获取两个或多个输入范围并创建一个新范围，其中元素是由输入范围的元素组成的元组。如下图所示:
 
 \begin{center}
 \includegraphics[width=0.6\textwidth]{content/3/chapter8/images/5.png}\\
-Figure 8.5
+图 8.5
 \end{center}
 
-In this section, we will implement the first algorithm. In order to avoid confusion, we will call this flatzip. Here are the requirements for it:
+在本节中，我们将实现第一个算法。为了避免混淆，我们将其称为flatzip。以下是其要求:
 
 \begin{itemize}
 \item
-The algorithm takes two input ranges and writes to an output range.
+该算法接受两个输入范围并写入一个输出范围。
 
 \item
-The algorithm takes iterators as arguments. A pair of first and last input iterators define the bounds of each input range. An output iterator defines the beginning of the output range where the elements will be written to.
+算法以迭代器作为参数。一对第一个和最后一个输入迭代器定义了每个输入范围的边界。输出迭代器定义了将写入元素的输出范围的开始位置。
 
 \item
-The two input ranges should contain elements of the same type. The output range must have elements of the same type or a type to which the input type is implicitly convertible.
+两个输入范围应该包含相同类型的元素。输出范围必须具有相同类型的元素，或者输入类型可隐式转换为的类型。
 
 \item
-If the two input ranges are of different sizes, the algorithm stops when the smallest of the two has been processed (as shown in the previous diagrams).
+若两个输入范围的大小不同，当两个输入范围中最小的一个被处理时，算法就会停止(如前图所示)。
 
 \item
-The return value is the output iterator to the one-past-the-last element that was copied.
+返回值是复制的倒数第一元素的输出迭代器。
 \end{itemize}
 
-A possible implementation for the described algorithm is shown in the following listing:
+所描述的算法的可能实现如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename InputIt1, typename InputIt2,
@@ -57,7 +57,7 @@ OutputIt flatzip(
 }
 \end{lstlisting}
 
-As you can see in the snippet, the implementation is quite simple. All we do here is iterate through both input ranges at the same time and copy elements alternately from them to the destination range. The iteration on both input ranges stops when the end of the smallest range is reached. We can use this algorithm as follows:
+实现非常简单。我们在这里所做的只是同时遍历两个输入范围，并交替地从它们复制元素到目标范围。当到达最小范围的终点时，两个输入范围上的迭代停止。可以这样使用这个算法:
 
 \begin{lstlisting}[style=styleCXX]
 // one range is empty
@@ -79,7 +79,7 @@ flatzip(v1.begin(), v1.end(), v2.begin(), v2.end(),
 assert(v3 == std::vector<int>({ 1, 4, 2, 5 }));
 \end{lstlisting}
 
-These examples use std::vector for both the input and output ranges. However, the flatzip algorithm knows nothing about containers. The elements of the container are accessed with the help of iterators. Therefore, as long as the iterators meet the specified requirements, we can use any container. This includes the circular\_buffer container we previously wrote since circular\_buffer\_container meets the requirements for both the input and output iterator categories. This means we can also write the following snippet:
+这些例子对输入和输出范围都使用std::vector。然而，flatzip算法对容器一无所知。容器的元素可以在迭代器的帮助下访问。因此，只要迭代器满足指定的要求，就可以使用任何容器。这包括我们之前编写的circular\_buffer容器，因为circular\_buffer\_container同时满足输入和输出迭代器类别的要求。所以，还可以编写如下代码:
 
 \begin{lstlisting}[style=styleCXX]
 circular_buffer<int, 4> a({1, 2, 3, 4});
@@ -94,7 +94,7 @@ for (auto e : c)
 assert(v == std::vector<int>({ 1, 5, 2, 6, 3, 7, 0, 0 }));
 \end{lstlisting}
 
-We have two input circular buffers: a, which has four elements, and b, which has three elements. The destination circular buffer has a capacity of eight elements, all initialized with zero. After applying the flatzip algorithm, six elements of the destination circular buffer will be written with values from the a and b buffers. The result is that the circular buffer will contain the elements 1, 5, 2, 6, 3, 7, 0, 0.
+我们有两个输入循环缓冲区:a有四个元素，b有三个元素。目标循环缓冲区的容量为8个元素，全部初始化为0。应用flatzip算法之后，目标循环缓冲区的六个元素将使用a和b缓冲区中的值写入。结果是循环缓冲区将包含元素1,5,2,6,3,7,0,0。
 
 
 

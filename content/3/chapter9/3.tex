@@ -1,4 +1,4 @@
-The standard library provides over one hundred general-purpose algorithms. As we discussed in the introductory section for the ranges library earlier, these have one thing in common: they work with abstract ranges with the help of iterators. They take iterators as arguments and they sometimes return iterators. That makes it cumbersome to repeatedly use with standard containers or arrays. Here is an example:
+标准库提供了一百多种通用算法，它们有一个共同点:在迭代器的帮助下处理抽象范围。可以接受迭代器作为参数，有时返回迭代器。这使得重复使用标准容器或数组非常麻烦。这里有一个例子:
 
 \begin{lstlisting}[style=styleCXX]
 auto l_odd = [](int const n) {return n % 2 == 1; };
@@ -15,9 +15,9 @@ auto e2 = std::copy_if(std::begin(arr), std::end(arr),
 						l_odd);
 \end{lstlisting}
 
-In this snippet, we have a vector v and an array arr, and we copy the odd elements from each of these two to a second vector, o. For this, the std::copy\_if algorithm is used. This takes begin and end input iterators (defining the input range), an output iterator to a second range, where the copied elements will be inserted, and a unary predicate (in this example, a lambda expression). What it returns is an iterator to the destination range past the last copied element.
+这段代码中，有一个vector v和一个array arr，我们将这两个vector中的奇数元素复制到第二个vector o中。为此，使用std::copy\_if算法，其接受开始和结束输入迭代器(定义输入范围)、第二个范围的输出迭代器(复制的元素将插入其中)和一个一元谓词(在本例中为lambda表达式)，并返回的是指向最后一个复制元素之后的目标范围的迭代器。
 
-If we look at the declaration of the std::copy\_if algorithm, we will find the following two overloads:
+若查看std::copy\_if算法的声明，会发现有以下两个重载:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename InputIt, typename OutputIt,
@@ -35,26 +35,25 @@ ForwardIt2 copy_if(ExecutionPolicy&& policy,
 				   UnaryPredicate pred);
 \end{lstlisting}
 
-The first overload is the one used and described here. The second overload was introduced in C++17. This allows you to specify an execution policy such as parallel or sequential.
-This basically enables the parallel execution of the standard algorithms. However, this is not relevant to the topic of this chapter, and we will not explore it further.
+第一个重载就是这里使用和描述的重载，第二个重载是在C++17中引入的。允许指定一个执行策略，如并行或顺序。这基本上支持标准算法的并行执行。但这与本章的主题无关，我们将不再深入探讨。
 
-Most of the standard algorithms have a new constrained version in the std::ranges namespace. These algorithms are found in the <algorithm>, <numeric>, and <memory> headers and have the following traits:
+大多数标准算法在std::ranges命名空间中都有一个新的约束版本。这些算法存在于<algorithm>， <numeric>和<memory>头文件中，具有以下特征:
 
 \begin{itemize}
 \item
-They have the same name as the existing algorithms.
+与现有算法的名称相同。
 
 \item
-They have overloads that allow you to specify a range, either with a begin iterator and an end sentinel, or as a single range argument.
+具有重载，允许指定一个范围，可以使用开始迭代器和结束哨兵，也可以作为单个范围参数。
 
 \item
-They have modified return types that provide more information about the execution.
+修改了返回类型，提供关于执行的更多信息。
 
 \item
-They support projections to apply to the processed elements. A projection is an entity that can be invoked. It can be a pointer to a member, a lambda expression, or a function pointer. Such a projection is applied to the range element before the algorithm logic uses the element.
+支持应用于已处理元素的投影。投影可以是一个可调用的实体，可以是指向成员的指针、Lambda表达式或函数指针。在算法逻辑使用范围元素之前，将这样的投影应用到范围元素。
 \end{itemize}
 
-Here is how the overloads of the std::ranges::copy\_if algorithm are declared:
+下面是如何声明std::ranges::copy\_if算法的重载:
 
 \begin{lstlisting}[style=styleCXX]
 template <std::input_iterator I,
@@ -82,7 +81,7 @@ constexpr copy_if_result<ranges::borrowed_iterator_t<R>, O>
 				  Proj proj = {});
 \end{lstlisting}
 
-If these seem more difficult to read, it is because they have more arguments, constraints, and longer type names. The good part, however, is that they make the code easier to write. Here is the previous snippet rewritten to use std::ranges::copy\_if:
+若这些看起来比较难读，那是因为它们有更多的参数、约束和更长的类型名。然而，好的方面是它们使代码更容易编写。下面是之前的代码片段，使用std::ranges::copy\_if:
 
 \begin{lstlisting}[style=styleCXX]
 std::vector<int> v{ 1, 1, 2, 3, 5, 8, 13 };
@@ -99,9 +98,9 @@ auto e3 = std::ranges::copy_if(r, std::back_inserter(o),
 								l_odd);
 \end{lstlisting}
 
-These examples show two things: how to copy elements from a std::vector object and an array and how to copy elements from a view (a range adaptor). What they don’t show is projections. This was briefly mentioned earlier. We’ll discuss it with more details and examples here.
+这些例子展示了两件事:如何从std::vector对象和数组复制元素，以及如何从视图(范围适配器)复制元素。这里没有显示的是投影，这一点在前面简要提到过。我们将在这里讨论更多细节和示例。
 
-A projection is an invocable entity. It’s basically a function adaptor. It affects the predicate, providing a way to perform function composition. It does not provide a way to change the algorithm. For instance, let’s say we have the following type:
+投影是一个可调用的实体，基本上是一个功能适配器。它影响谓词，提供了一种执行函数组合的方法。它没有提供改变算法的方法。假设有以下类型:
 
 \begin{lstlisting}[style=styleCXX]
 struct Item
@@ -112,7 +111,7 @@ struct Item
 };
 \end{lstlisting}
 
-Also, for the purpose of the explanation, let’s also consider the following sequence of elements:
+为了便于解释，还考虑了以下元素序列:
 
 \begin{lstlisting}[style=styleCXX]
 std::vector<Item> items{
@@ -122,7 +121,7 @@ std::vector<Item> items{
 };
 \end{lstlisting}
 
-Projections allow you to perform composition on the predicate. For instance, let’s say we want to copy to a second vector all the items whose names begin with the letter p. We can write the following:
+投影允许您对谓词执行组合。例如，假设想要将所有名称以字母p开头的项复制到第二个vector中。可以这样写:
 
 \begin{lstlisting}[style=styleCXX]
 std::vector<Item> copies;
@@ -132,7 +131,7 @@ std::ranges::copy_if(
 	[](Item const& i) {return i.name[0] == 'p'; });
 \end{lstlisting}
 
-However, we can also write the following equivalent example:
+然而，也可以写成如下等价的方式:
 
 \begin{lstlisting}[style=styleCXX]
 std::vector<Item> copies;
@@ -143,9 +142,9 @@ std::ranges::copy_if(
 	&Item::name);
 \end{lstlisting}
 
-The projection, in this example, is the pointer-to-member expression \&Item::name that is applied to each Item element before executing the predicate (which is a lambda expression here). This can be useful when you already have reusable function objects or lambda expressions and you don’t want to write another one for passing different types of arguments.
+本例中，投影是指向成员的指针表达式\&Item::name，在执行谓词(Lambda表达式)之前应用于每个Item元素。当有可重用的函数对象或Lambda表达式，而不想再写一个来传递不同类型的参数时，这会很有用。
 
-What projects cannot be used for, in this manner, is transforming a range from one type into another. For instance, you cannot just copy the names of the items from std::vector<Item> to std::vector<std::string>. This requires the use of the std::ranges::transform range adaptor, as shown in the following snippet:
+以这种方式，项目不能用于将范围从一种类型转换为另一种类型。例如，不能将Item名称从std::vector<Item>复制到std::vector<std::string>。这需要使用std::ranges::transform范围适配器，如下代码所示:
 
 \begin{lstlisting}[style=styleCXX]
 std::vector<std::string> names;
@@ -155,10 +154,9 @@ std::ranges::copy_if(
 	[](std::string const& name) {return name[0] == 'p'; });
 \end{lstlisting}
 
-There are many constrained algorithms, but we will not list them here. Instead, you can check them all either directly in the standard, or on the \url{https://en.cppreference.
-com/w/cpp/algorithm/ranges} page.
+有许多受约束的算法，但不会在这里列出它们。有兴趣的读者可以直接在标准中或在\url{https://en.cppreference.com/w/cpp/algorithm/ranges}页面上找到它们。
 
-The last topic that we’ll address in this chapter is writing a custom range adaptor.
+本章的最后一个主题是编写自定义范围适配器。
 
 
 

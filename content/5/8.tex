@@ -1,63 +1,63 @@
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Question 1}
+\textbf{习题 1}
 
-What are the sequence containers from the standard library?
-
-\hspace*{\fill} \\ %插入空行
-\noindent
-\textbf{Answer}
-
-The sequence containers from the C++ standard library are std::vector, std::deque, std::list, std::array, and std::forward\_list.
-
+标准库中的序列容器是什么?
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Question 2}
+\textbf{参考答案}
 
-What are the common member functions defined in the standard containers?
+C++标准库中的序列容器有std::vector、std::deque、std::list、std::array和std::forward\_list。
 
-\hspace*{\fill} \\ %插入空行
-\noindent
-\textbf{Answer}
-
-The member functions that are defined for most containers in the standard library are size (not present in std::forward\_list), empty, clear (not present in std::array, std::stack, std::queue, and std::priority\_queue), swap, begin, and end.
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Question 3}
+\textbf{习题 2}
 
-What are iterators and how many categories exist?
-
-\hspace*{\fill} \\ %插入空行
-\noindent
-\textbf{Answer}
-
-An iterator is an abstraction that enables us to access the elements of a container in a generic way, without having to know the implementation details of each container. Iterators are key for writing general-purpose algorithms. There are six categories of iterators in C++: input, forward, bidirectional, random-access, contiguous (as of C++17), and output.
+标准容器中定义的公共成员函数是什么?
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Question 4}
+\textbf{参考答案}
 
-What operations does a random-access iterator support?
-
-\hspace*{\fill} \\ %插入空行
-\noindent
-\textbf{Answer}
-
-The random-access iterators must support the following operations (in addition to those required for input, forward, and bidirectional iterators): the + and - arithmetic operators, inequality comparison (with other iterators), compound assignment, and offset dereference operators.
+标准库中为大多数容器定义的成员函数是size(std::forward\_list中不存在)、empty、clear(std::array、std::stack、std::queue和std::priority\_queue中不存在)、swap、begin和end。
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Question 5}
+\textbf{习题 3}
 
-What are range access functions?
+什么是迭代器，存在多少个类别?
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Answer}
+\textbf{参考答案}
 
-Range access functions are non-member functions that provide a uniform way to access the data or properties of containers, arrays, and the std::initializer\_list class. These functions include std::size/std::ssize, std::empty, std::data, std::begin, and std::end.
+迭代器是一种抽象，它使我们能够以通用的方式访问容器的元素，而不必知道每个容器的实现细节。迭代器是编写通用算法的关键。C++中有六类迭代器:输入、向前、双向、随机访问、连续(至C++17)和输出。
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{习题 4}
+
+随机迭代器支持哪些操作?
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{参考答案}
+
+随机迭代器必须支持以下操作(除了输入迭代器、正向迭代器和双向迭代器所需的操作之外):+和-算术运算符、不等式比较(与其他迭代器)、复合赋值和偏移解引用操作符。
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{习题 5}
+
+范围访问函数是什么?
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{参考答案}
+
+范围访问函数是非成员函数，提供了一种统一的方式来访问容器、数组和std::initializer\_list类的数据或属性。这些函数包括std::size/std::ssize、std::empty、std::data、std::begin和std::end。
 
 
 

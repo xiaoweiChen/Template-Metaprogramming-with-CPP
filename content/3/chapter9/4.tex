@@ -1,6 +1,6 @@
-The standard library contains a series of range adaptors that can be used for solving many different tasks. More are being added in newer versions of the standard. However, there can be situations when you’d like to create your own range adaptor to use with others from the range library. This is not actually a trivial task. For this reason, in this final section of the chapter, we will explore the steps you need to follow to write such a range adaptor.
+标准库包含一系列范围适配器，可用于解决许多不同的任务。新版本的标准中增加了更多的内容。但在某些情况下，可能希望创建自己的范围适配器，以便与范围库中的其他适配器一起使用。这实际上不是一项微不足道的任务，所以在本章的最后一节中，我们将探讨编写这样一个范围适配器所需要遵循的步骤。
 
-For this purpose, we will consider a range adaptor that takes every Nth element of a range and skips the others. We will call this adaptor step\_view. We can use it to write code as follows:
+为此，考虑一个范围适配器，接受范围的第n个元素，而跳过其他元素。我们将这个适配器称为step\_view。我们可以使用它来编写如下代码:
 
 \begin{lstlisting}[style=styleCXX]
 for (auto i : std::views::iota(1, 10) | views::step(1))
@@ -17,31 +17,31 @@ for (auto i : std::views::iota(1, 10) | views::step(2) |
 	std::cout << i << '\n';
 \end{lstlisting}
 
-The first loop will print all the numbers from one to nine. The second loop will print all the odd numbers, 1, 3, 5, 7, 9. The third loop will print 1, 4, 7. Lastly, the fourth loop will print 1, 3, 5.
+第一个循环将打印从1到9的所有数字。第二个循环将输出所有的奇数，1、3、5、7、9。第三个循环将输出1,4,7。最后，第四个循环将输出1,3,5。
 
-To make this possible, we need to implement the following entities:
+为了实现这一点，我们需要实现以下实现:
 
 \begin{itemize}
 \item
-A class template that defines the range adaptor
+定义范围适配器的类模板
 
 \item
-A deduction guide to help with class template argument deduction for the range adaptor
+推导指南，用于帮助演绎范围适配器的类模板参数
 
 \item
-A class template that defines the iterator type for the range adaptor
+为范围适配器定义迭代器类型的类模板
 
 \item
-A class template that defines the sentinel type for the range adaptor
+为范围适配器定义哨点类型的类模板
 
 \item
-An overloaded pipe operator (|) and helper functors, required for its implementation
+实现所需的重载管道操作符(|)和辅助函子
 
 \item
-A compile-time constant global object to simplify the use of the range adaptor
+编译时常量全局对象，以简化范围适配器的使用
 \end{itemize}
 
-Let’s take them one by one and learn how to define them. We’ll start with the sentinel class. A sentinel is an abstraction of a past-the-end iterator. It allows us to check whether an iteration reached the end of a range. A sentinel makes it possible for the end iterator to have a different type than the range iterators. Sentinels cannot be dereferenced or incremented. Here is how it can be defined:
+一个一个地来了解如何定义它们，从哨兵类开始。哨点是对过尾迭代器的抽象，允许检查迭代是否到达了范围的末端。哨兵可以使结束迭代器的类型与范围迭代器的类型不同，哨兵不能解除引用或增加。下面是它的定义:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename R>
@@ -72,7 +72,7 @@ constexpr bool step_sentinel<R>::is_at_end(
 }
 \end{lstlisting}
 
-The sentinel is constructed from an iterator and contains a member function called is\_at\_end that checks whether the stored range iterator is equal to the range iterator stored in a step\_iterator object. This type, step\_iterator, is a class template that defines the iterator type for our range adaptor, which we call step\_view. Here is an implementation of this iterator type:
+哨兵由迭代器构造，包含一个名为is\_at\_end的成员函数，该函数检查存储的范围迭代器是否等于存储在step\_iterator对象中的范围迭代器。这个类型step\_iterator是一个类模板，定义了范围适配器的迭代器类型，称之为step\_view。下面是该迭代器类型的实现:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename R>
@@ -123,25 +123,25 @@ private:
 };
 \end{lstlisting}
 
-This type must have several members:
+这个类型必须有几个成员:
 
 \begin{itemize}
 \item
-The alias template called base that represents the type of the underlying range iterator.
+别名模板base，表示基础范围迭代器的类型。
 
 \item
-The alias template called value\_type that represents the type of elements of an underlying range.
+别名模板称为value\_type，表示底层范围的元素类型。
 
 \item
-The overloaded operators ++ and *.
+重载操作符++和*。
 
 \item
-The overloaded operator == compares this object with a sentinel.
+重载操作符==将该对象与哨兵进行比较。
 \end{itemize}
 
-The implementation of the ++ operator uses the std::ranges::next constrained algorithm to increment an iterator with N positions, but not past the end of the range.
+++操作符的实现使用std::ranges::next约束算法对迭代器增加N个位置，但不超过范围的结束。
 
-In order to use the step\_iterator and step\_sentinel pair for the step\_view range adaptor, you must make sure this pair is actually well-formed. For this, we must ensure that the step\_iterator type is an input iterator, and that the step\_sentinel type is indeed a sentinel type for the step\_iterator type. This can be done with the help of the following static\_assert statements:
+为了将step\_iterator和step\_sentinel对用于step\_view范围适配器，必须确保这个对实际上是格式良好的。为此，必须确保step\_iterator类型是一个输入迭代器，并且step\_sentinel类型确实是step\_iterator类型的哨兵类型。这可以在以下static\_assert的帮助下完成:
 
 \begin{lstlisting}[style=styleCXX]
 namespace details
@@ -156,7 +156,7 @@ namespace details
 }
 \end{lstlisting}
 
-The step\_iterator type is used in the implementation of the step\_view range adaptor. At a minimum, this could look as follows:
+step\_iterator类型用于step\_view范围适配器的实现。至少，可以如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template<std::ranges::view R>
@@ -233,32 +233,32 @@ public:
 };
 \end{lstlisting}
 
-There is a pattern that must be followed when defining a range adaptor. This pattern is represented by the following aspects:
+定义范围适配器时，必须遵循一个模式。这种模式表现为以下几个方面:
 
 \begin{itemize}
 \item
-The class template must have a template argument that meets the std::ranges::view concept.
+类模板必须有一个符合std::ranges::view概念的模板参数。
 
 \item
-The class template should be derived from std::ranges:view\_interface. This takes a template argument itself and that should be the range adaptor class. This is basically an implementation of the CRTP that we learned about in Chapter 7, Patterns and Idioms.
+类模板应该派生自std::ranges:view\_interface，其本身接受一个模板参数，应该是范围适配器类。这基本上是第7章中的CRTP实现。
 
 \item
-The class must have a default constructor.
+类必须有默认构造函数。
 
 \item
-The class must have a base member function that returns the underlying range.
+类必须具有返回基础范围的基成员函数。
 
 \item
-The class must have a begin member function that returns an iterator to the first element in the range.
+该类必须有begin成员函数，该函数返回指向范围内第一个元素的迭代器。
 
 \item
-The class must have an end member function that returns either an iterator to the one-past-the-last element of the range or a sentinel.
+该类必须有一个结束成员函数，该函数返回一个指向范围中倒数第一元素的迭代器或一个哨兵。
 
 \item
-For ranges that meet the requirements of the std::ranges::sized\_range concept, this class must also contain a member function called size that returns the number of elements in the range.
+对于满足std::ranges::size\_range概念要求的范围，该类还必须包含名为size的成员函数，该函数返回范围内的元素数量。
 \end{itemize}
 
-In order to make it possible to use class template argument deduction for the step\_view class, a user-defined deduction guide should be defined. These were discussed in Chapter 4, Advanced Template Concepts. Such a guide should look as follows:
+为了能够对step\_view类使用类模板参数推导，应该定义一个用户定义的推导指南。这些已经在第4中讨论过，这样的指南应该如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template<class R>
@@ -267,7 +267,7 @@ step_view(R&& base,
 	-> step_view<std::ranges::views::all_t<R>>;
 \end{lstlisting}
 
-In order to make it possible to compose this range adaptor with others using the pipe iterator (|), this operator must be overloaded. However, we need some helper function object, which is shown in the next listing:
+为了能够使用管道迭代器(|)将此范围适配器与其他范围适配器组合在一起，必须重载此操作符。但我们需要一些辅助函数对象，如下面的代码所示:
 
 \begin{lstlisting}[style=styleCXX]
 namespace details
@@ -296,9 +296,9 @@ namespace details
 }
 \end{lstlisting}
 
-The step\_view\_fn\_closure class is a function object that stores a value representing the number of elements to skip for each iterator. Its overloaded call operator takes a range as an argument and returns a step\_view object created from the range and the value for the number of steps to jump.
+step\_view\_fn\_closure类是一个函数对象，存储了一个表示每个迭代器要跳过的元素数量的值。其重载调用操作符以一个范围作为参数，并返回从该范围创建的step\_view对象和要跳转的步数的值。
 
-Finally, we want to make it possible to write code in a similar manner to what is available in the standard library, which provides a compile-time global object in the std::views namespace for each range adaptor that exists. For instance, instead of std::ranges::transform\_view, you could use std::views::transform. Similarly, instead of step\_view (in some namespace), we want to have an object, views::step. To do so, we need yet another function object, as shown next:
+最后，希望能够以与标准库中可用的方式类似的方式编写代码，标准库为每个存在的范围适配器在std::views名称空间中提供了一个编译时全局对象。例如，可以使用std::views::transform，而不是std::ranges::transform\_view。类似地，我们希望有一个对象views::step，而不是step\_view(某个命名空间中)。为此，还需要另一个函数对象，如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 namespace details
@@ -325,9 +325,9 @@ namespace views
 }
 \end{lstlisting}
 
-The step\_view\_fn type is a function object that has two overloads for the call operator: one takes a range and an integer and returns a step\_view object, and the other takes an integer and returns a closure for this value, or, more precisely, an instance of step\_view\_fn\_closure that we saw earlier.
+step\_view\_fn类型是一个函数对象，对调用操作符有两个重载:一个接受一个范围和一个整数并返回一个step\_view对象，另一个接受一个整数并返回这个值的闭包。更准确地说，是我们前面看到的step\_view\_fn\_closure的实例。
 
-Having all these implemented, we can successfully run the code shown at the beginning of this section. We have completed the implementation of a simple range adaptor. Hopefully, this should give you a sense of what writing range adaptors takes. The ranges library is significantly complex when you look at the details. In this chapter, you have learned some basics about the content of the library, how it can simplify your code, and how you can extend it with custom features. This knowledge should be a starting point for you should you want to learn more using other resources.
+实现了所有这些之后，就可以成功地运行本节开头所示的代码。我们已经完成了一个简单的范围适配器的实现，希望这能让您了解写入范围适配器需要什么。从细节上看，范围库非常复杂。本章中，您已经学习了一些关于库内容的基础知识，如何简化代码，以及如何使用自定义特性扩展它。若想利用其他资源了解更多，这些知识应该只能算是一个起点。
 
 
 
