@@ -1,6 +1,6 @@
 每种语言特性都旨在帮助开发人员解决当前的问题或任务，模板的目的是为了避免编写只有细微差别的重复性代码。
 
-为了证明这一点，我们以一个经典的max函数为例。函数接受两个数值参数，并返回两个参数中最大的一个。可以简单地实现:
+这里，我们以一个经典的max函数为例。函数接受两个数值参数，并返回两个参数中最大的一个:
 
 \begin{lstlisting}[style=styleCXX]
 int max(int const a, int const b)
@@ -9,7 +9,7 @@ int max(int const a, int const b)
 }
 \end{lstlisting}
 
-这个函数没毛病，但它只适用于int类型的值(或那些可转换为int的值)。若需要相同的函数，但参数类型是double怎么办呢？直接为double类型重载这个函数就好了(创建一个具有相同名称，但参数数量或类型不同的函数):
+这个函数没毛病，但只适用于int类型的值(或那些可转换为int的值)。若需要相同的函数，但参数类型是double怎么办呢？直接为double类型重载这个函数就好了(创建一个具有相同名称，但参数数量或类型不同的函数):
 
 \begin{lstlisting}[style=styleCXX]
 double max(double const a, double const b)
@@ -18,11 +18,11 @@ double max(double const a, double const b)
 }
 \end{lstlisting}
 
-然而，int和double并不是唯一的数字类型。有char, short, long, long和它们的unsigned对等物，unsigned char, unsigned short, unsigned long, unsigned long。还有浮点型和长双精度型。以及其他类型，如int8\_t, int16\_t, int32\_t和int64\_t。可以比较其他类型，例如bigint、Matrix、point2d和任何支持大于运算符的自定义类型。通用库如何为所有这些类型提供诸如max这样的通用函数呢?它可以重载所有内置类型和其他库类型的函数，但不能重载任何自定义类型。
+然而，int和double并不是唯一的数字类型。有char, short, long, long和相应的unsigned版本，unsigned char, unsigned short, unsigned long, unsigned long。还有浮点型和长双精度型，以及其他类型，如int8\_t, int16\_t, int32\_t和int64\_t。可以比较其他类型，例如bigint、Matrix、point2d和任何支持大于运算符的自定义类型。通用库如何为这些类型提供诸如max这样的通用函数呢?它可以重载所有内置类型和其他库类型的函数，但不能重载自定义类型。
 
-使用不同参数重载函数的另一种方法是使用void*来传递不同类型的参数，但这是一种糟糕的做法。下面的示例只是在没有模板的情况下作为一种可能的替代方案。为了便于讨论，我们设计了一个排序函数，该函数将对任何可能类型的元素数组运行快速排序算法，该数组提供严格的弱排序。快速排序算法的详细信息可以在网上查询，例如：\url{https://en.wikipedia.org/wiki/Quicksort}。
+使用不同参数重载函数的另一种方法是使用void*来传递不同类型的参数，但这很糟糕。下面的示例只是在没有模板的情况下作为一种可能的替代方案。这里，我们设计了一个排序函数，该函数将对任何可能类型的元素数组运行快速排序，该数组提供严格的弱排序。快速排序算法的详细信息可以在网上查询，例如：\url{https://en.wikipedia.org/wiki/Quicksort}。
 
-快速排序算法需要比较和交换两个元素，但由于提前不知道其数据类型，不能直接实现。解决方案是依赖回调，回调是作为参数传递的函数，在必要时调用。可能的实现方式如下:
+快速排序算法需要比较和交换两个元素，但由于事先不知道其数据类型，不能直接实现。解决方案是依赖回调，回调是作为参数传递的函数，可以在必要时调用:
 
 \begin{lstlisting}[style=styleCXX]
 using swap_fn = void(*)(void*, int const, int const);
@@ -60,7 +60,7 @@ void quicksort(void* arr, int const low, int const high,
 }
 \end{lstlisting}
 
-为了调用快速排序函数，需要为传递给函数的每种类型的数组提供这些比较和交换函数的实现。以下是int类型的实现:
+为了调用快速排序函数，需要为传递给函数的每种类型的数组提供比较和交换函数的实现。以下是int类型的实现:
 
 \begin{lstlisting}[style=styleCXX]
 void swap_int(void* arr, int const i, int const j)
@@ -89,7 +89,7 @@ int main()
 }
 \end{lstlisting}
 
-这些例子关注的是函数，但同样的问题也适用于类。假设要编写一个类，该类对具有可变大小的数值集合建模，并将元素连续存储在内存中。可以提供以下实现(这里仅概述声明)来存储整数:
+这些例子关注的是函数，同样的问题也适用于类。假设要编写一个类，可对具有可变大小的数值集合建模，并将元素连续存储在内存中。可以使用以下实现(这里仅概述声明)来存储整数:
 
 \begin{lstlisting}[style=styleCXX]
 struct int_vector
@@ -115,15 +115,15 @@ private:
 };
 \end{lstlisting}
 
-这一切看起来都很好，但当需要存储类型为double、std::string或自定义类型的值时，将需要编写相同的代码，每次只更改元素的类型。应该没有人愿意干这种事情吧，这明显就是一项重复性极高的工作，而且当需要更改某些内容时(例如添加新功能或修复错误)，就需要在多个地方进行相同的更改。
+目前这一切看起来都很好，但当需要存储类型为double、std::string或自定义类型的值时，将需要编写相同的代码，每次只更改元素的类型。应该没有人愿意干这种事情吧，这明显就是一项重复性极高的工作，而且当需要更改某些内容时(例如添加新功能或修复错误)，就需要在多个地方进行相同的更改。
 
-最后，当要定义变量时，可能会遇到类似的问题(尽管不太常见)。让我们考虑保存新行字符的变量的情况。可以考虑以下方式:
+最后，当要定义变量时，可能会遇到类似的问题(尽管不太常见)。考虑保存换行字符的变量的情况:
 
 \begin{lstlisting}[style=styleCXX]
 constexpr char NewLine = '\n';
 \end{lstlisting}
 
-若需要相同的常量，但需要不同的编码，比如：宽字符串字面值、UTF-8等，该怎么办？可以有多个变量，有不同的名字，比如下面的例子:
+若需要相同的常量，但需要不同的编码，比如：宽字符串字面值、UTF-8等，该怎么办？多个变量当然可以，有不同的名字，比如下面的例子:
 
 \begin{lstlisting}[style=styleCXX]
 constexpr wchar_t NewLineW = L'\n';

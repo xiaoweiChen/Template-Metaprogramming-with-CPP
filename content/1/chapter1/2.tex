@@ -1,4 +1,4 @@
-现在来看看如何用C++编写模板。本节中，我们将从三个简单的示例开始，每个示例对应前面给出的代码片段。
+本节中，我们将从三个简单的示例开始编写C++模板，每个示例对应前面给出的代码片段。
 
 前面max函数的模板如下所示:
 
@@ -10,9 +10,9 @@ T max(T const a, T const b)
 }
 \end{lstlisting}
 
-这里的类型名称(例如int或double)被T(代表类型)取代。T称为类型模板形参，并通过语法template<typename T>或typename<class T>引入。请记住，T是一个参数，可以使用任何名称。我们将在下一章学习更多有关模板参数的知识。
+这里的类型名称(例如int或double)被T(代表类型)取代。T称为类型模板形参，并通过语法template<typename T>或typename<class T>引入。T是一个参数，可以使用任意的名称。
 
-此时，源代码中的模板只是一个蓝图，编译器将根据其使用情况生成代码。更准确地说，它将为使用模板的每种类型实例化一个函数重载。这里有一个例子:
+此时，源码中的模板只是一个蓝图，编译器将根据其使用情况生成代码，并将为使用模板的每种类型实例化一个函数重载:
 
 \begin{lstlisting}[style=styleCXX]
 struct foo{};
@@ -26,9 +26,9 @@ int main()
 }
 \end{lstlisting}
 
-代码段中，首先使用两个整数调用max，operator>可用于int类型。这将生成一个重载int max(int const a, int const b)。其次，用两个双精度值调用max，这也没关系，因为operator>适用于双精度值。因此，编译器将生成另一个重载，double max(double const a, double const b)。然而，第三次调用max将生成一个编译器错误，因为foo类型没有重载operator>。
+代码中，首先使用两个整数调用max，operator>可用于int类型。这将生成一个重载int max(int const a, int const b)。其次，用两个double值调用max，这也没关系，因为operator>适用于double值。因此，编译器将生成另一个重载，double max(double const a, double const b)。第三次调用max将生成一个编译器错误，因为foo类型没有重载operator>。
 
-这一点不需要讨论太多细节，调用max函数的完整语法如下所示:
+这里不讨论太多细节，使用max函数的方式如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 max<int>(1, 2);
@@ -36,9 +36,9 @@ max<double>(1.0, 2.0);
 max<foo>(f1, f2);
 \end{lstlisting}
 
-编译器能够推断模板形参的类型，因此编写它是多余的。但在某些情况下，是不可能的，需要使用以下语法显式指定类型。
+编译器能够推断推导参数的类型，因此写上去就是是多余的。但在某些情况下，编译器无法推导参数类型，所以需要使用以下语法显式指定类型。
 
-第二个例子涉及前一节中的函数，理解模板的需要，是处理void*参数的quicksort()实现。实现可以很容易地转换为模板版本，只需进行少量的改动。这在下面的代码片段中显示:
+第二个例子涉及前一节中的函数，是处理void*参数的quicksort()实现，可以很容易地改为模板版本:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -81,7 +81,7 @@ void quicksort(T arr[], int const low, int const high)
 }
 \end{lstlisting}
 
-快速排序函数模板的使用与前面的非常类似，就是不需要将指针传递给回调函数了:
+快速排序函数模板的使用与前面的非常类似，并且不需要将指针传递给回调函数了:
 
 \begin{lstlisting}[style=styleCXX]
 int main()
@@ -112,6 +112,7 @@ struct vector
 	
 	T at(size_t const index) const;
 	T operator[](size_t const index) const;
+	
 private:
 	T* data_;
 	size_t size_;
@@ -119,7 +120,7 @@ private:
 };
 \end{lstlisting}
 
-max函数那种情况，变化是最小的。在类上面的行中有模板声明，元素的int类型可以使用类型模板形参T取代。实现的使用方式如下所示:
+max函数那种情况，变化很小。类的模板声明中，元素的int类型可以使用类型模板形参T取代。实现方式如下:
 
 \begin{lstlisting}[style=styleCXX]
 int main()
@@ -130,9 +131,9 @@ int main()
 }
 \end{lstlisting}
 
-这里需要的是，在声明变量v时必须指定元素的类型，在代码段中v的元素是int，否则编译器将无法推断它们的类型。C++17中，有些情况下可以不声明类型，可将其称为\textbf{类模板参数推导}，将在第4章中讨论。
+声明变量v时必须指定元素的类型。代码中，v的元素是int，否则编译器将无法推断它们的类型。C++17中，有些情况下可以不声明类型，可将其称为\textbf{类模板参数推导}(将在第4章中讨论)。
 
-第四个也是最后一个例子，只有类型不同的情况下声明几个变量。可以用一个模板替换所有这些变量，如下面的代码段所示:
+第四个也是最后一个例子，只有类型不同的情况下声明几个变量。可以用一个模板替换所有这些变量，如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename T>
@@ -150,7 +151,7 @@ int main()
 }
 \end{lstlisting}
 
-本节中的示例表明，无论模板表示函数、类还是变量，声明和使用模板的语法都是相同的。这将引导我们进入下一节，讨论模板的类型从而来了解模板。
+本节中的示例表明，无论模板表示函数、类还是变量，声明和使用模板的语法都是相同的。这将引导我们进入下一节，通过模板类型而来了解模板。
 
 
 
