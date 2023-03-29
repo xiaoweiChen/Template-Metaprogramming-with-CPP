@@ -9,7 +9,7 @@
 非依赖名称，则在模板定义时执行。
 \end{itemize}
 
-首先，来看看非依赖名称，位于模板定义的前面。为了了解这是如何工作的，看一下下面的例子:
+首先，来看看非依赖名称，位于模板定义的前面。先来看一下下面的例子:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -40,11 +40,11 @@ int main()
 }
 \end{lstlisting}
 
-注释中有几个参考点。[1]处，声明了一个名为parser的类模板。然后在点[2]处定义一个名为handle的函数，该函数以double作为参数。类模板的定义在点[3]处。该类包含一个名为run的方法，该方法调用一个名为handle的函数，其参数值为42，位于点[4]。
+注释中有几个参考点。[1]声明了一个名为parser的类模板，[2]定义一个名为handle的函数，该函数以double作为参数。类模板的定义在[3]。该类包含一个名为run的方法，该方法调用一个名为handle的函数，其参数值为42，位于[4]。
 
-handle是一个非依赖名称，因为它不依赖于任何模板参数。因此，此处执行名称查找和绑定。handle必须是点[3]上已知的函数，在[2]上定义的函数是唯一匹配的。在类模板定义之后(点[5]处)，我们有了函数handle的重载定义，该函数句柄以整数作为参数。这是handle(42)更好的匹配，但它是在执行名称绑定之后出现的，因此将被忽略。main函数中(点[6]处)，有int类型的解析器类模板的实例化。调用run函数时，会将"processing adouble: 42"输出至控制台。
+handle是一个非依赖名称，因为它不依赖于任何模板参数，所以此处执行名称查找和绑定。handle必须是[3]已知的函数，[2]上定义的函数是唯一匹配的。定义类模板之后([5])，就有了函数handle的重载定义，该函数handle以整数作为参数。这是handle(42)更好的匹配候选，但它是在执行名称绑定之后出现的，因此将被忽略。main函数中([6])，有int类型的解析器类模板的实例化。调用run函数时，会将"processing adouble: 42"输出至控制台。
 
-下一个示例来介绍依赖名称的概念:
+下一个示例就来介绍依赖名称的概念:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -82,15 +82,15 @@ int main()
 }
 \end{lstlisting}
 
-这个示例与前面的示例略有不同。parser类模板非常相似，但是handle函数已经成为另一个类模板的成员。
+这个示例与前面的示例略有不同。parser类模板非常相似，但handle函数已经成为另一个类模板的成员。
 
-注释[1]处，有一个名为handler的类模板的定义。包含一个名为handle的公共方法，该方法接受T类型的参数并将其值输出到控制台。接下来，在[2]处，有称为parser的类模板的定义。这与前一个类似，除了一个关键方面:[3]处，它在其参数上调用一个名为handle的方法。因为实参的类型是模板形参T，其使handle成为依赖名称。依赖名称在模板实例化时查找，因此句柄此时没有绑定。继续下面的代码，[4]处，有int类型的处理程序类模板的模板特化。作为特化，这是与依赖名称更好的匹配。因此，当模板实例化发生在[6]时，handler<int>::handle会绑定到[3]处，使用的依赖名称的名称。运行此程序，控制台将会输出"handler<int>: 42"。
+注释[1]，有一个名为handler的类模板的定义。包含一个名为handle的公共方法，该方法接受T类型的参数，并将其值输出到控制台。接下来，[2]有parser类模板的定义。这与前一个类似，除了[3]在其参数上调用一个名为handle的方法。因为实参的类型是模板形参T，其使handle成为依赖名称。依赖名称在模板实例化时查找，因此句柄此时没有绑定。[4]有int类型的处理程序类模板的模板特化，这是与依赖名称更好的匹配。因此，当模板实例化发生在[6]时，handler<int>::handle会绑定到[3]，使用的依赖名称的名称。运行此程序，控制台将会输出"handler<int>: 42"。
 
 现在已经了解了名称绑定是如何发生的，接下来来了解它与模板实例化之间的关系。
 
 \subsubsubsection{4.1.1\hspace{0.2cm}两阶段的名称查找}
 
-上一节的关键内容是，名称查找对于依赖名称(依赖于模板参数的名称)和非依赖名称(不依赖于模板参数的名称，加上模板名称和当前模板实例化中定义的名称)是不同的。当编译器遍历模板定义时，需要判断名称是依赖的还是非依赖的，高阶名称查找依赖于这种分类，并且发生在模板定义点(对于非依赖名称)或模板实例化点(对于依赖名称)。因此，模板的实例化会分为两个阶段:
+上一节的关键内容是，名称查找对于依赖名称(依赖于模板参数的名称)和非依赖名称(不依赖于模板参数的名称，加上模板名称和当前模板实例化中定义的名称)不同。当编译器遍历模板定义时，需要判断名称是依赖的还是非依赖的，高阶名称查找依赖于这种分类，并且发生在模板定义点(对于非依赖名称)或模板实例化点(对于依赖名称)。因此，模板的实例化会分为两个阶段:
 
 \begin{itemize}
 \item
@@ -100,7 +100,7 @@ int main()
 第二个阶段发生在实例化时，此时模板实参替换为模板参数。依赖名称的绑定这时发生。
 \end{itemize}
 
-这个分为两步的过程称为\textbf{两阶段名称查找}。为了更好地理解，来看一个例子:
+这个分为两步的过程称为\textbf{两阶段名称查找}，来看一个例子:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -129,9 +129,9 @@ int main()
 }
 \end{lstlisting}
 
-这段代码中，有两个类模板:base\_parser和parser，前者包含名为init的公共方法，后者派生自base\_parser，并包含一个名为parse的公共方法。parse成员函数调用了一个名为init的函数，目的是在这里调用的是基类方法init。然而，编译器将报错，因为它无法找到init。发生这种情况的原因是init是一个不依赖的名称(不依赖于模板参数)。因此，必须在定义解析器模板时就知道。尽管base\_parser<T>::init存在，但编译器不能假定它是我们想要的，因为主模板base\_parser可以稍后进行特化，而init可以定义为其他东西(例如：类型、变量或另一个函数)。因此，名称查找不会发生在基类中，而只发生在其外围作用域中，并且parser中没有名为init的函数。
- 
-这个问题可以通过将init设置为依赖名称来解决。这可以通过添加前缀this ->或base\_parser<T>::来实现。将init转换为依赖名称，其名称绑定将从模板定义点移动到模板实例化点。下面的代码片段中，这个问题通过this指针调用init来解决:
+代码中有两个类模板:base\_parser和parser，前者包含名为init的公共方法，后者派生自base\_parser，并包含一个名为parse的方法。parse成员函数调用了一个名为init的函数，目的是在这里调用的是基类方法init。然而，编译器将报错，因为它无法找到init。发生这种情况的原因是init是一个不依赖的名称(不依赖于模板参数)。因此，必须在定义解析器模板时就知道。尽管base\_parser<T>::init存在，但编译器不能假定它是我们想要的，因为主模板base\_parser可以稍后进行特化，而init可以定义为其他东西(例如：类型、变量或另一个函数)。因此，名称查找不会发生在基类中，而只发生在其外围作用域中，并且parser中没有名为init的函数。
+
+这个问题可以通过将init设置为依赖名称来解决。这可以通过添加前缀this->或base\_parser<T>::来实现。将init转换为依赖名称，其名称绑定将从模板定义点移动到模板实例化点。下面的代码段中，是通过this指针来解决问题的:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -145,7 +145,7 @@ struct parser : base_parser<T>
 };
 \end{lstlisting}
 
-继续这个例子，在定义parser类模板之后，int类型的base\_parser的特化是可用的。如下所示:
+继续这个例子，在定义parser类模板之后，int类型的base\_parser的特化可用。如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template <>
@@ -172,20 +172,20 @@ int main()
 
 运行这个程序时，下面的文本将输出到控制台:
 
-\begin{tcblisting}{commandshell={}}
+\begin{lstlisting}[style=styleCXX]
 specialized init
 parse
 init
 parse
-\end{tcblisting}
+\end{lstlisting}
 
-出现这种行为的原因是p1是parser<int>的实例，并且其基类base\_parser<int>实现了init函数，并将特化的init打印到控制台。另一方面，p2是parser<double>的实例。由于double类型的base\_parser的特化不可用，因此将调用主模板中的init函数，并且只将init打印到控制台。
+出现这种行为的原因是p1是parser<int>的实例，并且其基类base\_parser<int>实现了init函数，并将特化的init打印到控制台。另一方面，p2是parser<double>的实例。由于double类型的base\_parser的特化不可用，因此将调用主模板中的init函数，并且只将init输出到控制台。
 
-下一个主题就是如何使用依赖名称，即类型。
+下一个主题就是如何使用依赖名称(即类型)。
 
 \subsubsubsection{4.1.2\hspace{0.2cm}依赖类型的名称}
 
-目前为止的例子中，依赖名称是函数或成员函数。但在某些情况下，依赖名称是类型:
+目前的例子中，依赖名称是函数或成员函数。但在某些情况下，依赖名称是类型:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -207,9 +207,9 @@ struct parser : base_parser<T>
 };
 \end{lstlisting}
 
-这个代码片段中，base\_parser是一个类模板，为T定义了一个名为value\_type的类型别名。解析器类模板派生自base\_parser，需要在其解析方法中使用这种类型。然而，value\_type和base\_parser<T>::value\_type都不起作用，编译器会报错。value\_type无效，因为它是一个不依赖的名称，因此不会在基类中进行查找，只能在外围作用域中查找。base\_parser<T>::value\_type也不能工作，因为编译器不能假设这是一个实际类型。base\_parser的特化可能紧随其后，value\_type不一定是一种类型。
+这个代码段中，base\_parser是类模板，为T定义了名为value\_type的类型别名。parser类模板派生自base\_parser，需要在其parser方法中使用这种类型。然而，value\_type和base\_parser<T>::value\_type都不起作用，编译器会报错。value\_type无效，因为它是一个不依赖的名称，因此不会在基类中进行查找，只能在外围作用域中查找。base\_parser<T>::value\_type也不能工作，因为编译器不能假设这是一个实际类型。base\_parser的特化可能紧随其后，所以value\_type不一定是一种类型。
 
-为了解决这个问题，需要告诉编译器这个名称指向的类型。否则，默认情况下，编译器会假定它不是类型。这是通过typename关键字在定义点完成的，如下所示:
+为了解决这个问题，需要告诉编译器这个名称指向的类型。否则，编译器默认会假定它不是类型。这可通过typename关键字在定义点完成，如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -256,11 +256,11 @@ int main()
 }
 \end{lstlisting}
 
-dictionay\_traits是一个类，用作字典类template的模板参数。这个类派生于T::map\_type(参见第[1]行)，但不需要使用typename关键字。字典类定义了一个名为start\_key的成员，它是一个int型，初始化值为T::identity(参见第[2]行)。同样，这里不需要typename关键字。然而，若想定义类型T::key\_type的另一个成员(见[3]行)，需要使用typename。
+dictionay\_traits是一个类，用作dictionary类template的模板参数。这个类派生于T::map\_type(参见第[1]行)，但不需要使用typename关键字。dictionary类定义了一个名为start\_key的成员，是一个int型，初始化值为T::identity(参见第[2]行)。同样，这里不需要typename关键字。然而，若想定义类型T::key\_type的另一个成员(见[3]行)，需要使用typename。
 
-C++20中，对使用typename的要求已经放宽了，从而更容易使用类型名。编译器现在能够推断出我们在许多上下文中引用的是类型名。例如，在[3]行上那样定义成员变量时，就不再需要使用typename关键字作为前缀了。
+C++20中，对使用typename的要求已经放宽了，从而更容易使用类型名。编译器现在能够推断出我们在许多上下文中引用的是类型名。例如，在[3]行上那样定义成员变量时，不再需要使用typename关键字作为前缀了。
 
-C++20中，typename在以下情形中是隐式的(可以由编译器推导出来):
+C++20中，typename在以下情形中是隐式的(可以由编译器推导):
 
 \begin{itemize}
 \item
@@ -290,14 +290,14 @@ struct dictionary : T::map_type
 {
 	int start_key{ T::identity };
 	T::key_type next_key; // [1]
-	
+
 	using value_type = T::map_type::mapped_type; // [2]
-	
+
 	void add(T::key_type const&, value_type const&) {} // [3]
 };
 \end{lstlisting}
 
-这个代码片段中，[1]、[2]和[3]标记的所有行中，C++20之前，需要typename关键字来指示类型名称(例如T::key\_type或T::map\_type::mapped\_type)。当使用C++20编译时，这就不再需要了。
+这个代码段中，[1]、[2]和[3]标记的所有行中，C++20之前，需要typename关键字来指示类型名称(例如T::key\_type或T::map\_type::mapped\_type)。当使用C++20编译时，这就不再需要了。
 
 \begin{tcolorbox}[breakable,enhanced jigsaw,colback=blue!5!white,colframe=blue!75!black,title={Note}]
 第2章中，我们已经看到关键字typename和class可以用来引入类型模板参数，而且是可互换的。这里的关键字typename虽然具有类似的使用方式，但不能用class替换。
@@ -332,7 +332,7 @@ struct parser : base_parser<T>
 };
 \end{lstlisting}
 
-这类似于前面的代码片段，base\_parser中的init函数也是一个模板。尝试使用base\_parser<T>::init<int>()，如[1]所示，将导会致编译器错误。因此，必须使用template关键字告诉编译器依赖名称是模板，如[2]所示。
+这类似于前面的代码，base\_parser中的init函数也是一个模板。尝试使用base\_parser<T>::init<int>()，如[1]所示，将导会致编译器报错，所以必须使用template关键字告诉编译器依赖名称是模板，如[2]所示。
 
 template关键字只能跟随作用域解析操作符(::)、通过指针(->)进行成员访问和成员访问(.)。正确用法的例子为X::template foo<T>()，this->template foo<T>()和obj.template foo()。
 
@@ -354,7 +354,7 @@ struct parser : base_parser<T>
 		using token_type =
 			base_parser<T>::template token<int>; // [1]
 		token_type t1{};
-		
+
 		typename base_parser<T>::template token<int> t2{};
 		                     // [2]
 		std::cout << "parse\n";
@@ -362,15 +362,15 @@ struct parser : base_parser<T>
 };
 \end{lstlisting}
 
-令牌类是base\_parser类模板的内部类模板，既可以在[1]行中使用，定义了类型别名(然后用于实例化对象)；也可以在[2]行中使用，直接用于声明变量。typename关键字在[1]中是不必要的，其中using声明表示正在处理类型，但在[2]中是必需的，因为编译器会假定其为非类型名称。
+token类是base\_parser类模板的内部类模板，既可以在[1]行中使用，定义了类型别名(然后用于实例化对象)；也可以在[2]行中使用，直接用于声明变量。typename关键字在[1]中是不必要的，其中using声明表示正在处理类型，因为编译器会假定其为非类型名称，所以在[2]中是必需的。
 
-观察当前模板实例化的某些上下文中，其实并不需要使用typename和template关键字。
+观察当前模板实例化的某些上下文中，并不需要使用typename和template关键字。
 
 \subsubsubsection{4.1.4\hspace{0.2cm}实例化}
 
 类模板定义的上下文中，可以避免使用typename和template关键字来消除依赖名称的歧义。在类模板定义的上下文中，编译器能够推导出一些依赖名称(例如嵌套类的名称)来引用当前实例化，所以一些错误可以在定义时(而不是实例化时)就可以找出来。
 
-根据C++标准§13.8.2.1-依赖类型，可以引用当前实例化名称的完整列表如下表所示:
+根据C++标准§13.8.2.1-依赖类型，可以引用当前实例化名称的完整列表如下所示:
 
 \begin{table}[H]
 \centering
@@ -410,7 +410,7 @@ struct parser : base_parser<T>
 若基类是依赖类型(依赖于模板形参)并且不在当前实例化中，那么基类就是依赖类。否则，基类为非依赖类。
 \end{tcolorbox}
 
-这些规则听起来可能有点难以理解，通过以下几个例子来尝试进行理解:
+这些规则听起来可能有点难以理解，以下几个例子可能有助于对其进行理解:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -420,7 +420,7 @@ struct parser
 	parser<T>* p2; // parser<T> is the CI
 	::parser<T>* p3; // ::parser<T> is the CI
 	parser<T*> p4; // parser<T*> is not the CI
-	
+
 	struct token
 	{
 		token* t1; // token is the CI
@@ -438,7 +438,7 @@ struct parser<T*>
 };
 \end{lstlisting}
 
-主模板parser中，名称parser、parser<T>和::parser<T>都指向当前实例化，但parser<T*>没有。token类是主模板parser的嵌套类。在该类的范围内，token和parser<T>::token都表示当前实例化，但对于parser<T*>::token则不是这样。该代码段还包含指针类型T*的主模板的部分特化。在这个偏特化的上下文中，parser<T*>是当前实例化，而parser<T>不是。
+主模板parser中，名称parser、parser<T>和::parser<T>都指向当前实例化，但parser<T*>没有。token类是主模板parser的嵌套类。该类的范围内，token和parser<T>::token都表示当前实例化，但对于parser<T*>::token则不是这样。该代码段还包含指针类型T*的主模板的偏特化。在这个偏特化的上下文中，parser<T*>是当前实例化，而parser<T>不是。
 
 依赖名称对于模板编程很重要。本节的关键内容是将名称分为依赖名称(依赖于模板参数的名称)和非依赖名称(不依赖于模板参数的名称)。名称绑定发生在非依赖类型的定义点和依赖类型的实例化点。某些情况下，需要关键字typename和template来消除名称使用的歧义，并告诉编译器名称指的是类型或模板。然而，在类模板定义的上下文中，编译器能够找出一些依赖名称指向当前实例化，这使它能够更快地找到错误。
 

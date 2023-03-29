@@ -1,6 +1,6 @@
 类模板也可以有数量可变的模板参数，这是构建标准库中某些类型类别(如tuple和variant)的关键。本节中，将了解如何为tuple类编写一个简单的实现。tuple是一种表示固定大小的异构值集合的类型。
 
-实现可变函数模板时，使用了带有两个重载的递归模式，一个用于一般情况，另一个用于结束递归。除了为此目的需要使用特化外，可变参数类模板也必须采用相同的方法。下面，可以看到一个tuple类的最小实现:
+实现可变函数模板时，使用了带有两个重载的递归模式，一个用于一般情况，另一个用于结束递归。除了为此目的需要使用特化外，可变参数类模板也必须采用相同的方法。下面是一个tuple类的最小实现:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T, typename... Ts>
@@ -31,7 +31,7 @@ struct tuple<T>
 };
 \end{lstlisting}
 
-第一个类是主模板，有两个模板参数:一个类型模板和一个参数包。所以，至少必须为实例化该模板指定一种类型。主模板元组有两个成员变量:value，类型为T, rest的类型为tuple<Ts…>。这是模板其余参数的扩展。说明包含N个元素的元组将包含第一个元素和另一个tuple;这第二个tuple，依次包含第二个元素和另一个tuple;这第三个嵌套tuple包含其余内容。这种模式一直持续下去，直到得到只有一个元素的tuple，这是由偏特化tuple<T>定义。与主模板不同，此特化不聚合另一个tuple对象。
+第一个类是主模板，有两个模板参数:一个类型模板和一个参数包。所以，至少必须为实例化该模板指定一种类型。主模板元组有两个成员变量:value，类型为T, rest的类型为tuple<Ts…>，这是模板其余参数的扩展。说明包含N个元素的元组将包含第一个元素和另一个tuple;这第二个tuple，依次包含第二个元素和另一个tuple;这第三个嵌套tuple包含其余内容。这种模式一直持续下去，直到得到只有一个元素的tuple，这是由偏特化tuple<T>定义。与主模板不同，此特化不聚合另一个tuple对象。
 
 可以使用这个简单的实现来编写如下代码:
 
@@ -48,7 +48,7 @@ std::cout << three.value << ','
           << three.rest.rest.value << '\n';
 \end{lstlisting}
 
-虽然这是可行的，但通过rest成员访问元素，例如three.rest.rest.value，还是很繁琐的。而且tuple的元素越多，用这种方式写代码就越难。因此，我们希望使用一些辅助函数来简化tuple元素的访问。以下是如何转换之前的代码片段:
+虽然可行，但需要通过rest成员访问元素，例如three.rest.rest.value，还是很繁琐的。而且tuple的元素越多，用这种方式写代码就越难。因此，我们希望使用一些辅助函数来简化tuple元素的访问:
 
 \begin{lstlisting}[style=styleCXX]
 std::cout << get<0>(one) << '\n';
@@ -66,7 +66,7 @@ template <size_t N, typename... Ts>
 typename nth_type<N, Ts...>::value_type & get(tuple<Ts...>& t);
 \end{lstlisting}
 
-模板参数是元组类型的索引和形参包，但其实现需要一些帮助器类型。首先，需要了解tuple中第N个下标处元素的类型。这可以在以下nth\_type可变类型模板的帮助下进行检索:
+模板参数是元组类型的索引和形参包，但其实现需要一些帮助器类型。首先，需要了解tuple中第N个下标处元素的类型。可以在以下nth\_type可变类型模板的帮助下进行检索:
 
 \begin{lstlisting}[style=styleCXX]
 template <size_t N, typename T, typename... Ts>
@@ -83,7 +83,7 @@ struct nth_type<0, T, Ts...>
 };
 \end{lstlisting}
 
-同样，有一个主模板，使用递归继承和索引0的特化。特化为第一个类型模板定义了一个名为value\_type的别名(是模板参数列表的头)，此类型仅用作确定tuple元素类型的机制，需要另一个可变类模板来检索值:
+同样，有一个主模板，使用递归继承和索引0的特化。特化为第一个类型模板定义了一个名为value\_type的别名(是模板参数列表的头)，此类型仅用作确定tuple元素类型的机制，需要另一个可变参数类模板来检索值:
 
 \begin{lstlisting}[style=styleCXX]
 template <size_t N>
@@ -108,7 +108,7 @@ struct getter<0>
 };
 \end{lstlisting}
 
-可以看到相同的递归模式，有一个主模板和一个显式特化。类模板称为getter，只有一个模板参数，这是非类型模板参数。这个参数表示要访问的tuple元素的索引。这个类模板有一个名为get的静态成员函数，是一个可变参数函数模板。主模板中的实现以tuple的其余成员作为参数调用get函数，并且显式特化的实现会返回对元组成员值的引用。
+可以看到相同的递归模式，有一个主模板和一个显式特化。类模板称为getter，只有一个模板参数，这是非类型模板参数，这个参数表示要访问的tuple元素的索引。这个类模板有一个名为get的静态成员函数，是一个可变参数函数模板。主模板中的实现以tuple的其余成员作为参数调用get函数，并且显式特化的实现会返回对元组成员值的引用。
 
 定义了这些之后，现在可以为辅助可变参数函数模板get提供一个实现。这个实现依赖于getter类模板，并调用其get可变参数函数模板:
 
@@ -121,14 +121,14 @@ get(tuple<Ts...>& t)
 }
 \end{lstlisting}
 
-若这个例子看起来有点复杂，那么一步步地分析它可能会帮助您更好地理解其工作原理。让我们从以下片段开始:
+若这个例子有点复杂，那么对其一步步地分析可能会有助于读者们更好地理解其工作原理。先从以下片段开始:
 
 \begin{lstlisting}[style=styleCXX]
 tuple<int, double, char> three(42, 42.0, 'a');
 get<2>(three);
 \end{lstlisting}
 
-我们将使用cppinsights.io Web工具来检查，这个代码段中发生的模板实例化。首先要查看的是类模板元组，有一个主模板和几个特化:
+使用cppinsights.io Web工具来检查，这个代码段中发生的模板实例化。首先要查看的是类模板元组，有一个主模板和几个特化:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T, typename... Ts>
@@ -193,14 +193,14 @@ struct tuple<T>
 };
 \end{lstlisting}
 
-tuple<int, double, char>结构包含一个int和一个tuple<double, char>；tuple<double, char>包含一个double和一个tuple<char>；tuple<char>又包含一个char值。最后一个类表示元组的递归定义的结束。在概念上可以用以下图形表示:
+tuple<int, double, char>结构包含一个int和一个tuple<double, char>；tuple<double, char>包含一个double和一个tuple<char>；tuple<char>又包含一个char值，最后一个类表示元组的递归定义的结束。可以用以下图形表示:
 
 \begin{center}
 \includegraphics[width=0.4\textwidth]{content/1/chapter3/images/1.png}\\
 图3.1 - 元组的示例
 \end{center}
 
-接下来，是nth\_type类模板，有一个主模板和几个特化:
+接下来，是nth\_type类模板，一个主模板和几个特化:
 
 \begin{lstlisting}[style=styleCXX]
 template <size_t N, typename T, typename... Ts>
@@ -234,7 +234,7 @@ struct nth_type<0, T, Ts...>
 
 nth\_type<2, int, double, char>特化派生自nth\_type<1, double, char>，而nth\_type<1, double, char>又派生自nth\_type<0, char>，nth\_type<0, char>是层次结构中的最后一个基类(递归层次结构的末尾)。
 
-nth\_type结构体用作getter辅助类模板中的返回类型，其实例化如下所示:
+nth\_type结构体用作getter辅助类模板中的返回类型，实例化如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template <size_t N>
@@ -288,7 +288,7 @@ struct getter<0>
 };
 \end{lstlisting}
 
-最后，我们用来检索tuple元素值的get函数模板定义如下所示:
+最后，检索tuple元素值的get函数模板定义:
 
 \begin{lstlisting}[style=styleCXX]
 template <size_t N, typename... Ts>
@@ -319,7 +319,7 @@ get<1, int, double, char>(tuple<int, double, char> & t)
 
 这个例子演示了如何使用用于一般情况的主模板，和一个用于可变参数递归的结束情况的特化来实现可变参数类模板。
 
-这里使用关键字typename作为nth\_type<N, Ts...>::value\_type类型的前缀，是一个依赖类型。C++20中，这个不再是必要的，这个主题将在第4章中详细讨论。
+这里使用关键字typename作为nth\_type<N, Ts...>::value\_type类型的前缀，是一个依赖类型。C++20中，这个不再必要，这个主题将在第4章中详细讨论。
 
 由于实现可变参数模板通常是冗长且繁琐的，C++17标准添加了折叠表达式来进行简化。我们将在下一节中来探讨折叠表达式。
 

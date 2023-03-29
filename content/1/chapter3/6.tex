@@ -1,4 +1,4 @@
-所有可以模板化的东西也可以变参数化，别名模板是一组类型的别名(另一个名称)。可变别名模板是具有可变数量模板参数的类型族的名称。目前为止，编写别名模板会相当简单的，先来看一个例子:
+所有可以模板化的东西也可以变参数化，别名模板是一组类型的别名(另一个名称)。可变别名模板是具有可变数量模板参数的类型族的名称。编写别名模板会相当简单的，先来看一个例子:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T, typename... Args>
@@ -10,7 +10,7 @@ template <typename... Args>
 using int_foo = foo<int, Args...>;
 \end{lstlisting}
 
-类模板foo是可变的，并且至少接受一个类型模板参数。另外，int\_foo只是一个名称，用于从foo类型实例化的类型，并且int作为第一个类型模板参数的模板:
+类模板foo是可变参数的，并且至少接受一个类型模板参数。int\_foo只是一个名称，用于从foo类型实例化的类型，并且int作为第一个类型模板参数的模板:
 
 \begin{lstlisting}[style=styleCXX]
 foo<double, char, int> f1;
@@ -19,9 +19,9 @@ int_foo<char, double> f3;
 static_assert(std::is_same_v<decltype(f2), decltype(f3)>);
 \end{lstlisting}
 
-这段代码中，f1和f2和f3是不同foo类型的实例，它们是从foo的不同模板参数集实例化的。然而，f2和f3是同一类型的实例，所以int\_foo<char, double>是foo<int, char, double>类型的别名。
+这段代码中，f1和f2和f3是不同foo类型的实例，都是从foo的不同模板参数集实例化的。然而，f2和f3是同一类型的实例，所以int\_foo<char, double>是foo<int, char, double>类型的别名。
 
-前面介绍了一个类似的例子，尽管有点复杂。标准库包含一个名为std::integer\_sequence的类模板，表示一个编译时的整数序列，以及一堆别名模板，从而帮助创建各种类型的此类整数序列。虽然这里显示的是一个简化的代码段，但至少在概念上，其实现如下所示:
+前面介绍了一个类似的例子，尽管有点复杂。标准库包含一个名为std::integer\_sequence的类模板，表示一个编译时的整数序列，以及一堆别名模板，从而帮助创建各种类型的此类整数序列。虽然这是一个简化的代码段，在概念上的实现如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename T, T... Ints>

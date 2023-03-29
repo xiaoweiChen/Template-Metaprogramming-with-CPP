@@ -9,7 +9,7 @@ constexpr unsigned int factorial(unsigned int const n)
 
 这应该很容易理解:通过递归地调用函数和递减的参数，返回函数参数与返回值相乘的结果，若参数为0或1，则返回值1。参数的类型(以及返回值)是unsigned int，以避免使用负整数。
 
-为了在编译时计算阶乘函数的值，需要定义一个类模板，其中包含一个持有函数值的数据成员。实现如下所示:
+为了在编译时计算阶乘函数的值，需要定义一个类模板，其中包含一个持有函数值的数据成员:
 
 \begin{lstlisting}[style=styleCXX]
 template <unsigned int N>
@@ -31,9 +31,9 @@ int main()
 }
 \end{lstlisting}
 
-第一个定义是主要模板，有一个非类型模板参数，表示需要计算其阶乘的值。该类包含一个名为value的静态constexpr数据成员，初始化的结果是参数N与阶乘类模板的值相乘，参数自减后实例化。递归需要一个初始值，这是由(非类型模板参数的)第一个参数(0号)的显式特化提供的，成员值初始化为1。
+第一个定义是主模板，有一个非类型模板参数，表示需要计算其阶乘的值。该类包含一个名为value的静态constexpr数据成员，初始化的结果是参数N与阶乘类模板的值相乘，参数自减后实例化。递归需要一个初始值，这是由(非类型模板参数的)第一个参数(0号)的显式特化提供的，成员值初始化为1。
 
-main函数中遇到实例化factorial<4>::value时，编译器生成从factorial<4>到factorial<0>的所有递归实例化。看起来如下所示:
+main函数中遇到实例化factorial<4>::value时，编译器生成从factorial<4>到factorial<0>的所有递归实例化:
 
 \begin{lstlisting}[style=styleCXX]
 template<>
@@ -71,9 +71,9 @@ struct factorial<0>
 };
 \end{lstlisting}
 
-这些实例化中，编译器能够计算出数据成员阶乘<N>::value的值。需要再次提到的是，当启用优化时，甚至不会生成此代码，但生成的常量将直接用于生成的汇编代码中。
+这些实例化中，编译器能够计算出数据成员阶乘<N>::value的值。当启用优化时，甚至不会生成此代码，但生成的常量将直接用于生成的汇编代码中。
 
-阶乘类模板的实现相对简单，类模板基本上只是静态数据成员值的包装器。实际上，我们可以通过变量模板来避免这种情况。可以有如下定义:
+阶乘类模板的实现相对简单，类模板基本上只是静态数据成员值的包装器。实际上，可以通过变量模板来避免这种情况:
 
 \begin{lstlisting}[style=styleCXX]
 template <unsigned int N>
@@ -88,7 +88,7 @@ int main()
 }
 \end{lstlisting}
 
-阶乘类模板和阶乘变量模板的实现之间有很多相似之处。对于变量模板，我们取出了数据成员值，并将其称为阶乘。另一方面，这也会更方便使用，因为不需要访问factorial<4>::value中数据成员的值。
+阶乘类模板和阶乘变量模板的实现之间有很多相似之处。对于变量模板，我们取出了数据成员值，并将其称为阶乘。另一方面，因为不需要访问factorial<4>::value中数据成员的值，这也会容易使用。
 
 编译时计算阶乘还有第三种方法:使用函数模板。可能的实现如下所示:
 
@@ -110,7 +110,7 @@ int main()
 }
 \end{lstlisting}
 
-可以看到主模板递归地调用factorial函数模板，并且我们对值1和0有两个完全的特化，都返回1。
+可以看到主模板递归地调用factorial函数模板，并且对值1和0有两个完全的特化，都返回1。
 
 这三种不同的方法中哪一种是最好的可能不太好说，但阶乘模板的递归实例化的复杂性保持不变，这取决于模板的性质。下面的代码段增加了复杂性:
 
@@ -145,7 +145,7 @@ int main()
 }
 \end{lstlisting}
 
-本例中有两个类模板。第一个称为wrapper，它有一个空实现(包含什么并不重要)，但它表示某种类型的包装器类(或者更准确地说，某种类型的值)。第二个模板称为manyfold\_wrapper，表示一个包装器对一个类型的包装器进行多次包装。包装数量没有上限，但是下限有。0值的全特化为unsigned int类型定义了一个名为value\_type的成员类型。因此，manyfold\_wrapper<1>为wrapper<unsigned int>定义了一个名为value\_type的成员类型，manyfold\_wrapper<2>为wrapper<wrapper<unsigned int>>定义了一个名为value\_type的成员类型，以此类推。因此，执行main函数将输出以下内容到控制台:
+本例中有两个类模板。第一个称为wrapper，有一个空实现(并不重要)，但它表示某种类型的包装器类(或者更准确地说，某种类型的值)。第二个模板称为manyfold\_wrapper，表示一个包装器对一个类型的包装器进行多次包装。包装数量没有上限，但是下限有。0值的全特化为unsigned int类型定义了一个名为value\_type的成员类型。因此，manyfold\_wrapper<1>为wrapper<unsigned int>定义了一个名为value\_type的成员类型，manyfold\_wrapper<2>为wrapper<wrapper<unsigned int>>定义了一个名为value\_type的成员类型，以此类推。在执行main函数时，会将输出以下内容到控制台:
 
 \begin{lstlisting}[style=styleCXX]
 unsigned int
@@ -154,7 +154,7 @@ struct wrapper<struct wrapper<unsigned int> >
 struct wrapper<struct wrapper<struct wrapper<unsigned int> > >
 \end{lstlisting}
 
-C++标准没有为递归嵌套的模板实例化指定限制，但推荐限制为1024个。然而，这只是一个建议，而不是要求。因此，不同的编译器实现了不同的限制。VC++ 16.11编译器的限制设置为500，GCC 12为900，Clang 13为1024。超过此限制时将生成编译器错误。以下是一些例子:
+C++标准没有为递归嵌套的模板实例化指定限制，但推荐限制为1024个。这只是一个建议，而不是要求，所以不同的编译器实现了不同的限制。VC++ 16.11编译器的限制设置为500，GCC 12为900，Clang 13为1024。超过此限制时将使编译器报错。以下是一些例子:
 
 VC++:
 
@@ -179,9 +179,9 @@ use -ftemplate-depth=N to increase recursive template
 instantiation depth
 \end{tcblisting}
 
-对于GCC和Clang，可以使用编译器选项-ftemplate-depth=N来增加嵌套模板实例化的最大值，但Visual C++编译器没有这样的选项。
+对于GCC和Clang，可以使用编译器选项-ftemplate-depth=N可以增加嵌套模板实例化的最大值，但Visual C++编译器没有这种选项。
 
-递归模板在编译时，可以以递归的方式解决一些问题。使用递归函数模板、变量模板，还是类模板，取决于试图解决的问题或开发偏好。但应该记住，深度模板递归的深度是有限制的，需要明智地使用模板递归。
+递归模板在编译时，可以以递归的方式解决一些问题。使用递归函数模板、变量模板，还是类模板，取决于具体问题或开发偏好。但深度模板递归的深度是有限制的，需要明智地使用模板递归。
 
 本章要讨论的下一个高级主题是模板参数推导，包括函数和类。
 

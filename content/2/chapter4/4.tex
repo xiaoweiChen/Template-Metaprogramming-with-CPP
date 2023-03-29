@@ -12,13 +12,13 @@ std::vector<int> v{ 1,2,3,4,5 };
 wrapper<int> w{ 42 };
 \end{lstlisting}
 
-通过为函数模板利用模板实参推断，一些标准类型具有辅助函数，这些函数可以创建类型的实例，而不需要显式地指定模板实参。例如：std::make\_pair用于std::pair, std::make\_unique用于std::unique\_ptr。这些辅助函数模板用于辅助auto关键字，避免了为类模板指定模板实参的需要。这里有一个例子:
+通过为函数模板利用模板实参推断，一些标准类型具有辅助函数，这些函数可以创建类型的实例，而不需要显式地指定模板实参。例如：std::make\_pair用于std::pair, std::make\_unique用于std::unique\_ptr。这些辅助函数模板会使用auto关键字，避免了为类模板指定模板实参。这里有一个例子:
 
 \begin{lstlisting}[style=styleCXX]
 auto p = std::make_pair(42, 42.0);
 \end{lstlisting}
 
-尽管并非所有标准类模板都有这样一个用于创建实例的辅助函数，但编写自己的帮助函数并不难。在下面的代码片段中，可以看到一个make\_vector函数模板用于创建std::vector<T>实例，还有一个make\_wrapper函数模板用于创建wrapper<T>实例:
+尽管并非所有标准类模板都有这样一个用于创建实例的辅助函数，但编写自己的帮助函数并不难。下面的代码中，可以看到一个make\_vector函数模板用于创建std::vector<T>实例，还有一个make\_wrapper函数模板用于创建wrapper<T>实例:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T, typename... Ts,
@@ -41,7 +41,7 @@ auto v = make_vector(1, 2, 3, 4, 5);
 auto w = make_wrapper(42);
 \end{lstlisting}
 
-C++17标准通过为类模板提供模板参数推导，简化了类模板的使用。因此，使用从C++17，本节中的第一个代码段可以进行如下简化:
+C++17标准通过为类模板提供模板参数推导，简化了类模板的使用。因此使用C++17，本节中的第一段代码可以进行如下的简化:
 
 \begin{lstlisting}[style=styleCXX]
 std::pair p{ 42, 42.0 }; // std::pair<int, double>
@@ -49,7 +49,7 @@ std::vector v{ 1,2,3,4,5 }; // std::vector<int>
 wrapper w{ 42 }; // wrapper<int>
 \end{lstlisting}
 
-这是可能的，因为编译器能够从初始化式的类型推断出模板参数。本例中，编译器从变量的初始化表达式中推导出，但是编译器也能够从new表达式和函数样式的强制转换表达式中推导出模板参数。下面举几个例子:
+本例中，因为编译器能够从初始化式的类型推断出模板参数，编译器从变量的初始化表达式中推导出。当然，编译器也能够从new表达式和函数样式的强制转换表达式中推导出模板参数。下面举几个例子:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -70,11 +70,11 @@ auto l = std::lock_guard(mt); // [2]
 // function-style cast expression
 \end{lstlisting}
 
-类模板的模板参数推断方式与函数模板不同，当在变量声明或函数样式强制转换中遇到类模板的名称时，编译器将构建一组推导指南。
+类模板的模板参数推导方式与函数模板不同，当在变量声明或函数样式强制转换中遇到类模板的名称时，编译器将构建一组推导指南。
 
-有虚构函数代表一个虚构的类的构造函数签名模板类型，还可以提供推断参考，这些参考线将添加到编译器生成的参考列表中。若在虚构函数模板的构造集上重载解析失败(返回类型不是匹配过程的一部分，因为这些函数表示构造函数)，则程序格式错误，并报错。否则，所选函数模板特化的返回类型将变成推导出类模板的特化。
+有虚构函数代表一个虚构的类的构造函数签名模板类型，还可以提供推导参考，这些参考线将添加到编译器生成的参考列表中。若在虚构函数模板的构造集上重载解析失败(因为这些函数表示构造函数，返回类型不是匹配过程的一部分)，则程序格式错误并报错。否则，所选函数模板特化的返回类型将变成推导出类模板的特化。
 
-为了更好地理解这一点，来看看推导指南实际上是什么样子的。在下面的代码片段中，可以看到编译器为std::pair类生成的一些指南。实际的列表更长，为了简洁起见，这里只列出了一些:
+为了更好地理解这一点，来看看推导指南实际的样子。下面的代码中，可以看到编译器为std::pair类生成的一些指南。实际的列表更长，这里只列出了一些:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T1, typename T2>
@@ -88,9 +88,9 @@ typename U2>
 std::pair<T1, T2> F(U1&& x, U2&& y);
 \end{lstlisting}
 
-这组隐式推导指南由类模板的构造函数生成。这包括默认构造函数、复制构造函数、移动构造函数和所有转换构造函数，参数以精确的顺序复制。若构造函数是显式的，那么推导指南也是显式的。但若类模板没有任何用户定义的构造函数，则为假设的默认构造函数创建推导指南。总是为假设的复制构造函数创建推导指南。
+这组隐式推导指南由类模板的构造函数生成。包括默认构造函数、复制构造函数、移动构造函数和所有转换构造函数，参数以精确的顺序复制。若构造函数是显式的，推导指南也是显式的。但若类模板没有用户定义的构造函数，则为假设的默认构造函数创建推导指南。总会为假设的复制构造函数创建推导指南。
 
-用户定义的演绎指南可以在源代码中提供，其语法类似于带有尾部返回类型，但没有auto关键字的函数。推导指南可以是函数也可以是函数模板，但这些必须在与类模板相同的命名空间中提供。因此，若要为std::pair类添加用户定义的推导指南，则必须在std命名空间中完成。下面是一个例子:
+用户定义的演绎指南可以在源代码中提供，其语法类似于带有尾部返回类型，但没有auto关键字的函数。推导指南可以是函数也可以是函数模板，但这些必须在与类模板相同的命名空间中提供。若要为std::pair类添加用户定义的推导指南，则必须在std命名空间中完成。下面是一个例子:
 
 \begin{lstlisting}[style=styleCXX]
 namespace std
@@ -100,7 +100,7 @@ namespace std
 }
 \end{lstlisting}
 
-目前为止，演绎指南都针对的是函数模板，但它们不一定是函数模板，也可以是正则函数。看一下下面的例子:
+目前，推导指南都针对的是函数模板，但它们不一定是函数模板，也可以是正则函数:
 
 \begin{lstlisting}[style=styleCXX]
 std::pair p1{1, "one"}; // std::pair<int, const char*>
@@ -109,7 +109,7 @@ std::pair p3{"3", "three"};
 // std::pair<const char*, const char*>
 \end{lstlisting}
 
-使用编译器退化的std::pair类推导指南，推导出的类型为std::pair<int, const char*> (p1)， std::pair<const char*， int> (p2)， std::pair<const char*， const char*> (p3)。换句话说，编译器在使用字面值字符串的地方推导出的类型是const char*(正如预料的那样)。可以通过提供几个用户定义的推导指南，告诉编译器推导std::string而不是const char*。如下所示:
+使用编译器退化的std::pair类推导指南，推导出的类型为std::pair<int, const char*> (p1)， std::pair<const char*，int> (p2)， std::pair<const char*，const char*> (p3)。换句话说，编译器在使用字面值字符串的地方推导出的类型是const char*(正如预料的那样)。可以通过提供几个用户定义的推导指南，告诉编译器推导std::string，而非const char*:
 
 \begin{lstlisting}[style=styleCXX]
 namespace std
@@ -125,7 +125,7 @@ namespace std
 }
 \end{lstlisting}
 
-注意，前两个是函数模板，但第三个是常规函数。有了这些指南，从前面的例子中为p1、p2和p3推导出的类型分别是std::pair<int, std::string>， std::pair<std::string, int>和std::pair<std::string, std::string>。
+前两个是函数模板，但第三个是常规函数。有了这些指南，从前面的例子中为p1、p2和p3推导出的类型分别是std::pair<int, std::string>， std::pair<std::string, int>和std::pair<std::string, std::string>。
 
 再看一个用户定义指南的例子，这次是一个用户定义的类。考虑以下对范围建模的类模板:
 
@@ -143,14 +143,14 @@ struct range_t
 };
 \end{lstlisting}
 
-这个实现没有太多内容，但对于我们的目的来说已经足够了。假设想从一个整数数组中构造一个range对象:
+这个实现没有太多内容，但已经足够了。假设想从一个整数数组中构造一个range对象:
 
 \begin{lstlisting}[style=styleCXX]
 int arr[] = { 1,2,3,4,5 };
 range_t r(std::begin(arr), std::end(arr));
 \end{lstlisting}
 
-运行这段代码将生成一个错误。不同的编译器会生成不同的错误消息，也许Clang提供的错误消息最能描述问题:
+运行这段代码将报错。不同的编译器会生成不同的错误消息，也许Clang提供的错误消息最能描述问题:
 
 \begin{tcblisting}{commandshell={}}
 error: no viable constructor or deduction guide for deduction
@@ -166,7 +166,7 @@ argument, but 2 were provided
 struct range_t
 \end{tcblisting}
 
-然而，不管实际的错误消息是什么，其含义都是一样的:range\_t的模板参数推导失败。为了使推导工作，需要提供一个自定义的推导指南:
+然而，不管实际的错误消息是什么，其含义都是一样的:range\_t的模板参数推导失败。为了使推导工作，需要提供自定义的推导指南:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename Iter>
@@ -183,16 +183,16 @@ typename std::iterator_traits<Iter>::value_type>;
 wrapper w{ 42 }; // wrapper<int>
 \end{lstlisting}
 
-C++17中，若没有用户定义的推导指南，这实际上是不正确的。原因是wrapper<T>是一个聚合类型，并且类模板参数推导在C++17中从聚合初始化中不起作用。因此，为了使上一行代码工作，需要提供如下的推导指南:
+C++17中，若没有用户定义的推导指南，这实际上不正确。因为是wrapper<T>是一个聚合类型，并且类模板参数推导在C++17中从聚合初始化中不起作用。所以为了使上一行代码工作，需要提供如下的推导指南:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
 wrapper(T) -> wrapper<T>;
 \end{lstlisting}
 
-C++20中取消了对这种用户定义的推导指南的要求。这个版本的标准提供了对聚合类型的支持(只要任何依赖基类都没有虚函数或虚基类，并且变量可从一个非空的初始化器列表中进行初始化)。
+C++20中取消了对这种用户定义的推导指南的要求，标准提供了对聚合类型的支持(只要任何依赖基类都没有虚函数或虚基类，并且变量可从一个非空的初始化器列表中进行初始化)。
 
-只有在没有提供模板参数的情况下，类模板参数推导才有效。因此，下面的p1和p2声明都是有效的，并且发生类模板参数推导。对于p2，推导出的类型是std::pair<int, std::string>(假设用户定义的指南可用)。然而，p3和p4的声明会产生错误，因为类模板参数推导没有发生，因为模板参数列表是存在的(<>和<int>)，但不包含所有必需的参数:
+只有在没有提供模板参数的情况下，类模板参数推导才有效。因此，下面的p1和p2声明都是有效的，并且发生类模板参数推导。对于p2，推导出的类型是std::pair<int, std::string>(假设用户定义的指南可用)。然而，p3和p4的声明会产生错误，因为类模板参数推导没有发生。而模板参数列表是存在的(<>和<int>)，但不包含所有必需的参数:
 
 \begin{lstlisting}[style=styleCXX]
 std::pair<int, std::string> p1{ 1, "one" }; // OK
@@ -209,9 +209,9 @@ std::vector v2{ v1, v1 };
 std::vector v3{ v1 };
 \end{lstlisting}
 
-v1的推导类型是std::vector<int>， v2的推导类型是std::vector<std::vector<int>>。但编译器应该为v3类型推断出什么?有两个选项:std::vector<std::vector<int>>和std::vector<int>。若期望是前者，那么将失望地发现编译器实际上推导出后者。这是因为演绎依赖于参数的数量和类型。
+v1的推导类型是std::vector<int>，v2的推导类型是std::vector<std::vector<int>{}>。但编译器应该为v3类型推断出什么?有两个选项:std::vector<std::vector<int>{}>和std::vector<int>。若期望是前者，那么将失望地发现编译器实际上推导出后者。这是因为推导依赖于参数的数量和类型。
 
-当参数数量大于1时，将使用接受初始化列表的构造函数。对于v2变量，即std::initializer\_list<std::vector<int>>。当参数的数量为1时，则考虑参数的类型。若参数的类型是std::vector的(特化)-考虑到这种显式情况-则使用复制构造函数，推导的类型是实参的声明类型。这就是变量v3的情况，其中推导出的类型是std::vector<int>。否则，使用接受初始化列表(包含单个元素)的构造函数，例如变量v1，其推导出的类型为std::vector<int>。在cppinsights.io可视化工具的帮助下，可以显示生成的代码(对于前面的代码段)。为了简洁起见，删除了allocator参数:
+当参数数量大于1时，将使用接受初始化列表的构造函数。对于v2变量，即std::initializer\_list<std::vector<int>{}>。当参数的数量为1时，则考虑参数的类型。若参数的类型是std::vector的(特化)-考虑到这种显式情况-则使用复制构造函数，推导的类型是实参的声明类型。这就是变量v3的情况，其中推导出的类型是std::vector<int>。否则，使用接受初始化列表(包含单个元素)的构造函数，例如变量v1，其推导出的类型为std::vector<int>。在cppinsights.io可视化工具的帮助下，可以显示生成的代码(对于前面的代码段)。为了简单起见，删除了allocator参数:
 
 \begin{lstlisting}[style=styleCXX]
 std::vector<int> v1 =
@@ -227,9 +227,9 @@ std::vector<vector<int>>{
 std::vector<int> v3 = std::vector<int>{v1};
 \end{lstlisting}
 
-类模板参数推导是C++17的一个有用特性，C++20改进了对聚合类型的处理。当编译器能够推导出不必要的模板参数时，器有助于避免编写不必要的显式模板参数，即使在某些情况下，编译器可能需要用户定义的推导指南才能进行推导。这还避免了创建工厂函数的需要，例如std::make\_pair或std::make\_tuple，这是在类模板可用之前从模板参数推导中受益的一种方式。
+类模板参数推导是C++17的一个特性，C++20改进了对聚合类型的处理。当编译器能够推导出不必要的模板参数时，器有助于避免编写不必要的显式模板参数，即使在某些情况下，编译器可能需要用户定义的推导指南才能进行推导。这还避免了创建工厂函数的需要，例如std::make\_pair或std::make\_tuple，这是在类模板可用之前从模板参数推导中受益的一种方式。
 
-关于模板参数推导的内容比我们到目前为止讨论的内容要多。函数模板参数推断有一种特殊情况，称为转发引用。这个主题将在下面讨论。
+关于模板参数推导的内容比我们到目前为止讨论的内容要多。函数模板参数推断有一种特殊情况，称为转发引用。这个主题将在下面的章节中进行讨论。
 
 
 

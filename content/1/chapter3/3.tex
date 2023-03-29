@@ -1,5 +1,5 @@
 
-模板或函数形参包可以接受零个、一个或多个参数。该标准没有指定参数数量的上限，但编译器可能会有一些。该标准所做的是为这些限制推荐最小值，但不要求遵守这些限定值。这些限制如下:
+模板或函数形参包可以接受零个、一个或多个参数。该标准没有指定参数数量的上限，但编译器可能会进行设定。该标准所做的是为这些限制推荐最小值，但不要求遵守这些限定值。这些限制如下:
 
 \begin{itemize}
 \item
@@ -9,7 +9,7 @@
 对于模板形参包，参数的最大数量取决于模板形参的限制，建议至少为1024个。
 \end{itemize}
 
-参数包中的参数数量，可以在编译时使用sizeof…操作符检索。该操作符返回std::size\_t类型的constexpr值。通过几个例子来看看其是如何工作的。
+参数包中的参数数量，可以在编译时使用sizeof…操作符检索。该操作符返回std::size\_t类型的constexpr值。
 
 第一个示例中，sizeof…操作符用于借助constexpr if语句实现可变参数函数模板sum的递归模式的结束。若形参包中的参数数量为零(函数只有一个参数)，则处理的是最后一个参数，因此只返回值。否则，将第一个参数与其余参数进行加和。实现如下所示:
 
@@ -24,7 +24,7 @@ T sum(T a, Args... args)
 }
 \end{lstlisting}
 
-这在语义上是等价的，比下面的可变参数函数模板实现的方法更简洁:
+这在语义上是等价的，比下面的可变参数函数模板的实现更加简洁:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -40,7 +40,7 @@ T sum(T a, Args... args)
 }
 \end{lstlisting}
 
-注意sizeof…(args)(函数形参包)和sizeof…(Args)(模板形参包)返回相同的值。另一方面，sizeof…(args)和sizeof(args)…不是一回事。前者是用于参数包args的sizeof操作符。后者是sizeof操作符上参数包args的扩展。在下面的例子中都进行了展示:
+注意sizeof…(args)(函数形参包)和sizeof…(Args)(模板形参包)返回相同的值。另一方面，sizeof…(args)和sizeof(args)…不是一回事。前者是用于参数包args的sizeof操作符，后者是sizeof操作符上参数包args的扩展:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename... Ts>
@@ -53,7 +53,7 @@ constexpr auto get_type_sizes()
 auto sizes = get_type_sizes<short, int, long, long long>();
 \end{lstlisting}
 
-在这段代码中，sizeof…(Ts)在编译时计算为4，而sizeof(Ts)…展开为以下以逗号分隔的参数包:sizeof(short)、sizeof(int)、sizeof(long)、sizeof(long long)。所以，前面的函数模板get\_type\_sizes相当于下面的函数模板，其有四个模板形参:
+这段代码中，sizeof…(Ts)在编译时计算为4，而sizeof(Ts)…展开为以下以逗号分隔的参数包:sizeof(short)、sizeof(int)、sizeof(long)、sizeof(long long)。所以，前面的函数模板get\_type\_sizes相当于下面的函数模板，有四个模板形参:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename T1, typename T2,
@@ -66,7 +66,7 @@ constexpr auto get_type_sizes()
 }
 \end{lstlisting}
 
-通常，形参包是函数或模板的尾形参。但若编译器可以推断实参，则一个形参包后面可以跟其他形参包，其中包括更多形参包。看看下面的例子:
+通常，形参包是函数或模板的尾形参。但若编译器可以推断实参，则一个形参包后面可以跟其他形参包，其中包括更多形参包:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename... Ts, typename... Us>
@@ -77,7 +77,7 @@ constexpr auto multipacks(Ts... args1, Us... args2)
 }
 \end{lstlisting}
 
-这个函数应该取两组可能类型不同的元素，并对它们做一些事情。可以在以下示例中调用:
+这个函数应该取两组可能类型不同的元素，并对它们做一些处理:
 
 \begin{lstlisting}[style=styleCXX]
 multipacks<int>(1, 2, 3, 4, 5, 6);
@@ -90,16 +90,16 @@ multipacks<int, int, int, int, int, int>(1, 2, 3, 4, 5, 6);
                 // 6,0
 \end{lstlisting}
 
-对于第一次调用，args1包在函数调用时指定(就像在multipacks<int>中一样)并包含1，而args2则从函数参数推断为2,3,4,5,6。类似地，对于第二次调用，两个包将拥有相同数量的参数，更准确地说是1,2,3和3,4,6。对于最后一次调用，第一个包包含所有元素，第二个包为空。所有这些示例中，元素都是int类型。但在下面的例子中，这两个包包含有不同类型的元素:
+对于第一次调用，args1包在函数调用时指定(如multipacks<int>一样)并包含1，而args2则从函数参数推断为2,3,4,5,6。类似地，对于第二次调用，两个包将拥有相同数量的参数，更准确地说是1,2,3和3,4,6。对于最后一次调用，第一个包包含所有元素，第二个包为空。这些示例中，元素都是int类型。但在下面的例子中，这两个包中就会有不同类型的元素了:
 
 \begin{lstlisting}[style=styleCXX]
 multipacks<int, int>(1, 2, 4.0, 5.0, 6.0); // 2,3
 multipacks<int, int, int>(1, 2, 3, 4.0, 5.0, 6.0); // 3,3
 \end{lstlisting}
 
-对于第一次调用，args1包将包含整数1、2，而args2包将推导为包含双精度值4.0、5.0、6.0。类似地，对于第二次调用，args1包将是1,2,3，而args2包将包含4.0,5.0,6.0。
+对于第一次调用，args1包将包含整数1、2，而args2包将推导为包含double值4.0、5.0、6.0。类似地，对于第二次调用，args1包将是1,2,3，而args2包将包含4.0,5.0,6.0。
 
-若稍微改变一下函数模板的多重包，要求这些包具有相同的大小，那么只有前面显示的一些调用仍然可行。如下例所示:
+若稍微改变一下函数模板的多重包，要求这些包具有相同的大小，那么只有前面显示的调用仍然可用。如下例所示:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename... Ts, typename... Us>
@@ -119,16 +119,16 @@ multipacks<int, int>(1, 2, 4.0, 5.0, 6.0); // error
 multipacks<int, int, int>(1, 2, 3, 4.0, 5.0, 6.0); // OK
 \end{lstlisting}
 
-这个代码片段中，只有第2个和第6个调用是有效的。这两种情况下，两个推导的包各有三个元素。其他情况下，就像前面的例子一样，包的大小不同，static\_assert语句将在编译时生成错误。
+这里，只有第2个和第6个调用是有效的。这两种情况下，两个推导的包各有三个元素。其他情况下，就像前面的例子一样，包的大小不同，static\_assert将在编译时生成错误。
 
-多参数包并不特定于可变参数函数模板，也可以用于偏特化中的可变类模板，前提是编译器可以推断模板参数。为了举例说明这一点，我们将考虑表示一对函数指针的类模板的情况，实现应该允许存储指向任何函数的指针。所以，我们定义了一个主模板，称为func\_pair，以及一个带有四个模板参数的偏特化:
+多参数包并不特定于可变参数函数模板，也可以用于偏特化中的可变类模板，前提是编译器可以推断模板参数。为了说明，我们考虑用一对函数指针表示类模板的情况，实现应该允许存储指向任何函数的指针。所以，我们定义了一个主模板，称为func\_pair，以及带有四个模板参数的偏特化:
 
 \begin{itemize}
 \item
 第一个函数的返回类型的类型模板参数
 
 \item
-用于第一个函数的参数类型的模板参数包
+第一个函数的参数类型的模板参数包
 
 \item
 第二个函数的返回类型的第二个类型模板参数
@@ -137,7 +137,7 @@ multipacks<int, int, int>(1, 2, 3, 4.0, 5.0, 6.0); // OK
 第二个模板形参包，用于第二个函数的形参类型
 \end{itemize}
 
-func\_pair类模板如下面的代码所示:
+func\_pair类模板如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename, typename>
@@ -166,7 +166,7 @@ double sum_and_div(int a, int b, double c)
 }
 \end{lstlisting}
 
-可以实例化func\_pair类模板，并使用它来使用这两个函数，如下面的代码所示:
+可以实例化func\_pair类模板，并使用它来使用这两个函数:
 
 \begin{lstlisting}[style=styleCXX]
 func_pair<bool(int, int), double(int, int, double)> funcs{
@@ -178,13 +178,13 @@ funcs.g(42, 12, 10.0);
 
 参数包可以在不同的上下文中展开，这将成为下一节的主题。
 
-\subsubsubsection{3.3.1\hspace{0.2cm}参数包扩展}
+\subsubsubsection{3.3.1\hspace{0.2cm}展开参数包}
 
 参数包可以出现在不同的上下文中，扩展形式可能取决于这一背景。前面列出了这些可能的上下文和示例:
 
 \begin{itemize}
 \item
-模板参数(parameter)列表:当为模板指定参数时:
+模板参数(parameter)列表:为模板指定参数时:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename... T>
@@ -198,7 +198,7 @@ outer<int, double, char[5]> a;
 \end{lstlisting}
 
 \item
-模板参数(argument)列表:当为模板指定参数时:
+模板参数(argument)列表:为模板指定参数时:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename... T>
@@ -215,7 +215,7 @@ void tagger()
 \end{lstlisting}
 
 \item
-函数参数(parameter)列表:当为函数模板指定参数时:
+函数参数(parameter)列表:为函数模板指定参数时:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename... Args>
@@ -226,7 +226,7 @@ make_it(42, 'a');
 \end{lstlisting}
 
 \item
-函数参数(argument)列表:当展开包出现在函数调用的圆括号内时，省略号左侧表达式或大括号初始化列表就是展开的模式:
+函数参数(argument)列表:展开包出现在函数调用的圆括号内时，省略号左侧表达式或大括号初始化列表就是展开模式:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -258,7 +258,7 @@ do_sums(1, 2, 3, 4);
 \end{lstlisting}
 
 \item
-圆括号初始化式:当扩展包出现在直接初始化式、函数样式强制转换、成员初始化式、new表达式和其他类似上下文的圆括号内时，规则与函数实参列表的上下文相同:
+圆括号初始化式:展开包出现在直接初始化式、函数样式强制转换、成员初始化式、new表达式和其他类似上下文的圆括号内时，规则与函数实参列表的上下文相同:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename... T>
@@ -289,7 +289,7 @@ parenthesized(1, 2, 3, 4);
 \end{lstlisting}
 
 \item
-大括号初始化式:当使用大括号符号进行初始化时:
+大括号初始化式:使用大括号符号进行初始化时:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename... T>
@@ -306,7 +306,7 @@ brace_enclosed(1, 2, 3, 4);
 \end{lstlisting}
 
 \item
-基类说明符和成员初始化程序列表:包扩展可以在类声明中指定基类的列表。此外，也可能出现在成员初始化器列表中，因为调用基类的构造函数可能需要这样做:
+基类说明符和成员初始化程序列表:包展开可以在类声明中指定基类的列表。此外，也可能出现在成员初始化器列表中，因为调用基类的构造函数可能需要这样做:
 
 \begin{lstlisting}[style=styleCXX]
 struct A {};
@@ -365,7 +365,7 @@ x.C::execute();
 \end{lstlisting}
 
 \item
-Lambda捕获:Lambda表达式的捕获子句可能包含包扩展:
+Lambda捕获:Lambda表达式的捕获子句可能包含包展开:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename... T>
@@ -391,7 +391,7 @@ int sum(T... args)
 \end{lstlisting}
 
 \item
-sizeof…操作符:本节前面已经展示了示例。这里还有一个例子:
+sizeof…操作符:本节前面已经展示了示例。这里再来一个例子:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename... T>
@@ -425,10 +425,10 @@ alignment2<1, 4, 8> al2;
 \end{lstlisting}
 
 \item
-属性列表:目前还没有任何编译器支持。
+属性列表:目前还没有编译器支持。
 \end{itemize}
 
-现在，我们已经了解了更多关于参数包及其扩展的知识，可以继续探索可变参数类模板。
+现在，已经了解了更多关于参数包及其扩展的知识，可以继续探索可变参数类模板。
 
 
 

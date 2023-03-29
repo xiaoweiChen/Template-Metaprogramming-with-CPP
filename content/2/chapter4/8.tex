@@ -1,4 +1,4 @@
-定义类时，可以使用protected和private访问说明符限制对其成员数据和成员函数的访问。若成员是private，则只能在类中访问它。若成员是protected，则可以从具有public访问权限或protected访问权限的派生类访问。但类可以通过friend关键字将其private成员或protected成员的访问权授予其他函数或类。这些授予特殊访问权限的函数或类称为友元函数或友元类。先来看一个简单的例子:
+定义类时，可以使用protected和private访问说明符限制对其成员数据和成员函数的访问。若成员是private，则只能在类中访问它。若成员是protected，则可以从具有public访问权限或protected访问权限的派生类访问。但类可以通过friend关键字将其private成员或protected成员的访问权授予其他函数或类，这些授予特殊访问权限的函数或类称为友元函数或友元类。先来看一个简单的例子:
 
 \begin{lstlisting}[style=styleCXX]
 struct wrapper
@@ -17,9 +17,9 @@ wrapper w{ 42 };
 print(w);
 \end{lstlisting}
 
-wrapper类有一个名为value的private数据成员。有一个名为print的独立函数，接受类型wrapper的参数，并将包装的值输出到控制台。但，为了能够访问它，该函数声明为wrapper类的友元。
+wrapper类有一个名为value的private数据成员。有一个名为print的独立函数，接受类型wrapper的参数，并将包装的值输出到控制台。为了能够访问它，将该函数声明为wrapper类的友元。
 
-我们将不关注友谊对非模板的作用。读者需要熟悉该特性，我们才能继续在模板上下文中对其进行讨论。当涉及到模板时，事情变得有点复杂。我们将通过几个例子来研究这个问题:
+我们将不关注友情对非模板的作用。读者需要熟悉该特性，才能继续在模板上下文中对其进行讨论。当涉及到模板时，事情变得有点复杂。我们将通过几个例子来研究这个问题:
 
 \begin{lstlisting}[style=styleCXX]
 struct wrapper
@@ -53,7 +53,7 @@ printer<int>()(w);
 printer<double>()(w);
 \end{lstlisting}
 
-print函数现在是一个函数模板，有一个类型模板参数，但实际上并没有使用。这看起来可能有点奇怪，但这是一个有效的代码，需要通过指定模板参数来使用。但它指出，不管模板参数如何，print的模板实例化都可以访问wrapper类的私有成员。注意用于将其声明为wrapper类的友元的语法:使用模板语法。这同样适用于类模板printer，可声明为wrapper类的友元，任何模板实例化，无论模板参数如何，都可以访问其私有部分。
+print函数现在是一个函数模板，有一个类型模板参数，但实际上并没有使用。可能有点奇怪，但这是一个有效的代码，需要通过指定模板参数来使用。但不管模板参数如何，print的模板实例化都可以访问wrapper类的私有成员。注意用于将其声明为wrapper类的友元的语法:使用模板语法。这同样适用于类模板printer，可声明为wrapper类的友元，任何模板实例化，无论模板参数如何，都可以访问其私有部分。
 
 若想限制对这些模板的某些实例的访问呢?比如只有int类型的特化?然后，可以将这些特殊化声明为友元:
 
@@ -105,9 +105,9 @@ printer<int>()(w);
 printer<double>()(w);
 \end{lstlisting}
 
-这个代码段中，wrapper类与前面相同。对于print函数模板和printer类模板，都有一个主模板和int类型的完整特化。只有int实例化声明为wrapper类的友元。所以其他的特化，想试图访问主模板中wrapper类的私有部分时，会产生编译器错误。
+代码段中，wrapper类与前面相同。对于print函数模板和printer类模板，都有一个主模板和int类型的全特化。只有int实例化声明为wrapper类的友元。所以其他的特化，想试图访问主模板中wrapper类的私有部分时，会产生编译器错误。
 
-这些例子中，将友情授予私有部分的类是非模板类。但类模板也可以声明友元。先从类模板和非模板函数的情况开始:
+这些例子中，将友情授予私有部分的类是非模板类，但类模板也可以声明友元。先从类模板和非模板函数的情况开始:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -201,7 +201,7 @@ struct printer
 };
 \end{lstlisting}
 
-注意声明友元时，语法是template<typename U>，而不是template<typename T>。模板参数的名称U可以是除T名称之外的任何名称，这将掩盖wrapper类模板的模板参数名称，这是一个错误。请记住，使用这种语法，print或printer的特化都可以访问wrapper类模板特化的私有成员。若希望只有满足包装器类template参数的友元特化才可以访问私有部分，那么必须使用以下语法:
+注意声明友元时，语法是template<typename U>，而不是template<typename T>。模板参数的名称U可以是除T名称之外的名称，这将掩盖wrapper类模板的模板参数名称，这是一个错误。使用这种语法，print或printer的特化都可以访问wrapper类模板特化的私有成员。若希望只有满足包装器类template参数的友元特化才可以访问私有部分，那么必须使用以下语法:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -242,8 +242,8 @@ struct executor
 };
 \end{lstlisting}
 
-connection类模板有一个名为ConnectionString的私有数据成员，类型模板参数T是类的友元。executor类使用实例化connection<executor>，所以executor类型是模板参数，并受益于与connection类的友元权限，因此它可以访问私有数据成员ConnectionString。
+connection类模板有一个名为ConnectionString的私有数据成员，类型模板参数T是类的友元。executor类使用实例化connection<executor>，所以executor类型是模板参数，并受益于与connection类的友元权限，它可以访问私有数据成员ConnectionString。
  
-从所有这些示例中可以看出，与模板之间的友谊与非模板实体之间的友谊略有不同。请记住，朋友可以访问类的所有非公共成员。因此，交朋友需要小心。另一方面，若需要将访问权限授予一些私有成员，而不是全部成员，则可以借助“客户-律师”模式。此模式允许控制对类的私有部分的访问粒度。可以在这里了解关于这个模式的信息: \url{https://en.wikibooks.org/wiki/ More_C%2B%2B_Idioms/Friendship_and_the_Attorney-Client}。
+从所有这些示例中可以看出，与模板之间的友谊与非模板实体之间的友情略有不同。朋友可以访问类的所有非公共成员，所以交朋友需要小心。另一方面，若需要将访问权限授予一些私有成员，而不是全部成员，则可以借助“客户-律师”模式。此模式允许控制对类的私有部分的访问粒度。可以在这里了解关于这个模式的信息: \url{https://en.wikibooks.org/wiki/More_C%2B%2B_Idioms/Friendship_and_the_Attorney-Client}。
 
 
