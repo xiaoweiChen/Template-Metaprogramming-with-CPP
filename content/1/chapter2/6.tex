@@ -1,5 +1,5 @@
 
-模板特化是从模板实例化创建的定义，进行特化的模板称为主模板。可以为给定的模板参数集提供显式的特化定义，从而覆盖编译器将生成的隐式代码。这种技术支持诸如类型特征和条件编译等特性，这些元编程概念我们将在第5章中探讨。
+模板特化是从模板实例化创建的定义，进行特化的模板称为主模板。可以为给定的模板参数集提供显式的特化定义，从而覆盖编译器将生成的隐式代码。这种技术支持诸如类型特征和条件编译等特性，这些元编程概念将在第5章中探讨。
 
 模板特化有两种形式:显式(全)特化和偏特化。
 
@@ -27,7 +27,7 @@
 类模板的静态数据成员
 \end{itemize}
 
-先看一下下面的例子:
+看一下下面的例子:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -55,7 +55,7 @@ struct is_floating_point<long double>
 };
 \end{lstlisting}
 
-这个代码片段中，is\_float\_point是主模板，包含一个名为value的constexpr静态布尔数据成员，用false值初始化。然后，对这个主模板有三种完全的特化，分别用于float、double和long double类型。这些新定义改变了使用true，而不是false初始化值的方式。因此，可以使用这个模板编写如下代码:
+is\_float\_point是主模板，包含一个名为value的constexpr静态布尔数据成员，用false值初始化。然后，对这个主模板有三种完全的特化，分别用于float、double和long double类型。这些新定义改变了使用true，而不是false初始化值的方式，所以可以使用这个模板编写如下代码:
 
 \begin{lstlisting}[style=styleCXX]
 std::cout << is_floating_point<int>::value << '\n';
@@ -65,7 +65,7 @@ std::cout << is_floating_point<long double>::value << '\n';
 std::cout << is_floating_point<std::string>::value << '\n';
 \end{lstlisting}
 
-第一行和最后一行打印0，即false;其他行输出1，即true。这个例子演示了类型特征是如何工作的，标准库在std命名空间中包含一个名为is\_floating\_point的类模板，定义在<type\_traits>标头中。我们将在第5章中了解更多相关内容。
+第一行和最后一行打印0，即false;其他行输出1，即true。这个例子演示了类型特征是如何工作的，标准库在std命名空间中包含一个名为is\_floating\_point的类模板，定义在<type\_traits>标准头文件中。我们将在第5章中了解更多相关内容。
 
 正如在本例中看到的，静态类成员可以全特化。每个特化版本都有自己的静态成员副本:
 
@@ -85,9 +85,9 @@ foo<int> c; // c.value=42
 a.value = 100; // a.value=100, b.value=100, c.value=42
 \end{lstlisting}
 
-这里，foo<T>是一个类模板，只有一个静态成员，称为value。对于主模板初始化为0，对于int特化初始化为42。声明变量a、b和c后，a.value为0,b.value为0，而c.value为42。将值100赋给a.value后，b.value也是100，而c.value仍然是42。
+foo<T>是一个类模板，只有一个静态成员，称为value。对于主模板初始化为0，对于int特化初始化为42。声明变量a、b和c后，a.value为0,b.value为0，而c.value为42。将值100赋给a.value后，b.value也是100，而c.value仍然是42。
 
-显式特化必须出现在主模板声明之后，不需要在显式特化之前对主模板进行定义。因此，以下代码有效:
+显式特化必须出现在主模板声明之后，不需要在显式特化之前对主模板进行定义:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -120,9 +120,9 @@ foo<int>* b; // OK
 foo<int> c; // error, foo<int> incomplete type
 \end{lstlisting}
 
-本例中，foo<T>是主模板，其中存在int类型的显式特化声明。这使得可以使用foo<double>和foo<int>*(支持声明指向部分类型的指针)。在声明c变量时，完整的类型foo<int>是不可用的，因为缺少int的完整特化的定义，所以这会产生一个编译器错误。
+foo<T>是主模板，其中存在int类型的显式特化声明，可以使用foo<double>和foo<int>*(支持声明指向部分类型的指针)。声明c变量时，完整的类型foo<int>是不可用的，因为缺少int的完整特化的定义，所以这会在编译时报错。
 
-当特化一个函数模板时，若编译器可以从函数实参的类型推导出模板实参，那么该模板的参数可选填:
+当特化函数模板时，若编译器可以从函数实参的类型推导出模板实参，那么该模板的参数可选填:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -141,9 +141,9 @@ void func(foo<int>)
 }
 \end{lstlisting}
 
-func函数模板的完整特化int的语法应该是template<> func<int>(foo<int>)，而编译器能够从函数参数中推断出T所代表的实际类型。因此，不必在定义特化时进行指定。
+func函数模板的完整特化int的语法应该是template<> func<int>(foo<int>)，而编译器能够从函数参数中推断出T所代表的实际类型，所以不必在定义特化时进行指定。
 
-另外，函数模板和成员函数模板的声明或定义不允许包含默认函数参数。因此，在下面的例子中，编译器将报错:
+另外，函数模板和成员函数模板的声明或定义不允许包含默认函数参数。下面的例子中，编译器将报错:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -159,7 +159,7 @@ void func(int a = 0) // error: default argument not allowed
 }
 \end{lstlisting}
 
-所有这些示例中，模板都只有一个模板参数。在实践中，许多模板都有多个参数。显式特化要求定义指定完整的参数集:
+所有这些示例中，模板都只有一个模板参数。实际中，许多模板都有多个参数。显式特化要求定义指定完整的参数集:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T, typename U>
@@ -185,13 +185,13 @@ func(1, 2.0); // int-double specialization
 func(1.0, 2.0); // primary template
 \end{lstlisting}
 
-了解了这些内容后，我们可以继续讨论偏特化，也就是显式(全)特化的泛化。
+了解了这些内容后，继续讨论偏特化，也就是显式(全)特化的泛化。
 
 \subsubsubsection{2.6.2\hspace{0.2cm}偏特化}
 
-偏特化发生在特化一个主模板但只指定一些模板参数时，所以偏特化同时具有模板形参列表(跟在模板关键字后面)和模板实参列表(跟在模板名称后面)。但是，只有类可以部分特化。
+偏特化发生在特化一个主模板但只指定一些模板参数时，所以偏特化同时具有模板形参列表(跟在模板关键字后面)和模板实参列表(跟在模板名称后面)，只有类可以偏特化。
 
-下面的例子用来说明它是如何工作的:
+下面的例子用来说明这是如何工作的:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T, int S>
@@ -223,7 +223,7 @@ struct collection<T*, S>
 };
 \end{lstlisting}
 
-这里有一个名为collection的主模板，有两个模板实参(一个类型模板实参和一个非类型模板实参)，有三个部分的特化，如下所示:
+这里有一个名为collection的主模板，有两个模板实参(一个类型模板实参和一个非类型模板实参)，有三个偏特化:
 
 \begin{itemize}
 \item 
@@ -245,7 +245,7 @@ collection<char, 10> c; // partial specialization <T, 10>
 collection<int*, 20> d; // partial specialization <T*, S>
 \end{lstlisting}
 
-正如注释中所指定的，a从主模板实例化，b从int的偏特化(collection<int, S>)， c从10的偏特化(collection<T, 10>)，d从指针的偏特化(collection<T*， S>)。然而，有些组合是不可能的，因为类型模糊的原因，编译器无法选择使用哪个模板实例化。这里有几个例子:
+正如注释中所指定的，a从主模板实例化，b从int的偏特化(collection<int, S>)， c从10的偏特化(collection<T, 10>)，d从指针的偏特化(collection<T*, S>)。有些组合是不可能的，因为类型模糊的原因，编译器无法选择使用哪个模板实例化。这里有几个例子:
 
 \begin{lstlisting}[style=styleCXX]
 collection<int, 10> e; // error: collection<T,10> or
@@ -254,9 +254,9 @@ collection<char*, 10> f; // error: collection<T,10> or
                          // collection<T*,S>
 \end{lstlisting}
 
-第一种情况下，collection<T, 10>和collection<int, S>偏特化都匹配类型collection<int, 10>，而在第二种情况下，它可以是collection<T, 10>或collection<T*， S>。
+第一种情况下，collection<T, 10>和collection<int, S>偏特化都匹配类型collection<int, 10>，而在第二种情况下，可以是collection<T, 10>或collection<T*, S>。
 
-当定义主模板的特化时，需要记住以下几点:
+当定义主模板的特化时，需要记住几点:
 
 \begin{itemize}
 \item 
@@ -266,7 +266,7 @@ collection<char*, 10> f; // error: collection<T,10> or
 模板参数列表表示模板参数列表中的顺序，该顺序仅针对偏特化。偏特化的模板参数列表不能与模板参数列表所表示的模板参数列表相同。
 
 \item 
-模板参数列表中，只能对非类型模板参数使用标识符，此上下文中不允许使用表达式。下面的例子演示了这一点:
+模板参数列表中，只能对非类型模板参数使用标识符，此上下文中不允许使用表达式:
 \begin{lstlisting}[style=styleCXX]
 template <int A, int B> struct foo {};
 template <int A> struct foo<A, A> {}; // OK
@@ -278,18 +278,18 @@ template <int A> struct foo<A, A + 1> {}; // error
 
 \begin{itemize}
 \item 
-若没有找到匹配项，则从主模板生成一个定义。
+若没有找到匹配项，则从主模板生成定义。
 
 \item 
 若发现单个偏特化，则从该特化生成定义。
 
 \item 
-若发现了多个偏特化，则从最特化的偏特化生成定义，但前提是它是唯一的。否则，编译器将报错(如前所述)。若模板A接受了模板B接受的类型的子集，则认为模板A比模板B更特化，反之则不然。
+若发现了多个偏特化，则从最特化的偏特化生成定义，但前提是其是唯一的；否则，编译器将报错(如前所述)。若模板A接受了模板B接受的类型的子集，则认为模板A比模板B更特化，反之不然。
 \end{itemize}
 
 但偏特化不是通过名称查找找到的，只有在通过名称查找找到主模板时才会考虑使用。
 
-为了理解偏特化有什么用，让我们看一个真实的例子.
+为了理解偏特化有什么用，让我们看一个实际例子.
 
 本例中会创建一个函数，该函数将格式化数组的内容并将其输出到流中。格式化数组的内容应该类似于[1,2,3,4,5]，但对于char元素的数组，元素不应该用逗号分隔，而应该显示为方括号内的字符串，例如[demo]。为此，考虑使用std::array类。下面的实现使用元素间分隔符格式化数组的内容:
 
@@ -319,7 +319,7 @@ std::strcpy(str.data(), "template");
 pretty_print(std::cout, str); // [t,e,m,p,l,a,t,e]
 \end{lstlisting}
 
-这个代码片段中，pretty\_print是一个带有两个模板参数的函数模板，与std::array类的模板形参匹配。当以arr数组作为参数调用时，输出[1,1,2,3,5,8,13,21]。当以str数组作为参数调用时，输出[t,e,m,p,l,a,t,e]。然而，我们想在这种情况下打印[template]。为此，我们需要另一个实现，使其专门用于char类型:
+pretty\_print是一个带有两个模板参数的函数模板，与std::array类的模板形参匹配。当以arr数组作为参数调用时，输出[1,1,2,3,5,8,13,21]。当以str数组作为参数调用时，输出[t,e,m,p,l,a,t,e]。然而，我们想在这种情况下打印[template]。为此，需要另一个实现，使其专门用于char类型:
 
 \begin{lstlisting}[style=styleCXX]
 template <size_t S>
@@ -338,10 +338,10 @@ std::strcpy(str.data(), "template");
 pretty_print(std::cout, str); // [template]
 \end{lstlisting}
 
-第二个实现中，pretty\_print是一个带有单个模板形参的函数模板，该形参是非类型模板参数，指示数组的大小。类型模板参数显式指定为char，在std::array<char, S>中。这一次，调用带有str数组的pretty\_print将[template]打印到控制台。
+第二个实现中，pretty\_print是一个带有单个模板形参的函数模板，该形参是非类型模板参数，指示数组的大小。类型模板参数显式指定为char，在std::array<char, S>中。这一次，调用带有str数组的pretty\_print将[template]输出到控制台。
 
-这里需要理解的是，其不是pretty\_print函数模板，而是std::array类模板。函数模板不能特化，这里的是重载函数。然而，std::array<char, S>是主类模板std::array<T, S>的特化。
+这里需要理解的是，其不是pretty\_print函数模板，而是std::array类模板。函数模板不能特化，而是重载函数，因为std::array<char, S>是主类模板std::array<T, S>的特化。
 
-我们在本章中看到的所有示例都是函数模板或类模板。然而，变量也可以是模板，这将是下一节的主题。
+我们在本章中看到的所有示例都是函数模板或类模板，并且变量也可以是模板，这将是下一节的主题。
 
 

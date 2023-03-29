@@ -1,9 +1,9 @@
 
-目前为止，我们已经看到了带有一个或多个参数的模板的多个示例。这些示例中，参数表示实例化时提供的类型，这些类型可以由用户显式提供，也可以由编译器在可以推导时隐式提供。这些类型的参数称为类型模板参数，但模板也可以有非类型模板参数和双重模板参数。在接下来的部分中，我们将探讨所有这些问题。
+我们已经看到了带有一个或多个参数的模板的多个示例，其中参数表示实例化时提供的类型，这些类型可以由用户显式提供，也可以由编译器在可以推导时隐式提供。这些类型的参数称为类型模板参数，但模板也可以有非类型模板参数和双重模板参数。在接下来的部分中，我们将探讨这些问题。
 
 \subsubsubsection{2.4.1\hspace{0.2cm}类型模板参数}
 
-如前所述，这些参数表示模板实例化期间作为参数提供的类型，由typename或class关键字引入。使用这两个关键字没什么区别。类型模板参数可以有一个默认值，即类型。这与为函数形参指定默认值的方式相同，如下所示:
+如前所述，这些参数表示模板实例化期间作为参数提供的类型，由typename或class关键字引入。使用这两个关键字没什么区别。类型模板参数可以有一个默认值，即类型。这与为函数形参指定默认值的方式相同:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -30,9 +30,9 @@ template <typename... T>
 class wrapper { /* ... */ };
 \end{lstlisting}
 
-可变参数模板将在第3章中讨论。这里，我们不会详细讨论这类参数。
+可变参数模板将在第3章中讨论，这里不会详细讨论这类参数。
 
-C++20引入了概念和约束。约束指定了对模板参数的要求，一系列命名的约束称为概念。概念可以指定为类型模板参数，但它们语法有点不同。使用概念的名称(若有的话，后面跟着尖括号中的模板参数列表)来代替typename或class关键字。示例，包括具有默认值和约束类型模板参数包的概念，如下所示:
+C++20引入了概念和约束。约束指定了对模板参数的要求，一系列命名的约束称为概念。概念可以指定为类型模板参数，但语法有点不同。使用概念的名称(若有的话，后面跟着尖括号中的模板参数列表)来代替typename或class关键字。具有默认值和约束类型模板参数包的概念:
 
 \begin{lstlisting}[style=styleCXX]
 template <WrappableType T>
@@ -45,12 +45,12 @@ template <WrappableType... T>
 class wrapper { /* ... */ };
 \end{lstlisting}
 
-概念和约束将在第6章中讨论，将在那一章学习更多关于这类参数的知识。现在，让我们看看第二种模板参数，非类型模板参数。
+概念和约束将在第6章中讨论，将在那一章学习更多关于这类参数的知识。现在，来看看第二种模板参数，非类型模板参数。
 
 
 \subsubsubsection{2.4.2\hspace{0.2cm}非类型模板参数}
 
-模板参数并不总是必须表示类型，也可以是编译时表达式，例如常量、具有外部链接的函数，或对象的地址或静态类成员的地址。编译时表达式提供的参数称为非类型模板参数。这类参数只能有结构类型。以下是结构类型:
+模板参数并不总是必须表示类型，也可以是编译时表达式，例如常量、外部函数，或对象的地址或静态类成员的地址。编译时表达式提供的参数称为非类型模板参数，这类参数只能有结构类型。以下是结构类型的描述:
 
 \begin{itemize}
 \item 
@@ -85,7 +85,7 @@ class wrapper { /* ... */ };
 \end{itemize}
 \end{itemize}
 
-这些类型的cv限定形式也可以用于非类型模板参数。非类型模板参数可以以不同的方式指定，可能的形式显示在下面的代码段中:
+这些类型的cv限定形式也可以用于非类型模板参数。非类型模板参数可以以不同的方式指定，可能的形式如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template <int V>
@@ -98,9 +98,9 @@ template <int... V>
 class foo { /*...*/ };
 \end{lstlisting}
 
-这些例子中，非类型模板形参的类型都是int。第一个示例和第二个示例类似，只是第二个示例使用了默认值。第三个示例有很大不同，因为参数实际上是一个参数包，这将在下一章讨论。
+这些例子中，非类型模板形参的类型是int。第一个示例和第二个示例类似，只是第二个示例使用了默认值。第三个示例有很大不同，因为参数实际上是一个参数包，这将在下一章讨论。
 
-为了更好地理解非类型模板参数，让我们看看下面的例子，在这里我们描绘了一个固定大小的数组类，称为buffer:
+为了更好地理解非类型模板参数，来看看下面的例子，这里有一个固定大小的数组类，称为buffer:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T, size_t S>
@@ -122,14 +122,14 @@ public:
 };
 \end{lstlisting}
 
-这个buffer类包含S个T类型元素的内部数组。因此，S需要是一个编译类型的值。这个类可以进行如下的实例化:
+这个buffer类包含S个T类型元素的内部数组，所以S需要是一个编译类型的值。这个类可以进行如下的实例化:
 
 \begin{lstlisting}[style=styleCXX]
 buffer<int, 10> b1;
 buffer<int, 2*5> b2;
 \end{lstlisting}
 
-这两个定义相同，b1和b2都是两个存储10个整数的buffer。此外，其具有相同的类型，因为2*5和10是两个表达式，其计算值为相同的编译时值。你可以用下面的语句来检查:
+这两个定义相同，b1和b2都是两个存储10个整数的buffer。此外，其具有相同的类型，因为2*5和10是两个表达式，其计算值为相同的编译时值。可以用下面的语句进行检查:
 
 \begin{lstlisting}[style=styleCXX]
 static_assert(std::is_same_v<decltype(b1), decltype(b2)>);
@@ -163,7 +163,7 @@ public:
 };
 \end{lstlisting}
 
-这是主要模板的代码，下面显示了一些特化:
+这是主模板的代码，下面显示了一些特化:
 
 \begin{lstlisting}[style=styleCXX]
 template<>
@@ -189,13 +189,13 @@ public:
 };
 \end{lstlisting}
 
-在这个示例中，可以看到的特化的概念(将在本章后续的内容中详细介绍)。目前，应该注意到这两种不同的buffer类型。同样，可以用下面的语句验证b1和b3的类型是否相同:
+这个示例中，可以看到的特化的概念(本章后续的内容中详细介绍)。目前，应该注意到这两种不同的buffer类型，可以用下面的语句验证b1和b3的类型是否相同:
 
 \begin{lstlisting}[style=styleCXX]
 static_assert(!std::is_same_v<decltype(b1), decltype(b3)>);
 \end{lstlisting}
 
-实践中，结构类型(如整数、浮点数或枚举类型)的使用比其他类型更常见。理解其用法，并找到相应的例子可能更容易。然而，也有使用指针或引用的场景。在下面的例子中，我们将研究如何使用指向函数参数的指针。先来看看代码:
+实践中，结构类型(如整数、浮点数或枚举类型)的使用比其他类型更常见。理解其用法，并找到相应的例子可能更容易，也有使用指针或引用的场景。下面的例子中，将研究如何使用指向函数参数的指针。先来看看代码:
 
 \begin{lstlisting}[style=styleCXX]
 struct device
@@ -214,7 +214,7 @@ struct smart_device : device
 };
 \end{lstlisting}
 
-这段代码中，device是一个基类，具有一个名为output的纯虚函数(以及一个虚析构函数)。这是名为smart\_device的类模板的基类，该类模板通过函数指针调用函数来实现输出虚函数，此函数的指针会作为传递给类模板的非类型模板的实参。下面的示例展示了如何使用它:
+device是一个基类，具有一个名为output的纯虚函数(以及一个虚析构函数)。这是名为smart\_device的类模板的基类，该类模板通过函数指针调用函数来实现output虚函数，此函数的指针会作为传递给类模板的非类型模板的实参。下面的示例展示了如何使用:
 
 \begin{lstlisting}[style=styleCXX]
 void say_hello_in_english()
@@ -236,13 +236,13 @@ auto w2 =
 w2->output();
 \end{lstlisting}
 
-这里，w1和w2是两个unique\_ptr对象，指向相同类型的对象，但事实并非如此，因为smart\_device<\&say\_hello\_in\_english>和smart\_device<\&say\_hello\_in\_spanish>是不同的类型，它们的函数指针实例化不同。这可以很容易确定:
+w1和w2是两个unique\_ptr对象，指向相同类型的对象，但事实并非如此。因为smart\_device<\&say\_hello\_in\_english>和smart\_device<\&say\_hello\_in\_spanish>是不同的类型，所以它们的函数指针实例化不同。这可以很容易确定:
 
 \begin{lstlisting}[style=styleCXX]
 static_assert(!std::is_same_v<decltype(w1), decltype(w2)>);
 \end{lstlisting}
 
-另一方面，若用std::unique\_ptr<device>替换auto，如下段所示，那么w1和w2是指向基类device的智能指针，因此具有相同的类型:
+另一方面，若用std::unique\_ptr<device>替换auto，那么w1和w2是指向基类device的智能指针，因此具有相同的类型:
 
 \begin{lstlisting}[style=styleCXX]
 std::unique_ptr<device> w1 =
@@ -256,7 +256,7 @@ w2->output();
 static_assert(std::is_same_v<decltype(w1), decltype(w2)>);
 \end{lstlisting}
 
-虽然这个例子使用的是指向函数的指针，但也可以假设一个类似的例子，用于指向成员函数的指针。前面的例子可以转换为以下(仍然使用相同的基类设备):
+虽然这个例子使用的是指向函数的指针，但也可以假设一个类似的例子，用于指向成员函数的指针。前面的例子可以转换为以下(仍然使用相同的基类设备)方式:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename Command, void (Command::*action)()>
@@ -319,9 +319,9 @@ foo<42.0> f2; // foo<double> in C++20, error for older
 foo<"42"> f3; // error
 \end{lstlisting}
 
-第一个例子中，对于f1，编译器将实参的类型推断为int。在第二个例子中，对于f2，编译器将类型推断为double，但这需要支持C++20。以前的C++版本中，这一行会产生错误。C++20之前，浮点类型不允许作为非类型模板参数。所以，最后一行会出错，因为“42”是一个字符串字面量，字符串字面量不能用作非类型模板参数。
+第一个例子中，对于f1，编译器将实参的类型推断为int。第二个例子中，对于f2，编译器将类型推断为double，但需要支持C++20。以前的C++版本中，这一行会产生错误。C++20之前，浮点类型不允许作为非类型模板参数。所以，最后一行会出错，因为“42”是一个字符串字面量，不能用作非类型模板参数。
 
-然而，最后一个例子可以在C++20中通过将字面值字符串，包装在结构字面值类中来解决。这个类将字符串字面值的字符存储在一个固定长度的数组中。下面的代码片段说明了这一点:
+然而，最后一个例子可以在C++20中通过将字面值字符串，包装在结构字面值类中来解决。这个类将字符串字面值的字符存储在一个固定长度的数组中:
 
 \begin{lstlisting}[style=styleCXX]
 template<size_t N>
@@ -335,7 +335,7 @@ struct string_literal
 };
 \end{lstlisting}
 
-然而，前面显示的foo类模板需要修改，需要显式使用string\_literal，而不是auto:
+前面的foo类模板也需要修改，需要显式使用string\_literal，而不是auto:
 
 \begin{lstlisting}[style=styleCXX]
 template <string_literal x>
@@ -344,9 +344,9 @@ struct foo
 };
 \end{lstlisting}
 
-在C++20中，foo<"42"> f;的声明将在编译时通过。
+C++20中，foo<"42"> f;的声明将在编译时通过。
 
-auto也可以与非类型模板参数包一起使用，类型是为每个模板参数独立推导的。模板参数的类型不需要相同:
+auto也可以与非类型模板参数包一起使用，类型为每个模板参数独立推导。模板参数的类型不需要相同:
 
 \begin{lstlisting}[style=styleCXX]
 template<auto... x>
@@ -362,9 +362,9 @@ foo<42, 42.0, false, 'x'> f;
 
 \subsubsubsection{2.4.3\hspace{0.2cm}双重模板参数}
 
-尽管这个名字有点奇怪，但它指的是一类模板参数，这些参数本身就是模板。这些参数可以像类型模板参数一样指定，带或不带名称，带或不带默认值，以及作为带或不带名称的参数包。C++17起，关键字class和typename都可以用来引入双重模板参数。在此版本之前，只能使用class关键字。
+尽管这个名字有点奇怪，指的是一类模板参数，这些参数本身就是模板。这些参数可以像类型模板参数一样指定，带或不带名称，带或不带默认值，以及作为带或不带名称的参数包。C++17起，关键字class和typename都可以用来引入双重模板参数。此版本之前，只能使用class关键字。
 
-为了展示双重模板参数的使用，首先来看一下下面两个类模板:
+为了展示双重模板参数的使用，先来看一下下面两个类模板:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -394,7 +394,7 @@ private:
 };
 \end{lstlisting}
 
-simple\_wrapper类是一个简单的类模板，保存类型模板参数T的值。另一方面，fancy\_wrapper是一个更复杂的包装器实现，它隐藏了包装的值，并公开了用于数据访问的成员函数。接下来，我们实现一个名为wrapped\_pair的类模板，包含两个包装类型的值。这可以是simple\_wrapper，fancy\_wrapper，或任何类似的类型:
+simple\_wrapper类是一个简单的类模板，保存类型模板参数T的值。另一方面，fancy\_wrapper是一个更复杂的包装器实现，隐藏了包装的值，并公开了用于数据访问的成员函数。接下来，我们实现一个名为wrapped\_pair的类模板，包含两个包装类型的值。这可以是simple\_wrapper，fancy\_wrapper，或任何类似的类型:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T, typename U,
@@ -412,7 +412,7 @@ public:
 };
 \end{lstlisting}
 
-wrapping\_pair类模板有三个参数。前两个是类型模板形参，名为T和U。第三个形参是模板模板参数为W，有一个默认值，即fancy\_wrapper类型。我们可以使用这个类模板，如下所示:
+wrapping\_pair类模板有三个参数。前两个是类型模板形参，名为T和U。第三个形参是模板模板参数为W，有一个默认值，即fancy\_wrapper类型。可以使用这个类模板，如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 wrapping_pair<int, double> p1(42, 42.0);
@@ -424,7 +424,7 @@ std::cout << p2.item1.value << ' '
 		  << p2.item2.value << '\n';
 \end{lstlisting}
 
-这个例子中，p1是一个wrapping\_pair对象，包含两个值，一个int和一个double，每个值都包装在一个fancy\_wrapper对象中。这没有显式指定，但是双重模板参数的默认值。另一方面，p2也是一个wrapping\_pair对象，也包含一个int和一个double，但是由一个simple\_wrapper对象包装的，该对象在模板实例化中进行了显式指定。
+这个例子中，p1是一个wrapping\_pair对象包含两个值，一个int和一个double，每个值都包装在一个fancy\_wrapper对象中。这没有显式指定，其为双重模板参数的默认值。另一方面，p2也是一个wrapping\_pair对象，也包含一个int和一个double，但是由一个simple\_wrapper对象包装的，该对象在模板实例化中进行了显式指定。
 
 这个例子中，我们看到了默认模板参数的使用。
 
@@ -437,7 +437,7 @@ std::cout << p2.item1.value << ' '
 可以与任何类型的模板参数一起使用，参数包除外。
 
 \item 
-若为类模板、变量模板或类型别名的模板参数指定了默认值，则所有后续模板参数也必须具有默认值。若最后一个参数是模板参数包，则是一个例外。
+若为类模板、变量模板或类型别名的模板参数指定了默认值，则所有后续模板参数也必须具有默认值。若最后一个参数是模板参数包，则是例外。
 
 \item 
 若在函数模板中为模板参数指定了默认值，则后续模板参数也不限于具有默认值。
@@ -446,16 +446,16 @@ std::cout << p2.item1.value << ' '
 函数模板中，只有当参数包有默认实参或者其值可以由编译器从函数实参推导出来时，形参包才可以后面跟更多的类型参数。
 
 \item 
-不允许出现在友元类模板的声明中。
+不允许在友元类模板的声明中出现。
 
 \item 
 只有当友元函数模板的声明也有定义，并且在同一个翻译单元中没有其他函数声明时，才允许在友元函数模板的声明中使用。
 
 \item 
-不允许出现在函数模板或成员函数模板的显式特化的声明或定义中。
+不允许在函数模板或成员函数模板的显式特化的声明或定义中出现。
 \end{itemize}
 
-下面的代码段展示了使用默认模板参数的示例:
+下面展示了使用默认模板参数的示例:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T = int>
@@ -492,7 +492,7 @@ struct foo
 };
 \end{lstlisting}
 
-这在语义上等价于:
+语义上等价于:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T = int, typename U = double>
@@ -503,7 +503,7 @@ struct foo
 };
 \end{lstlisting}
 
-但是，这些具有不同默认模板参数的多个声明不能按任何顺序提供，前面提到的规则仍然适用。若类模板声明的第一个形参有默认实参，而后面的形参没有默认实参即是非法:
+但这些具有不同默认模板参数的多个声明不能按任何顺序提供，前面提到的规则仍然适用。若类模板声明的第一个形参有默认实参，而后面的形参没有默认实参即是非法:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T = int, typename U>
@@ -513,7 +513,7 @@ template <typename T, typename U = double>
 struct foo;
 \end{lstlisting}
 
-对默认模板实参的另一个限制是，同一个模板形参不能在同一个作用域中赋予多个默认值。因此，下面的例子将产生错误:
+对默认模板实参的另一个限制是，同一个模板形参不能在同一个作用域中赋予多个默认值。因此，下面的例子将在编译时报错:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T = int>
@@ -545,7 +545,7 @@ bar<foo<int>> x;
 
 当x变量定义时，bar类模板即会实例化，但是foo::value\_type的类型的定义是protected，因此不能在foo之外使用。结果是在bar类模板的声明处出现编译错误。
 
-了解了这些内容后，我们就先结束模板参数的话题。下一节中我们将探讨的是模板实例化，是根据模板定义和一组模板参数创建函数、类或变量的新定义。
+了解了这些内容后，我们先结束模板参数的话题。下一节中我们将探讨的是模板实例化，是根据模板定义和一组模板参数创建函数、类或变量的新定义。
 
 
 

@@ -1,4 +1,4 @@
-Lambda在形式上称为Lambda表达式，是在需要函数对象的地方定义函数对象的一种简化方法，通常包括传递给算法的谓词或比较函数。我们不会讨论Lambda表达式，但先来看看下面的例子:
+Lambda在形式上称为Lambda表达式，是对于定义函数对象的一种简化方法，通常包括传递给算法的谓词或比较函数。我们不会讨论Lambda表达式，但先来看看下面的例子:
 
 \begin{lstlisting}[style=styleCXX]
 int arr[] = { 1,6,3,8,4,2,9 };
@@ -37,7 +37,7 @@ private:
 };
 \end{lstlisting}
 
-这里选择的名称很随意，每个编译器将生成不同的名称。另外，实现细节可能有所不同，这里看到的是编译器应该生成的最小值。请注意，第一个Lambda和第二个Lambda的区别在于，后者包含通过值捕获的状态。
+这里的名称很随意，每个编译器将生成不同的名称。另外，实现细节可能有所不同，这里看到的是编译器应该生成的最小值。注意，第一个Lambda和第二个Lambda的区别在于，后者包含通过值捕获的状态。
 
 Lambda表达式是在C++11中引入的，该标准的后续版本中进行了多次更新。值得注意的是，本章将讨论两个问题:
 
@@ -75,7 +75,7 @@ auto v10 = l3(std::string{ "42" }); // OK
 
 这里有三个不同的Lambda表达式: l1是一个常规Lambda, l2是一个泛型Lambda，因为至少有一个参数用auto定义，l3是一个模板Lambda，用模板语法定义，但没有使用template关键字。
 
-可以用一个整数调用l1，也可以使用double类型调用，但这一次编译器将产生一个关于可能丢失数据的警告。尝试用字符串参数调用会产生编译错误，因为std::string不能转换为int。另一方面，l2是泛型。编译器继续为它调用的所有参数类型实例化其特化版本，在本例中是int、double和std::string。下面的代码片段显示了生成的函数的外观(至少在概念上是这样的):
+可以用一个整数调用l1，也可以使用double类型调用，但这一次编译器将产生一个关于可能丢失数据的警告。尝试用字符串参数调用会产生编译错误，因为std::string不能转换为int。另一方面，l2是泛型。编译器继续为它调用的所有参数类型实例化其特化版本，本例中是int、double和std::string。下面的代码展示了生成的函数的外观(至少在概念上):
 
 \begin{lstlisting}[style=styleCXX]
 struct __lambda_3
@@ -106,7 +106,7 @@ struct __lambda_3
 };
 \end{lstlisting}
 
-可以在这里看到函数调用操作符的主要模板，以及提到的三个专门化。毫不奇怪，编译器将为第三个Lambda表达式l3生成相同的代码，这是一个模板Lambda，仅在C++20中可用。由此产生的问题是，通用Lambda和Lambda模板有什么不同?为了回答这个问题，稍微修改一下前面的例子:
+可以在这里看到函数调用操作符的主模板，以及提到的三个特化。毫不奇怪，编译器将为第三个Lambda表达式l3生成相同的代码，这是一个模板Lambda，仅在C++20中可用。由此产生的问题是，通用Lambda和Lambda模板有什么不同?为了回答这个问题，稍微修改一下前面的例子:
 
 \begin{lstlisting}[style=styleCXX]
 auto l1 = [](int a, int b) {return a + b; };
@@ -129,7 +129,7 @@ auto v10 = l3(std::string{ "42" }, '1'); // OK
 auto v11 = l3(std::string{ "42" }, std::string{ "42" }); // OK
 \end{lstlisting}
 
-新Lambda表达式有两个参数，可以用两个整数或一个int和一个double(尽管这同样会产生警告)调用l1，但不能用字符串和char调用。但可以用泛型Lambda l2和模板lambda l3来完成所有这些。编译器生成的代码对于l2和l3是相同的，从语义上看，如下所示:
+新Lambda表达式有两个参数，可以用两个整数或一个int和一个double(尽管这同样会产生警告)调用l1，但不能用字符串和char调用，但可以用泛型Lambda l2和模板Lambda l3来完成所有这些。从语义上看，编译器生成的代码对于l2和l3是相同的:
 
 \begin{lstlisting}[style=styleCXX]
 struct __lambda_4
@@ -168,7 +168,7 @@ struct __lambda_4
 };
 \end{lstlisting}
 
-这段代码中，我们看到了函数调用操作符的主要模板，以及几个完全显式的特化:两个int值，一个double和一个int，一个字符串和一个char，以及两个字符串对象。但是若想将泛型Lambda l2的使用限制为相同类型的参数呢?这是不可能的。编译器无法推断我们的意图，所以将为参数列表中出现的auto，生成不同类型的模板参数。然而，C++20的Lambda模板允许指定函数调用操作符的形式。来看看下面的例子:
+我们看到了函数调用操作符的主模板，以及几个完全显式的特化:两个int值，一个double和一个int，一个字符串和一个char，以及两个字符串对象。但若想将泛型Lambda l2的使用限制为相同类型的参数呢?这是不可能的。编译器无法推断我们的意图，所以将为参数列表中出现的auto，生成不同类型的模板参数。然而，C++20的Lambda模板允许指定函数调用操作符的形式。来看看下面的例子:
 
 \begin{lstlisting}[style=styleCXX]
 auto l5 = []<typename T>(T a, T b) { return a + b; };
@@ -184,15 +184,15 @@ auto v6 = l5(std::string{ "42" }, std::string{ "1" }); // OK
 auto v6 = l5(std::string{ "42" }, '1'); // error
 \end{lstlisting}
 
-使用任意两个不同类型的参数调用Lambda模板是不可能的，即使可以隐式转换，例如从int转换为double。编译器将生成一个错误。在调用模板Lambda时，不可能显式地提供模板参数，例如：l5<double>(42,1.0)会产生一个编译错误。
+使用两个不同类型的参数调用Lambda模板是不可能的，即使可以隐式转换，例如从int转换为double。编译器将会报错。调用模板Lambda时，不可能显式地提供模板参数，例如：l5<double>(42,1.0)会产生一个编译错误。
 
-decltype类型说明符允许告知编译器从表达式推导出类型。这个主题将在第4章中再进行讨论。C++14中，可以在泛型Lambda中使用它，来说明前面泛型Lambda表达式中的第二个参数具有与第一个参数相同的类型。看起来如下所示:
+decltype类型说明符允许告知编译器从表达式推导出类型。C++14中，可以在泛型Lambda中使用它，来说明前面泛型Lambda表达式中的第二个参数具有与第一个参数相同的类型。看起来如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 auto l4 = [](auto a, decltype(a) b) {return a + b; };
 \end{lstlisting}
 
-然而，这意味着第二个参数b的类型必须转换为第一个参数a的类型。所以可以进行以下方式的调用:
+所以第二个参数b的类型必须转换为第一个参数a的类型，并且可以进行以下方式的调用:
 
 \begin{lstlisting}[style=styleCXX]
 auto v1 = l4(42.0, 1); // OK
@@ -200,7 +200,7 @@ auto v2 = l4(42, 1.0); // warning
 auto v3 = l4(std::string{ "42" }, '1'); // error
 \end{lstlisting}
 
-第一次调用编译时没有问题，因为int可以隐式转换为double。第二个调用编译时发出警告，因为从double转换为int可能会导致数据丢失。但第三个调用会产生一个错误，因为char不能隐式转换为std::string。l4 Lambda比前面看到的泛型Lambda l2有所改进，但若参数类型不同，仍然不能帮助完全限制调用。这仅适用于前面所示的Lambda模板。
+因为int可以隐式转换为double，所以第一次调用编译时没有问题。第二个调用编译时发出警告，因为从double转换为int可能会导致数据丢失。但第三个调用会报错，因为char不能隐式转换为std::string。l4 Lambda比前面看到的泛型Lambda l2有所改进，但若参数类型不同，仍然不能帮助完全限制调用。这仅适用于前面所示的Lambda模板。
 
 下一段代码中显示了Lambda模板的另一个示例。这个Lambda只有一个参数std::array，但数组元素的类型和数组的大小指定为Lambda模板的模板参数:
 
@@ -239,7 +239,7 @@ struct __lambda_5
 };
 \end{lstlisting}
 
-泛型Lambda相对于常规Lambda的好处是递归Lambda。Lambda没有名字，是匿名的，因此不能直接递归调用它们。必须定义一个std::function对象，将Lambda表达式赋给它，并在捕获列表中通过引用捕获它。下面是一个递归Lambda的例子，用来计算一个数字的阶乘:
+泛型Lambda相对于常规Lambda的好处是递归Lambda。Lambda是匿名的，因此不能直接递归调用。必须定义一个std::function对象，将Lambda表达式赋给它，并在捕获列表中通过引用捕获它。下面是一个递归Lambda的例子，用来计算数字的阶乘:
 
 \begin{lstlisting}[style=styleCXX]
 std::function<int(int)> factorial;
@@ -288,6 +288,6 @@ factorial(factorial, 5);
 
 泛型Lambda是一个带有模板函数调用操作符的函数对象。用auto指定的第一个参数可以是任何东西，包括Lambda本身。因此，编译器将为生成的类型，提供完全显式特化的调用操作符。
 
-当需要将函数对象作为参数传递给其他函数时，Lambda表达式可以避免编写显式代码。相反，编译器可以生成代码。泛型Lambdas，在C++14中引入，避免为不同类型编写相同的Lambda。C++20的Lambda模板允许在模板语法和语义的帮助下，指定生成的调用操作符的形式。
+当需要将函数对象作为参数传递给其他函数时，Lambda表达式可以避免编写显式代码。相反，编译器可以生成代码。泛型Lambda，在C++14中引入，避免为不同类型编写相同的Lambda。C++20的Lambda模板允许在模板语法和语义下，指定生成调用操作符的形式。
 
 

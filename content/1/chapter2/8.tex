@@ -1,4 +1,4 @@
-C++中，别名是指先前定义的类型的名称，可以是内置类型，也可以是用户定义的类型。别名的主要目的是为具有较长名称的类型提供较短的名称，或者为某些类型提供语义上有意义的名称。这可以通过typedef声明来实现，也可以通过using声明来实现(后者是C++11中引入的)。下面是使用typedef的几个例子:
+C++中别名是指先前定义的类型的名称，可以是内置类型，也可以是用户定义的类型。别名的主要目的是为具有较长名称的类型提供较短的名称，或者为某些类型提供语义上有意义的名称。这可以通过typedef声明来实现，也可以通过using声明来实现(后者是C++11中引入的)。下面是使用typedef的几个例子:
 
 \begin{lstlisting}[style=styleCXX]
 typedef int index_t;
@@ -13,9 +13,9 @@ struct foo
 };
 \end{lstlisting}
 
-这个例子中，index\_t是int的别名，NameValueList是std::vector<std::pair<int, std::string>>的别名，而fn\_ptr是指向一个函数的指针类型的别名，该函数返回int类型，并具有int和char类型的两个参数。最后，foo::value\_type是类型模板T的别名。
+这个例子中，index\_t是int的别名，NameValueList是std::vector<std::pair<int, std::string>{}>的别名，而fn\_ptr是指向一个函数的指针类型的别名，该函数返回int类型，并具有int和char类型的两个参数。最后，foo::value\_type是类型模板T的别名。
 
-自C++11起，这些类型别名可以在使用声明的帮助下创建，如下所示:
+自C++11起，这些类型别名可以在使用声明的帮助下创建:
 
 \begin{lstlisting}[style=styleCXX]
 using index_t = int;
@@ -30,9 +30,9 @@ struct foo
 };
 \end{lstlisting}
 
-ssing声明现在比typedef声明更受欢迎，因为它们更容易使用，也更容易阅读(从左到右)。然而，与typedef相比，它有一个重要的优势，即允许我们为模板创建别名。别名模板不是指类型而是指类型族的名称。记住，模板不是类、函数或变量，而是允许创建类型、函数或变量家族的蓝图。
+using声明现在比typedef声明更受欢迎，因为更容易使用，也更容易阅读(从左到右)。然而，与typedef相比，using有一个重要的优势，即允许我们为模板创建别名。别名模板不是指类型而是指类型族的名称。记住，模板不是类、函数或变量，而是允许创建类型、函数或变量家族的蓝图。
 
-为了理解别名模板的工作原理，考虑以下示例:
+为了理解别名模板的工作原理，看看以下示例:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -48,11 +48,11 @@ using customer_invoice_addresses_t =
 	customer_addresses_t<invoice_address_t>; // [3]
 \end{lstlisting}
 
-第[1]行上的声明引入别名模板customer\_addresses\_t。它是map类型的别名，其中键类型为int，值类型为std::vector<T>。因为std::vector<T>不是一个类型，而是一个类型集，所以customer\_addresses\_t<T>定义了一个类型集。[2]和[3]处的using声明从上述类型集中引入了两种类型别名，customer\_delivery\_addresses\_t和customer\_invoice\_addresses\_t。
+第[1]行上的声明引入别名模板customer\_addresses\_t，其是map类型的别名，键类型为int，值类型为std::vector<T>。因为std::vector<T>不是一个类型，而是一个类型集，所以customer\_addresses\_t<T>定义了一个类型集。[2]和[3]处的using声明从上述类型集中引入了两种类型别名，customer\_delivery\_addresses\_t和customer\_invoice\_addresses\_t。
 
-别名模板可以像模板声明一样出现在命名空间或类范围内。另一方面，他们既不能完全特化，也不能偏特化。然而，有一些方法可以跨越这一限制。解决方案是创建具有类型别名成员的类模板并特化该类，然后可以创建引用类型别名成员的别名模板。让我们通过一个示例来演示一下。
+别名模板可以像模板声明一样出现在命名空间或类范围内。另一方面，他们既不能全特化，也不能偏特化。然而，有一些方法可以跨越这一限制。解决方案是创建具有类型别名成员的类模板并特化该类，然后可以创建引用类型别名成员的别名模板。让我们通过一个示例来演示一下。
 
-虽然下面的代码不是有效的C++代码，但它代表了我想要实现的最终目标，若别名模板可能特化的话:
+下面的代码虽然不是有效的C++代码，但代表了我想要实现的最终目标(若别名模板可能特化的话):
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T, size_t S>
@@ -62,7 +62,7 @@ template <typename T>
 using list_t<T, 1> = T;
 \end{lstlisting}
 
-这个例子中，list\_t是std::vector<T>的别名模板，前提是集合的大小大于1。然而，若只有一个元素，那么list\_t应该是类型模板参数T的别名。具体实现方法如下:
+list\_t是std::vector<T>的别名模板，前提是集合的大小大于1。若只有一个元素，list\_t应该是类型模板参数T的别名:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T, size_t S>
@@ -81,7 +81,7 @@ template <typename T, size_t S>
 using list_t = typename list<T, S>::type;
 \end{lstlisting}
 
-本例中，list<T,S>是一个类模板，其成员类型别名为T。主模板中，是std::vector<T>的别名。在偏特化列表<T,1>中，是T的别名。然后，list\_t定义为list<T, S>::type的别名模板。下面的断言证明了这种机制是有效的:
+list<T,S>是一个类模板，其成员类型别名为T。主模板中，是std::vector<T>的别名。偏特化列表<T,1>中，是T的别名,list\_t定义为list<T, S>::type的别名模板。下面的断言证明了这种机制的有效性:
 
 \begin{lstlisting}[style=styleCXX]
 static_assert(std::is_same_v<list_t<int, 1>, int>);
@@ -89,7 +89,7 @@ static_assert(std::is_same_v<list_t<int, 2>,
 std::vector<int>>);
 \end{lstlisting}
 
-结束本章之前，还有一个主题需要讨论:通用Lambda及其在C++20中进阶版——Lambda模板。
+结束本章之前，还有一个主题需要讨论:通用Lambda及其在C++20中进阶版本——Lambda模板。
 
 
 
