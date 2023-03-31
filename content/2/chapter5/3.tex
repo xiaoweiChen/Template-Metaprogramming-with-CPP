@@ -1,4 +1,4 @@
-C++标准库中，类型支持库是其子库之一。这个库定义了std::size\_t、std::nullptr\_t和std::byte等类型，运行时类型标识支持std::type\_info等类型，以及类型特征的集合。类型特征有两类:
+C++标准库中，类型库是其子库之一。这个库定义了std::size\_t、std::nullptr\_t和std::byte等类型，运行时类型标识支持std::type\_info等类型，以及类型特征的集合。类型特征有两类:
 
 \begin{itemize}
 \item
@@ -8,7 +8,7 @@ C++标准库中，类型支持库是其子库之一。这个库定义了std::siz
 能够在编译时执行类型转换的类型特征(添加或删除const限定符，或从类型中添加或删除指针或引用)，这些类型特征也称为元功能。
 \end{itemize}
 
-来自第二类的一个类型特征是std::enable\_if。这用于启用SFINAE并从函数的重载集中删除候选。一个可能的实现如下所示:
+来自第二类的一个类型特征是std::enable\_if，这用于启用SFINAE并从函数的重载集中删除候选。一个可能的实现如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template<bool B, typename T = void>
@@ -18,11 +18,11 @@ template<typename T>
 struct enable_if<true, T> { using type = T; };
 \end{lstlisting}
 
-有一个主模板，有两个模板参数，一个布尔型非类型模板和一个默认参数为void的类型参数。这个主模板是一个空类，非类型模板参数值也有偏特化。然而，这定义了一个称为type的成员类型，它是模板参数T的别名模板。
+有一个主模板，有两个模板参数，一个布尔型非类型模板和一个默认参数为void的类型参数。主模板是一个空类，非类型模板参数值也有偏特化。这定义了一个称为type的成员类型，它是模板参数T的别名模板。
 
 enable\_if元函数用于布尔表达式，这个布尔表达式求值为true时，定义了一个名为type的成员类型。若布尔表达式为false，则不定义此成员类型。来看看它是如何工作的。
 
-还记得本章开头理解和定义类型特征一节中的例子吗?例子中，我们有一些类，提供了一个写入方法，将它们的内容写入输出流，以及为了同样的目的重载了操作符<{}<的类。在那一节中，我们定义了一个名为uses\_write的类型特征，并编写了一个serialize函数模板，该模板允许我们以统一的方式序列化这两种类型的对象(widget和gadget)。然而，实现相当复杂。使用enable\_if，可以以一种简单的方式实现该函数。一个可能的实现如下面的代码段所显示:
+还记得本章开头理解和定义类型特征一节中的例子吗?例子中，有一些类提供了一个写入方法，将内容写入输出流，以及为了同样的目的重载了操作符<{}<的类。在那一节中，我们定义了一个名为uses\_write的类型特征，并编写了一个serialize函数模板，该模板允许以统一的方式序列化这两种类型的对象(widget和gadget)。然而，实现相当复杂。使用enable\_if，可以以一种简单的方式实现该函数。一个可能的实现如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T,
@@ -42,13 +42,13 @@ void serialize(std::ostream& os, T const& value)
 }
 \end{lstlisting}
 
-这个实现中有两个重载函数模板，有两个模板参数。第一个参数是类型模板参数，称为T。第二个参数是指针类型的匿名非类型模板参数，它的默认值是nullptr。只有当uses\_write\_v变量的值为true时，才使用enable\_if定义成为type的成员。因此，对于具有成员函数write的类，第一次重载替换成功，但第二次重载替换失败，因为typename * = nullptr不是有效参数。对于操作符<{}<重载的类，情况则相反。
+这个实现中有两个重载函数模板，有两个模板参数。第一个参数是类型模板参数，称为T。第二个参数是指针类型的匿名非类型模板参数，其默认值是nullptr。只有当uses\_write\_v变量的值为true时，才使用enable\_if定义成为type的成员。因此，对于具有成员函数write的类，第一次重载替换成功，但第二次重载替换失败，因为typename * = nullptr不是有效参数。对于操作符<{}<重载的类，情况则相反。
 
 enable\_if元函数可以在以下几种情况下使用:
 
 \begin{itemize}
 \item
-定义一个具有默认参数的模板参数
+定义具有默认参数的模板参数
 
 \item
 定义具有默认参数的函数参数
@@ -57,7 +57,7 @@ enable\_if元函数可以在以下几种情况下使用:
 指定函数的返回类型
 \end{itemize}
 
-出于这个原因，所以在前面提到的提供serialize重载实现只是一种可能性。类似的一个使用enable\_if来定义一个带有默认参数的函数参数，如下所示:
+出于这个原因，所以在前面提供serialize重载实现只是一种可能。类似的使用enable\_if来定义一个带有默认参数的函数参数，如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -79,7 +79,7 @@ void serialize(
 }
 \end{lstlisting}
 
-这里，我们基本上把参数从模板参数列表移到了函数参数列表。没有其他变化，用法相同，如下所示:
+这里，我们把参数从模板参数列表移到了函数参数列表。没有其他变化，用法相同，如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 widget w{ 1, "one" };
@@ -89,7 +89,7 @@ serialize(std::cout, w);
 serialize(std::cout, g);
 \end{lstlisting}
 
-第三种选择是使用enable\_if来包装函数的返回类型，实现只是略有不同(默认参数对于返回类型没有意义):
+第三种选择是使用enable\_if来包装函数的返回类型，实现略有不同(默认参数对于返回类型没有意义):
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -109,7 +109,7 @@ typename std::enable_if<!uses_write_v<T>>::type serialize(
 
 这个实现中，若uses\_write\_v<T>为true，则定义返回类型。否则，替换失败，SFINAE。
 
-尽管在所有这些示例中，enable\_if类型特征都用于在函数模板的重载解析期间启用SFINAE，但此类型特征也可用于限制类模板的实例化。下面的例子中，有一个叫做integral\_wrapper的类，只被整型类型实例化，还有一个叫做float \_wrapper的类，只被浮点型类型实例化:
+尽管在所有这些示例中，enable\_if类型特征都用于在函数模板的重载解析期间启用SFINAE，但此类型特征也可用于限制类模板的实例化。下面的例子中，有一个叫做integral\_wrapper的类，只进行了整型类型实例化，还有一个叫做float\_wrapper的类，只被浮点型类型实例化:
 
 \begin{lstlisting}[style=styleCXX]
 template <
@@ -160,9 +160,9 @@ floating_wrapper w5{ 42.0 }; // OK
 floating_wrapper w6{ "42" }; // error
 \end{lstlisting}
 
-其中只有两个实例化可以工作：w1，integral\_wrapper是用int类型实例化的；w5，float \_wrapper是用double类型实例化的。所有其他选项都会生成编译器错误。
+其中只有两个实例化可以工作：w1，integral\_wrapper是用int类型实例化的；w5，float\_wrapper是用double类型实例化的。所有其他选项都会让编译器报错。
 
-需要指出的是，此代码示例仅适用于C++20中提供的integral\_wrapper和float\_wrapper的定义。对于标准的以前版本，因为编译器无法推导模板参数，即使是w1和w5的定义也会产生编译器错误。为了使它们工作，我们必须更改类模板以包括一个构造函数，如下所示:
+需要指出的是，此代码示例仅适用于C++20中提供的integral\_wrapper和float\_wrapper的定义。对于标准的以前版本，因为编译器无法推导模板参数，即使是w1和w5的定义也会产生编译器错误。为了使其工作，必须更改类模板以包括一个构造函数，如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template <
@@ -188,7 +188,7 @@ struct floating_wrapper
 };
 \end{lstlisting}
 
-虽然enable\_if有助于通过更简单、更可读的代码实现SFINAE，但它仍然相当复杂。幸运的是，C++17中有一个更好的选择，使用constexpr if语句。接下来让我们来探索这个替代方案。
+虽然enable\_if有助于通过更简单、更可读的代码实现SFINAE，但它仍然复杂。幸运的是，C++17中有一个更好的选择——constexpr if。接下来让我们来探索一下这个替代方案。
 
 
 
