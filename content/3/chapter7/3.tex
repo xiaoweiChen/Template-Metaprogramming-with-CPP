@@ -44,7 +44,7 @@ struct movable_unit : T
 };
 \end{lstlisting}
 
-你会注意到knight和mage现在是没有任何基类的职业，都提供了step\_forth和step\_back成员函数，就像之前实现的CRTP模式。现在，movable\_unit类模板是从这些类中派生出来的，并定义了advance和retreat函数，并在循环中调用了step\_forth和step\_back。我们可以这样使用它们:
+knight和mage现在是没有基类的职业，都提供了step\_forth和step\_back成员函数，就像之前实现的CRTP模式。现在，movable\_unit类模板是从这些类中派生出来的，并定义了advance和retreat函数，并在循环中调用了step\_forth和step\_back。可以这样使用:
 
 \begin{lstlisting}[style=styleCXX]
 movable_unit<knight> k;
@@ -63,13 +63,13 @@ m.retreat(3);
 图7.1:CRTP和Mixins模式的比较
 \end{center}
 
-可以结合使用Mixins实现的静态多态，与使用接口和虚函数实现的动态多态。这里将通过一个关于战斗的游戏单位的例子来证明这一点。我们之前在讨论CRTP时举过一个例子，其中knight和mage职业都有一个叫做attack的成员函数。
+可以结合使用Mixins实现的静态多态，与使用接口和虚函数实现的动态多态。这里将通过一个关于战斗的游戏单位来说明这一点。我们之前在讨论CRTP时举过一个例子，其中knight和mage职业都有一个叫做attack的成员函数。
 
 假设想要定义多种攻击风格。例如，每个游戏单位可以使用侵略性或中等攻击风格。所以这意味着四种组合:侵略性和中等骑士，侵略性和中等法师。另一方面，骑士和法师都可能是喜欢独自战斗的孤独战士，或者是总是与其他单位一起战斗的团队成员。
 
 我们可以有单独的好斗骑士和温和骑士，也可以有团队合作的好斗骑士和温和骑士，这同样适用于法师。组合的数量增长了很多，Mixins是一个很好的方式来提供这种额外的功能，而不扩大knight和mage的职业。最后，我们希望能够在运行时多态地处理所有这些。现在，来看看怎么做。
 
-首先，可以定义好斗和温和的战斗风格。可以简单如下:
+首先，可以定义好斗和温和的战斗风格。简单实现如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 struct aggressive_style
@@ -89,7 +89,7 @@ struct moderate_style
 };
 \end{lstlisting}
 
-接下来，将Mixins定义为能够独自或在团队中战斗的需求。这些类是模板，由它们的模板参数派生:
+接下来，将Mixins定义为能够独自或在团队中战斗的需求。这些类是模板，由模板参数派生:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -112,7 +112,7 @@ struct team_warrior : T
 };
 \end{lstlisting}
 
-最后，我们需要定义knight和mage职业，这些本身就是战斗风格的Mixins。然而，为了能够在运行时多态地进行处理，我们从一个基本的game\_unit类中派生出它们，这个类包含一个叫做attack的纯虚方法:
+最后，需要定义knight和mage职业，这些本身就是战斗风格的Mixins。为了能够在运行时多态地进行处理，我们从game\_unit类中派生出它们，这个类包含一个叫做attack的纯虚方法:
 
 \begin{lstlisting}[style=styleCXX]
 struct game_unit
@@ -142,7 +142,7 @@ struct mage : T, game_unit
 };
 \end{lstlisting}
 
-knight和mage的attack成员函数使用了T::fight方法。细心的读者可能已经注意到，aggresive\_style和moderate\_style类，以及lone\_warrior和team\_warrior混合类都提供了这样的成员函数。所以，我们可以进行以下组合:
+knight和mage的attack成员函数使用了T::fight方法，aggresive\_style和moderate\_style类，以及lone\_warrior和team\_warrior混合类都提供了这样的成员函数。所以，可以进行以下组合:
 
 \begin{lstlisting}[style=styleCXX]
 std::vector<std::unique_ptr<game_unit>> units;
@@ -172,7 +172,7 @@ for (auto& u : units)
 	u->attack();
 \end{lstlisting}
 
-这里总共定义了12种组合，而这一切只需要6个类就能实现。这显示了Mixins如何帮助我们添加功能，同时将代码的复杂性保持在较低的水平。若运行代码，会得到以下输出:
+这里总共定义了12种组合，而这一切只需要6个类就能实现。这显示了Mixins如何添加功能，同时将代码的复杂性保持在较低的水平。若运行代码，会得到以下输出:
 
 \begin{tcblisting}{commandshell={}}
 draw sword.attack! attack attack!
@@ -189,7 +189,7 @@ spell magic curse.fighting with a team.attack! attack attack!
 spell magic curse.fighting with a team.attack then defend
 \end{tcblisting}
 
-这里看到了两种模式，CRTP和Mixins，都旨在向其他类添加额外的(公共)功能。尽管它们看起来很相似，但它们的结构不同，不应该混淆。利用不相关类型的通用功能的另一种技术称为类型擦除，我们将在下一节进行讨论。
+这里看到了两种模式，CRTP和Mixins，都旨在向其他类添加额外的(公共)功能。尽管看起来很相似，但它们的结构不同，不应该混淆。利用不相关类型的通用功能的另一种技术称为类型擦除，我们将在下一节进行讨论。
 
 
 

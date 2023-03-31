@@ -1,4 +1,4 @@
-前面看到的约束，是在使用它们的地方定义的匿名谓词。许多约束是通用的，可以在多个地方使用。看看以下类似于add函数的函数示例，这个函数执行算术值的乘法:
+约束是在使用它们的地方定义的匿名谓词。许多约束是通用的，可以在多个地方使用。以下是类似于add函数的函数示例，这个函数执行算术乘法:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -16,7 +16,7 @@ template<typename T>
 concept arithmetic = std::is_arithmetic_v<T>;
 \end{lstlisting}
 
-即使赋值为布尔值，概念名也不应该包含动词。它们表示需求，并用作模板参数的属性或限定符。因此，您应该使用arithmetic、copyable、serializable、container等名称，而不是is\_arithmetic、is\_copyable、is\_serializable和is\_container。前面定义的算术概念可以这样使用:
+即使赋值为布尔值，概念名也不应该包含动词。它们表示需求，并用作模板参数的属性或限定符，所以应该使用arithmetic、copyable、serializable、container等名称，而不是is\_arithmetic、is\_copyable、is\_serializable和is\_container。前面定义的arithmetic概念可以这样使用:
 
 \begin{lstlisting}[style=styleCXX]
 template <arithmetic T>
@@ -26,16 +26,16 @@ template <arithmetic T>
 T mul(T const a, T const b) { return a * b; }
 \end{lstlisting}
 
-从这段代码中可以看出，使用了这个概念而不是typename关键字。它用算术质量限定T类型，只有满足此要求的类型才能用作模板参数。相同的算术概念可以用不同的语法定义，如下面的代码段所示:
+这里直接使用了这个概念，而不是typename关键字。它用arithmetic来限定T类型，只有满足此要求的类型才能用作模板参数。相同的算术概念可以用不同的语法定义，如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename T>
 concept arithmetic = requires { std::is_arithmetic_v<T>; };
 \end{lstlisting}
 
-这使用了一个requires表达式。requires表达式使用大括号分支\{\}，而requires子句没有。需求表达式可以包含不同类型的需求序列:简单需求、类型需求、复合需求和嵌套需求。这里看到的是一个简单的需求。为了定义这个特定的概念，这种语法更加复杂，但具有相同的最终效果。但在某些情况下，确实需要复杂的需求。
+这使用了requires表达式，其使用大括号分支\{\}，而requires子句没有。requires表达式可以包含不同类型的需求序列:简单需求、类型需求、复合需求和嵌套需求。这里看到的是一个简单的需求。为了定义这个特定的概念，这种语法更加复杂，但具有相同的最终效果。但在某些情况下，确实需要复杂的要求。
 
-考虑这样一种情况，想要定义一个模板时，只接受容器类型作为参数。在概念出现之前，这个问题可以通过类型特征和SFINAE或静态\_assert语句来解决，就像在本章开头看到的那样。然而，容器类型实际上不容易定义，可以基于标准容器的一些属性来实现:
+考虑这样一种情况，想要定义一个模板时，只接受容器类型作为参数。在概念出现之前，这个问题可以通过类型特征和SFINAE或static\_assert来解决，就像在本章开头看到的那样。不过，容器类型实际上不容易定义，可以基于标准容器的一些属性来实现:
 
 \begin{itemize}
 \item
@@ -81,7 +81,7 @@ static_assert(!is_container_v<foo>);
 static_assert(is_container_v<std::vector<foo>>);
 \end{lstlisting}
 
-概念使得编写这样的模板约束更加容易，可以使用概念语法并要求表达式来定义以下内容:
+概念使得编写这样的模板约束更加容易，可以使用概念语法和requires表达式来定义以下内容:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -112,7 +112,7 @@ template <container C>
 void process(C&& c) {}
 \end{lstlisting}
 
-下一节中，将深入探讨可以在需求表达式中使用的各种需求。
+下一节中，将深入探讨可以在requires表达式中使用的各种需求。
 
 
 

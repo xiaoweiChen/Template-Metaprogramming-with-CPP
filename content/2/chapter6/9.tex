@@ -22,9 +22,9 @@ auto add(T a, T b)
 }
 \end{lstlisting}
 
-第[1]行以requires关键字开头的构造是一个requires表达式。验证表达式a + b对于任何T类型都是格式良好的。另一方面，行[2]处的构造是一个requires子句。若布尔表达式addable<T>的值为true，则该函数参与重载解析;否则，不会。
+[1]以requires关键字开头的构造是一个requires表达式。验证表达式a + b对于任何T类型都是格式良好的。另一方面，[2]的构造是一个requires子句。若布尔表达式addable<T>的值为true，则该函数参与重载解析;否则，不会。
 
-虽然requires子句应该使用概念，但也可以使用requires表达式。基本上，概念定义中可以放在=标记右侧的东西都可以与requires子句一起使用。所以，可以做到以下几点:
+虽然requires子句应该使用概念，但也可以使用requires表达式。基本上，概念定义中可以放在=标记右侧的东西，都可以与requires子句一起使用:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -35,7 +35,7 @@ auto add(T a, T b)
 }
 \end{lstlisting}
 
-虽然这是完全合法的代码，但是否是使用约束的好方法是有争议的。我建议避免创建以requires requires开头的构造，因为其可读性较差，可能会造成混乱。此外，命名概念可以在其他地方使用，而若需要用于多个函数，则必须复制带有requires表达式的requires子句。
+虽然这是完全合法的代码，但是否是使用约束的好方法却有有争议。我建议避免创建以requires requires开头的构造，因为其可读性较差，可能会造成混乱。此外，命名概念可以在其他地方使用，而若需要用于多个函数，则必须复制带有requires表达式的requires子句。
 
 现在已经了解了如何使用约束和概念以多种方式约束模板实参，让我们看看如何简化函数模板语法，并约束模板实参。
 

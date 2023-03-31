@@ -5,9 +5,9 @@ requires表达式可能是一个复杂表达式，如前面的容器概念示例
 requires (parameter-list) { requirement-seq }
 \end{lstlisting}
 
-参数列表是一个以逗号分隔的参数列表。与函数声明的唯一区别是不允许使用默认值。但是，此列表中指定的参数不具有存储空间、链接或生命周期。编译器不为它们分配任何内存，只用于定义需求。但它们有一个作用域，那就是requires表达式的右大括号。
+参数列表是一个以逗号分隔的参数列表。与函数声明的唯一区别是不允许使用默认值，但此列表中指定的参数不具有存储空间、链接或生命周期。编译器不为它们分配任何内存，只用于定义需求。其有一个作用域，那就是requires表达式的右大括号。
 
-requirements-seq是一系列需求。每个这样的需求都必须以分号结束。这里，有四种类型的需求:
+requirements-seq是一系列需求，每个这样的需求都必须以分号结束。这里，有四种类型的需求:
 
 \begin{itemize}
 \item
@@ -36,11 +36,11 @@ requires表达式的参数列表中可以引入局部参数
 封闭上下文中可见的其他声明
 \end{itemize}
 
-在下面的小节中，我们将探讨所有提到的需求类型。
+下面的小节中，将探讨所有提到的需求类型。
 
 \subsubsubsection{6.3.1\hspace{0.2cm}简单需求}
 
-简单需求是一个不求值，只检查正确性的表达式。表达式必须是有效的，以便对需求求值为true。表达式不能以requires关键字开头，因为它定义了嵌套的需求。
+简单需求是一个不求值，只检查正确性的表达式。表达式必须是有效的，以便对需求求值为true。因为它定义了嵌套的需求，所以表达式不能以requires关键字开头。
 
 前面定义算术和容器概念时，已经看到了简单语句的示例。让我们再看几个:
 
@@ -66,11 +66,11 @@ concept logger = requires(T t)
 };
 \end{lstlisting}
 
-第一个概念arithmetic，和我们之前定义的是一样的。std::is\_arithmetic\_v<T>表达式是一个简单的需求。当参数列表为空时，完全可以省略，只检查T类型模板参数是否为算术类型。
+第一个概念arithmetic，和之前定义的一样。std::is\_arithmetic\_v<T>表达式是一个简单的需求。当参数列表为空时，可以省略，只检查T类型模板参数是否为算术类型。
 
-addable和logger概念都有一个参数列表，因为正在检查T类型值的操作。表达式a + b是一个简单的要求，因为编译器只检查加号运算符是否为T类型重载。最后一个例子中，确保T类型有三个成员函数，分别是error、warning和info，它们接受一个const char*类型的参数，或可以从const char*构造的其他类型的参数。但作为参数传递的实际值并不重要，因为这些调用从未执行过，只检查它们的正确性。
+addable和logger概念都有一个参数列表，因为正在检查T类型值的操作。表达式a + b是一个简单的要求，因为编译器只检查加号运算符是否为T类型重载。最后一个例子中，确保T类型有三个成员函数，分别是error、warning和info，可以接受一个const char*类型的参数，或可以从const char*构造的其他类型的参数。但作为参数传递的实际值并不重要，因为这些调用从未执行过，只检查其正确性。
 
-简要地阐述最后一个例子，并看看如下的代码段:
+简要地阐述最后一个例子，并看看以下代码:
 
 \begin{lstlisting}[style=styleCXX]
 template <logger T>
@@ -92,7 +92,7 @@ struct stream_logger
 };
 \end{lstlisting}
 
-log\_error函数模板需要一个类型满足记录器要求的参数。我们有两个类，分别为console\_logger和stream\_logger。第一个满足logger的要求，但第二个不满足。这是因为info函数不能用const char*类型的单个参数调用。该函数还需要第二个布尔参数。前两个方法，error和warning，为第二个参数定义了默认值，所以可以通过t.error("just")和warning("a")进行调用。
+log\_error函数模板需要一个类型满足记录器要求的参数。这里有两个类，分别为console\_logger和stream\_logger。第一个满足logger的要求，但第二个不满足。这是因为info函数不能用const char*类型的单个参数调用。该函数还需要第二个布尔参数。前两个方法，error和warning，为第二个参数定义了默认值，所以可以通过t.error("just")和warning("a")进行调用。
 
 然而，由于第三个成员函数，stream\_logger不是一个满足预期要求的log类，因此不能与log\_error函数一起使用。console\_logger和stream\_logger的使用示例如下:
 
@@ -145,7 +145,7 @@ static_assert(KVP<key_value_pair<int, std::string>>);
 static_assert(!KVP<std::pair<int, std::string>>);
 \end{lstlisting}
 
-类型key\_value\_pair<int, std::string>满足这些类型要求，但std::pair<int, std::string>不满足。pair类型确实有内部类型，但被称为first\_type和second\_type。
+类型key\_value\_pair<int, std::string>满足这些类型要求，但std::pair<int, std::string>不满足。pair类型确实有内部类型，但称为first\_type和second\_type。
 
 第二个例子中，检查类模板特化是否命名了类型。类模板是container，特化是container<T>:
 
@@ -166,11 +166,11 @@ static_assert(!containerizeable<std::string>);
 
 这段代码中，container是一个类模板，只能针对算术类型特化，例如int、long、float或double。因此，特化container<int>存在，但container<std::string>不存在。containerizeable概念指定了类型T定义有效的container特化的需求。因此，containerizeable<int>为true，但containerizeable<std::string>为false。
 
-现在已经理解了简单的需求和类型需求，是时候探索更复杂的需求类别了。首先，要看的是复合需求。
+现在已经理解了简单的需求和类型需求，是时候探索更复杂的需求类别了。
 
 \subsubsubsection{6.3.3\hspace{0.2cm}复合需求}
 
-简单需求允许我们验证表达式是否有效，但有时需要验证表达式的某些属性，而不仅仅是其是否有效。这可以包括表达式是否对结果类型抛出异常或要求(例如函数的返回类型)。一般形式如下:
+简单需求允许验证表达式是否有效，但有时需要验证表达式的某些属性，而不仅仅是其是否有效。这可以包括表达式是否对结果类型抛出异常或要求(例如函数的返回类型)。一般形式如下:
 
 \begin{lstlisting}[style=styleCXX]
 { expression } noexcept -> type_constraint;
@@ -186,10 +186,10 @@ noexcept规范和type\_constraint(前导为->)都是可选的。替换过程和�
 若指定了noexcept，则表达式不能抛出异常;否则，需求为false。
 
 \item
-若存在类型约束，则模板参数也会被替换为type\_constraint，并且decltype((expression))必须满足type\_constraint所施加的条件;否则，需求为false。
+若存在类型约束，则模板参数也会替换为type\_constraint，并且decltype((expression))必须满足type\_constraint所施加的条件;否则，需求为false。
 \end{enumerate}
 
-这里讨论几个示例，来学习如何使用复合需求。第一个例子中，我们检查函数是否标记了noexcept说明符:
+这里讨论几个示例，来学习如何使用复合需求。第一个例子中，检查函数是否标为noexcept:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -212,7 +212,7 @@ void invoke(F&& func, T... t)
 }
 \end{lstlisting}
 
-代码片段中，有两个函数模板:f声明为noexcept;因此，它不会抛出任何异常，而g可能会抛出异常。NonThrowing概念强制要求类型为F的可变函数不能抛出异常。因此，在以下两个调用中，只有第一个是有效的，而第二个将产生编译错误:
+这里，有两个函数模板:f声明为noexcept;，所以不会抛出异常，而g可能会抛出异常。NonThrowing概念强制要求类型为F的可变函数不能抛出异常。因此，在以下两个调用中，只有第一个是有效的，而第二个将产生编译错误:
 
 \begin{lstlisting}[style=styleCXX]
 invoke(f<int>, 42);
@@ -238,9 +238,9 @@ prog.cc:13:20: note: because 'func(t)' may throw an exception
                        ^
 \end{tcblisting}
 
-这些错误消息告诉我们调用(g<int>， 42)无效，因为g<int>可能抛出异常，导致nonthrows <F, T…>计算为false。
+因为g<int>可能抛出异常，导致nonthrows <F, T…>计算为false，所以invoke(g<int>,42)无效。
 
-对于第二个示例，我们将定义一个概念，为计时器类提供需求。它要求存在一个名为start的函数，可以在没有参数的情况下调用它，并且它返回void。还要求存在第二个名为stop的函数，可以在没有任何参数的情况下调用，并且它返回一个可以转换为long long的值。概念定义如下:
+对于第二个示例，我们将定义一个概念，为timer类提供需求。它要求存在一个名为start的函数，可以在没有参数的情况下调用它，并且它返回void。还要求存在第二个名为stop的函数，可以在没有任何参数的情况下调用，并且返回一个可以转换为long long的值。概念定义如下:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T>
@@ -251,7 +251,7 @@ concept timer = requires(T t)
 };
 \end{lstlisting}
 
-注意，类型约束不能是任何编译时布尔表达式，而是实际的类型需求。因此，使用其他概念来指定返回类型。std::same\_as和std::convertible\_to都是在标准库<concepts>头文件中可用的概念。现在，让我们考虑以下实现计时器的类:
+注意，类型约束不能是任何编译时布尔表达式，而是实际的类型需求，所以使用其他概念来指定返回类型。std::same\_as和std::convertible\_to都是在标准库<concepts>头文件中可用的概念。现在，考虑以下计时器的类实现:
 
 \begin{lstlisting}[style=styleCXX]
 struct timerA
@@ -278,13 +278,13 @@ static_assert(timer<timerB>);
 static_assert(!timer<timerC>);
 \end{lstlisting}
 
-本例中，timerA满足timer概念，包含两个必需的方法:返回void的start方法和返回long long的stop方法。类似地，timerB也满足timer概念，具有相同的方法，即使stop返回int。然而，int类型可隐式转换为long long类型;因此，满足类型要求。最后，timerC也有相同的方法，但返回void，所以停止返回类型的类型要求不满足，因此，timer概念的约束条件不满足。
+本例中，timerA满足timer概念，包含两个必需的方法:返回void的start方法和返回long long的stop方法。类似地，timerB也满足timer概念，具有相同的方法，即使stop返回int。然而，int类型可隐式转换为long long类型，所以需要满足类型要求。最后，timerC也有相同的方法，但返回void，所以停止返回类型的类型要求不满足，因此，timer概念的约束条件不满足。
 
 最后一类需要研究的需求是嵌套需求。
 
 \subsubsubsection{6.3.4\hspace{0.2cm}嵌套需求}
 
-最后一类需求是嵌套需求。嵌套需求是通过requires关键字引入的(简单需求不使用requires关键字引入需求)，其形式如下:
+最后一类需求是嵌套需求。嵌套需求是通过requires关键字引入的(简单需求不使用requires关键字引入)，其形式如下:
 
 \begin{lstlisting}[style=styleCXX]
 requires constraint-expression;
@@ -292,7 +292,7 @@ requires constraint-expression;
 
 表达式必须由替换的参数来满足，将模板参数替换为约束表达式，只是为了检查表达式是否满足。
 
-下面的例子中，要定义一个函数，对可变数量的参数执行加法。但是，我们想提出一些条件:
+下面的例子中，要定义一个函数，对可变数量的参数执行加法。但我们想提一些条件:
 
 \begin{itemize}
 \item
@@ -305,7 +305,7 @@ requires constraint-expression;
 表达式arg1 + arg2 +…+ argn是有效的。
 \end{itemize}
 
-为了确保这一点，我们定义了一个名为HomogenousRange的概念，如下所示:
+这里，我们定义了一个名为HomogenousRange的概念，如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename T, typename... Ts>

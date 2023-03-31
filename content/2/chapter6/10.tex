@@ -1,4 +1,4 @@
-第2章中，讨论了C++14中引入的泛型Lambda，以及C++20中引入的Lambda模板。对至少一个参数使用自动说明符的Lambda称为泛型Lambda。编译器生成的函数对象，将具有模板化的调用操作符。这里有一个例子:
+第2章中，讨论了C++14中引入的泛型Lambda，以及C++20中引入的Lambda模板。对至少一个参数使用auto说明符的Lambda称为泛型Lambda。编译器生成的函数对象，将具有模板化的调用操作符。这里有一个例子:
 
 \begin{lstlisting}[style=styleCXX]
 auto lsum = [](auto a, auto b) {return a + b; };
@@ -13,7 +13,7 @@ auto add(auto a, auto b)
 }
 \end{lstlisting}
 
-这是一个函数，接受两个参数并返回它们的和(或者更准确地说，是对两个值应用operator+的结果)。这种使用auto作为函数参数的函数称为缩写函数模板，是函数模板的简写语法。上述函数的等效模板如下所示:
+这是一个函数，接受两个参数并返回和(或者更准确地说，是对两个值应用operator+的结果)。使用auto作为函数参数的函数称为缩写函数模板，是函数模板的简写语法。上述函数的等效模板如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template<typename T, typename U>
@@ -23,14 +23,14 @@ auto add(T a, U b)
 }
 \end{lstlisting}
 
-可以像调用模板函数一样调用这个函数，编译器将通过用实际类型替换模板参数来生成适当的实例化。考虑以下的调用方式:
+可以像调用模板函数一样调用这个函数，编译器将通过用实际类型替换模板参数的方式，生成适当的实例化。考虑以下的调用方式:
 
 \begin{lstlisting}[style=styleCXX]
 add(4, 2); // returns 6
 add(4.0, 2); // returns 6.0
 \end{lstlisting}
 
-我们可以用 cppinsights.io网站检查编译器生成的代码，以添加基于这两个调用的缩写函数模板。生成以下特化:
+可以用cppinsights.io网站检查编译器生成的代码，以添加基于这两个调用的缩写函数模板。生成以下特化:
 
 \begin{lstlisting}[style=styleCXX]
 template<>
@@ -46,7 +46,7 @@ double add<double, int>(double a, int b)
 }
 \end{lstlisting}
 
-由于缩写函数模板只不过是具有简化语法的常规函数模板，因此这样的函数可以由用户显式特化:
+由于缩写函数模板只不过是具有简化语法的常规函数模板，这样的函数可以由用户显式特化:
 
 \begin{lstlisting}[style=styleCXX]
 template<>
@@ -56,9 +56,9 @@ auto add(char const* a, char const* b)
 }
 \end{lstlisting}
 
-这是char const*类型的全特化。这种特化能够调用add("4"， "2")，尽管结果是一个std::string值。
+这是char const*类型的全特化。这种特化能够调用add("4"，"2")，尽管结果是一个std::string值。
 
-这类简化的函数模板称为无约束函数模板，模板参数没有限制，但可以用概念为它们的参数提供约束。使用概念的简短函数模板称为约束函数模板。接下来，会看到一个add函数约束整型的例子:
+这类简化的函数模板称为无约束函数模板，模板参数没有限制，但可以用概念为它们的参数提供约束。使用概念的简短函数模板称为约束函数模板。下面，会看到一个add函数约束整型的例子:
 
 \begin{lstlisting}[style=styleCXX]
 auto add(std::integral auto a, std::integral auto b)

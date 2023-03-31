@@ -1,6 +1,6 @@
-标准库提供了一组基本概念，可用于定义对函数模板、类模板、变量模板和别名模板的模板实参的需求，正如在本章中看到的那样。C++20中的标准概念分布在多个头文件和命名空间中。我们将在本节中介绍其中一些，你可以在\url{https://en.cppreference.com/}上找到所有的概念。
+标准库提供了一组基本概念，可用于定义对函数模板、类模板、变量模板和别名模板的模板实参的需求，正如在本章中看到的那样。C++20中的标准概念分布在多个头文件和命名空间中。我们将在本节中介绍其中一些，可以在\url{https://en.cppreference.com/}上找到所有的概念。
 
-主要的概念集可以在<concepts>头文件和std命名空间中找到。这些概念中的大多数等价于一个或多个现有的类型特征。对于其中一些，它们的实现是定义良好的;对另一些，则是不明确的。它们可分为四类:核心语言概念、比较概念、对象概念和可调用概念。这组概念包含以下内容(但不仅如此):
+主要的概念集可以在<concepts>头文件和std命名空间中找到。这些概念中的大多数等价于一个或多个现有的类型特征。对于其中一些，它们的实现是定义良好的;另一些，则是不明确的。可分为四类:核心语言概念、比较概念、对象概念和可调用概念。这组概念包含以下内容(但不仅如此):
 
 \begin{table}[H]
 \centering
@@ -12,9 +12,9 @@
 		convertible\_to &
 		类型T可以隐式转换为另一类型U。 \\ \hline
 		common\_reference\_with &
-		两种类型T和U具有共同引用类型。 \\ \hline
+		类型T和U具有共同引用类型。 \\ \hline
 		common\_with &
-		两种类型T和U具有共同类型，这两种类型都可以转换为共同类型。 \\ \hline
+		类型T和U具有共同类型，这两种类型都可以转换为共同类型。 \\ \hline
 		integral           & 类型T是整型。            \\ \hline
 		signed\_integral   & 类型T是有符号整型。      \\ \hline
 		unsigned\_integral & 类型T是无符号整型。  \\ \hline
@@ -26,9 +26,9 @@
 		swappable\_with &
 		类型T的值可以与类型U的值相匹配。 \\ \hline
 		destructible &
-		可以安全地销毁类型T的值(不需要从析构函数抛出任何异常)。 \\ \hline
+		可以安全地销毁类型T的值(析构函数不抛出异常)。 \\ \hline
 		constructible\_from &
-		可以用给定的参数网类型集构造类型为T的对象。 \\ \hline
+		可以用给定的参数类型集构造类型为T的对象。 \\ \hline
 		default\_initializable &
 		\begin{tabular}[c]{@{}l@{}}类型T的对象可以是默认可构造(值初始化T()，从空初始化列表T\{\}\\ 直接列表初始化，或默认初始化，如T t;)。\end{tabular} \\ \hline
 		move\_constructible &
@@ -54,7 +54,7 @@
 表 6.1
 \end{center}
 
-其中一些概念是使用类型特征定义的，一些是其他概念或概念与类型特征的组合，还有一些至少部分具有未指定的实现。下面是一些例子:
+其中一些概念是使用类型特征定义的，一些是其他概念或概念与类型特征的组合，还有一些具有部分未指定的实现。下面是一些例子:
 
 \begin{lstlisting}[style=styleCXX]
 template < class T >
@@ -82,17 +82,17 @@ C++20还引入了一个新的基于概念的迭代器系统，并在<iterator>�
 		indirectly\_writable &
 		迭代器类型所引用的对象可以写入。 \\ \hline
 		input\_iterator &
-		类型是输入迭代器(支持读取、前增量和后增量)。 \\ \hline
+		类型是输入迭代器(支持读取、前缀递增和后缀递增)。 \\ \hline
 		output\_iterator &
-		类型是输出迭代器(支持写入、增量前和增量后)。 \\ \hline
+		类型是输出迭代器(支持写入、前缀递增和后缀递增)。 \\ \hline
 		forward\_iterator &
 		\begin{tabular}[c]{@{}l@{}}作为input\_iterator的类型同时也是前向迭代器(支持相等比较和多次传递)\end{tabular} \\ \hline
 		bidirectional\_iterator &
 		作为forward\_iterator的类型同时，也是双向迭代器(支持向后移动) \\ \hline
 		randon\_access\_iterator &
-		\begin{tabular}[c]{@{}l@{}}作为bidirectional\_iterator类型的同时，也是随机访问迭代器(支持在常数时间\\ 内下标和前进)。\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}作为bidirectional\_iterator类型的同时，也是随机迭代器(支持在常数时间\\ 内下标和前进)。\end{tabular} \\ \hline
 		contiguous\_iterator &
-		\begin{tabular}[c]{@{}l@{}}作为random\_access\_iterator类型同时，也是连续迭代器(元素存储在连续的内\\ 存位置)的要求。\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}作为random\_access\_iterator类型同时，也是连续迭代器(元素存储在连续\\ 的内存位置)的要求。\end{tabular} \\ \hline
 	\end{tabular}
 \end{table}
 
@@ -123,7 +123,7 @@ concept random_access_iterator =
 	};
 \end{lstlisting}
 
-它使用了几个概念(其中一些没有在这里列出)，以及一个requires表达式来确保某些表达式是格式良好的。
+这里使用了几个概念(其中一些没有在这里列出)，以及一个requires表达式来确保某些表达式是格式良好的。
 
 此外，<iterator>头文件中，有一组旨在简化通用算法约束的概念。下表列出了其中一些概念:
 
@@ -147,7 +147,7 @@ concept random_access_iterator =
 表 6.3
 \end{center}
 
-C++20中包含的几个主要特性之一(以及概念、模块和协程)是范围。范围ranges库定义了一系列类和函数，用于简化使用range的操作。其中有一组概念，在<ranges>头文件和std::ranges命名空间中定义。其中的一些概念:
+C++20中包含的几个主要特性之一(以及概念、模块和协程)是范围。范围库定义了一系列类和函数，用于简化使用范围操作。其中有一组概念，在<ranges>头文件和std::ranges命名空间中定义。其中的一些概念:
 
 \begin{table}[H]
 \centering
@@ -200,7 +200,7 @@ concept input_range = ranges::range<T> &&
 	std::input_iterator<ranges::iterator_t<T>>;
 \end{lstlisting}
 
-如前所述，这里列出的概念要比这里列出的多得多，未来可能还会增加。本节不打算作为标准概念的完整参考，而是作为它们的介绍。感兴趣的读者可以在\url{https://en.cppreference.com/}官方C++参考文档了解更多关于这些概念的信息。至于范围，我们将在第8章中了解到更多，并探索标准库提供了什么。
+如前所述，这里列出的概念要比这里列出的多得多，未来可能还会增加。本节不打算作为标准概念的完整参考，而是作为它们的介绍。感兴趣的读者可以在\url{https://en.cppreference.com/}官方C++参考文档了解更多关于这些概念的信息。至于范围库，我们将在第8章中了解到更多，并探索标准库提供了什么。
 
 
 
