@@ -1,4 +1,4 @@
-标准库包含一系列范围适配器，可用于解决许多不同的任务。新版本的标准中增加了更多的内容。但在某些情况下，可能希望创建自己的范围适配器，以便与范围库中的其他适配器一起使用。这实际上不是一项微不足道的任务，所以在本章的最后一节中，我们将探讨编写这样一个范围适配器所需要遵循的步骤。
+标准库包含一系列范围适配器，可用于解决许多不同的任务。新版本的标准中增加了更多的内容。但某些情况下，可能希望创建自己的范围适配器，以便与范围库中的其他适配器一起使用。这实际上不是一项微不足道的任务，所以在本章的最后一节中，我们将探讨编写这样一个范围适配器所需要遵循的步骤。
 
 为此，考虑一个范围适配器，接受范围的第n个元素，而跳过其他元素。我们将这个适配器称为step\_view。我们可以使用它来编写如下代码:
 
@@ -19,7 +19,7 @@ for (auto i : std::views::iota(1, 10) | views::step(2) |
 
 第一个循环将打印从1到9的所有数字。第二个循环将输出所有的奇数，1、3、5、7、9。第三个循环将输出1,4,7。最后，第四个循环将输出1,3,5。
 
-为了实现这一点，我们需要实现以下实现:
+为了实现这个，我们需要以下实现:
 
 \begin{itemize}
 \item
@@ -41,7 +41,7 @@ for (auto i : std::views::iota(1, 10) | views::step(2) |
 编译时常量全局对象，以简化范围适配器的使用
 \end{itemize}
 
-一个一个地来了解如何定义它们，从哨兵类开始。哨点是对过尾迭代器的抽象，允许检查迭代是否到达了范围的末端。哨兵可以使结束迭代器的类型与范围迭代器的类型不同，哨兵不能解除引用或增加。下面是它的定义:
+一个个地来了解如何定义它们，从哨兵类开始。哨点是对过尾迭代器的抽象，允许检查迭代是否到达了范围的末端。哨兵可以使结束迭代器的类型与范围迭代器的类型不同，哨兵不能解除引用或增加。下面是其定义:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename R>
@@ -141,7 +141,7 @@ private:
 
 ++操作符的实现使用std::ranges::next约束算法对迭代器增加N个位置，但不超过范围的结束。
 
-为了将step\_iterator和step\_sentinel对用于step\_view范围适配器，必须确保这个对实际上是格式良好的。为此，必须确保step\_iterator类型是一个输入迭代器，并且step\_sentinel类型确实是step\_iterator类型的哨兵类型。这可以在以下static\_assert的帮助下完成:
+为了将step\_iterator和step\_sentinel对用于step\_view范围适配器，必须确保这个对实际上是格式良好的。为此，必须确保step\_iterator类型是一个输入迭代器，并且step\_sentinel类型确实是step\_iterator类型的哨兵类型。这可以在static\_assert帮助下完成:
 
 \begin{lstlisting}[style=styleCXX]
 namespace details
@@ -156,7 +156,7 @@ namespace details
 }
 \end{lstlisting}
 
-step\_iterator类型用于step\_view范围适配器的实现。至少，可以如下所示:
+step\_iterator类型用于step\_view范围适配器的实现:
 
 \begin{lstlisting}[style=styleCXX]
 template<std::ranges::view R>
@@ -237,7 +237,7 @@ public:
 
 \begin{itemize}
 \item
-类模板必须有一个符合std::ranges::view概念的模板参数。
+类模板必须有符合std::ranges::view概念的模板参数。
 
 \item
 类模板应该派生自std::ranges:view\_interface，其本身接受一个模板参数，应该是范围适配器类。这基本上是第7章中的CRTP实现。
@@ -258,7 +258,7 @@ public:
 对于满足std::ranges::size\_range概念要求的范围，该类还必须包含名为size的成员函数，该函数返回范围内的元素数量。
 \end{itemize}
 
-为了能够对step\_view类使用类模板参数推导，应该定义一个用户定义的推导指南。这些已经在第4中讨论过，这样的指南应该如下所示:
+为了能够对step\_view类使用类模板参数推导，应该定义一个用户定义的推导指南。这在第4中讨论过，指南应该如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template<class R>
@@ -267,7 +267,7 @@ step_view(R&& base,
 	-> step_view<std::ranges::views::all_t<R>>;
 \end{lstlisting}
 
-为了能够使用管道迭代器(|)将此范围适配器与其他范围适配器组合在一起，必须重载此操作符。但我们需要一些辅助函数对象，如下面的代码所示:
+为了能够使用管道迭代器(|)将此范围适配器与其他范围适配器组合在一起，必须重载此操作符。但需要一些辅助函数对象，如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 namespace details
@@ -298,7 +298,7 @@ namespace details
 
 step\_view\_fn\_closure类是一个函数对象，存储了一个表示每个迭代器要跳过的元素数量的值。其重载调用操作符以一个范围作为参数，并返回从该范围创建的step\_view对象和要跳转的步数的值。
 
-最后，希望能够以与标准库中可用的方式类似的方式编写代码，标准库为每个存在的范围适配器在std::views名称空间中提供了一个编译时全局对象。例如，可以使用std::views::transform，而不是std::ranges::transform\_view。类似地，我们希望有一个对象views::step，而不是step\_view(某个命名空间中)。为此，还需要另一个函数对象，如下所示:
+最后，希望能够以与标准库中可用的方式类似的方式编写代码，标准库为每个存在的范围适配器在std::views命名空间中提供了一个编译时全局对象。例如，可以使用std::views::transform，而不是std::ranges::transform\_view。类似地，我们希望有一个对象views::step，而不是step\_view(某个命名空间中)。为此，还需要另一个函数对象:
 
 \begin{lstlisting}[style=styleCXX]
 namespace details
@@ -325,9 +325,9 @@ namespace views
 }
 \end{lstlisting}
 
-step\_view\_fn类型是一个函数对象，对调用操作符有两个重载:一个接受一个范围和一个整数并返回一个step\_view对象，另一个接受一个整数并返回这个值的闭包。更准确地说，是我们前面看到的step\_view\_fn\_closure的实例。
+step\_view\_fn类型是一个函数对象，对调用操作符有两个重载:一个接受一个范围和一个整数，并返回一个step\_view对象，另一个接受一个整数并返回这个值的闭包。更准确地说，是前面step\_view\_fn\_closure的实例。
 
-实现了所有这些之后，就可以成功地运行本节开头所示的代码。我们已经完成了一个简单的范围适配器的实现，希望这能让您了解写入范围适配器需要什么。从细节上看，范围库非常复杂。本章中，您已经学习了一些关于库内容的基础知识，如何简化代码，以及如何使用自定义特性扩展它。若想利用其他资源了解更多，这些知识应该只能算是一个起点。
+实现了这些之后，就可以成功地运行本节开头所示的代码。我们已经完成了一个简单的范围适配器的实现，希望这能让您了解写入范围适配器需要什么。从细节上看，范围库非常复杂。本章中，已经了解了一些关于库内容的基础知识，如何简化代码，以及如何使用自定义特性扩展它。若想利用其他资源了解更多，这些知识应该只能算是一个起点。
 
 
 

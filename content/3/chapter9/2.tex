@@ -1,9 +1,9 @@
 
-术语范围指的是，由开始迭代器和结束迭代器限定的元素序列的抽象。因此，范围表示元素的可迭代序列。然而，这样的序列可以用几种方式定义:
+术语范围是指，由开始迭代器和结束迭代器限定的元素序列的抽象，所以范围表示元素的可迭代序列。这样的序列可以用几种方式定义:
 
 \begin{itemize}
 \item
-一个开始迭代器和一个结束哨，这样的序列从开始迭代到结束。哨兵是表示序列结束的对象。可以具有与迭代器类型相同的类型，也可以具有不同的类型。
+一个开始迭代器和一个结束哨兵，这样的序列从开始迭代到结束。哨兵是表示序列结束的对象。可以具有与迭代器类型相同的类型，也可以具有不同的类型。
 
 \item
 一个开始对象和一个大小(元素的数量)，表示一个所谓的计数序列。这样的序列从一开始就要迭代N次(其中N表示大小)。
@@ -15,7 +15,7 @@
 只有一个开始值，表示所谓的无界序列。这样的序列可以无限迭代。
 \end{itemize}
 
-所有这些类型的可迭代序列都被认为是范围。因为范围是一种抽象，C++20标准库定义了一系列概念来描述范围类型的需求，其可以在<ranges>头文件和std::ranges命名空间中使用。下表列出了范围概念的列表:
+所有这些类型的可迭代序列都是范围。因为范围是一种抽象，C++20标准库定义了一系列概念来描述范围类型的需求，可以在<ranges>头文件和std::ranges命名空间中使用。下表列出了范围概念的列表:
 
 \begin{table}[H]
 \centering
@@ -24,13 +24,13 @@
 		\textbf{名称} &
 		\textbf{描述} \\ \hline
 		range &
-		\begin{tabular}[c]{@{}l@{}}通过提供开始迭代器和结束前哨，定义类型R为范围的需求。\\ 迭代器和哨兵可以是不同的类型。\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}通过提供开始迭代器和结束哨兵，定义类型R为范围的需求。\\ 迭代器和哨兵可以是不同的类型。\end{tabular} \\ \hline
 		bgorrowed\_range &
 		\begin{tabular}[c]{@{}l@{}}定义R类型的要求，以便函数可以按值接受该类型的对象\\ 并返回从该对象获得的迭代器，而不会出现悬空的危险。\end{tabular} \\ \hline
 		sized\_range &
 		\begin{tabular}[c]{@{}l@{}}将类型R的要求定义为在常数时间内知道其大小的范围。\end{tabular} \\ \hline
 		common\_range &
-		\begin{tabular}[c]{@{}l@{}}将类型R的要求定义为迭代器类型和前哨类型相同的范围。\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}将类型R的要求定义为迭代器类型和哨兵类型相同的范围。\end{tabular} \\ \hline
 		view &
 		\begin{tabular}[c]{@{}l@{}}定义类型R的需求，该类型R是一个具有固定时间\\ 复制、移动和赋值操作的范围。\end{tabular} \\ \hline
 		viewable\_range &
@@ -40,7 +40,7 @@
 		output\_range &
 		\begin{tabular}[c]{@{}l@{}}要求范围类型具有满足output\_iterator概念的迭代器类型。\end{tabular} \\ \hline
 		forward\_range &
-		\begin{tabular}[c]{@{}l@{}}要求范围类型具有满足\\ forward\_iterator概念的迭代器类型。\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}要求范围类型具有满足forward\_iterator概念的迭代器类型。\end{tabular} \\ \hline
 		\begin{tabular}[c]{@{}l@{}}bidirectional\_\\ range\end{tabular} &
 		\begin{tabular}[c]{@{}l@{}}要求范围类型具有满足bidirectional\_iterator概念的迭代器类型。\end{tabular} \\ \hline
 		\begin{tabular}[c]{@{}l@{}}random\_access\_\\ range\end{tabular} &
@@ -54,7 +54,7 @@
 表 9.1
 \end{center}
 
-标准库为容器和数组定义了一系列访问函数。这包括std::begin和std::end代替成员函数begin和end, std::size代替成员函数size等，这些称为范围访问函数。类似地，范围库定义了一组范围访问函数。它们是为范围设计的，可以在<ranges>和<iterator>头文件和std::ranges命名空间中使用。下表列出了它们:
+标准库为容器和数组定义了一组访问函数。这包括std::begin和std::end代替成员函数begin和end, std::size代替成员函数size等，这些称为范围访问函数。类似地，范围库定义了一组范围访问函数。其为范围设计的，可以在<ranges>和<iterator>头文件和std::ranges命名空间中使用。下表列出了它们:
 
 \begin{table}[H]
 \centering
@@ -77,7 +77,7 @@
 		\begin{tabular}[c]{@{}l@{}}返回一个布尔值，指示范围是否为空。\end{tabular} \\ \hline
 		data/cdata &
 		data &
-		\begin{tabular}[c]{@{}l@{}}分别返回指向连续范围和只读连续范围开头的指针。\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}分别返回指向连续范围和只读连续范围开头的\\ 指针。\end{tabular} \\ \hline
 	\end{tabular}
 \end{table}
 
@@ -108,9 +108,9 @@ std::cout << "rbegin(r)=" << *std::ranges::rbegin(r)
 std::cout << "data(v)=" << *std::ranges::data(v) << '\n';
 \end{lstlisting}
 
-这段代码中，使用了一个名为std::views::iota的类型。正如命名空间所示，这是一个视图。视图是带有附加限制的范围，视图是具有非所有语义的轻量级对象，以一种不需要复制或改变序列的方式呈现底层元素序列(范围)的视图。关键特征是惰性求值。所以不管它们应用了什么转换，它们只在请求(迭代)元素时执行，而不是在创建视图时执行。
+这段代码中，使用了一个名为std::views::iota的类型。正如命名空间所示，这是一个视图。视图是带有限制的范围，视图是具有非所有语义的轻量级对象，以一种不需要复制或改变序列的方式呈现底层元素序列(范围)的视图。关键特征是惰性求值。所以不管它们应用了什么转换，只在请求(迭代)元素时执行，而不是在创建时执行。
 
-C++20中提供了一系列视图，C++23中也包含了新的视图。视图可以在<ranges>头文件和std::ranges命名空间的形式中使用，std::ranges::abc\_view，例如std::ranges::iota\_view。但为了使用方便，在std::views命名空间中，还存在一个形式为std::views::abc的变量模板，例如std::views::iota。这就是我们在前面的例子中看到的。下面是两个使用iota的等效示例:
+C++20中提供了一系列视图，C++23中也包含了新视图。视图可以在<ranges>头文件和std::ranges命名空间的形式中使用，std::ranges::abc\_view，例如std::ranges::iota\_view。为了使用方便，在std::views命名空间中，还存在一个形式为std::views::abc的变量模板，例如std::views::iota。这就是我们在前面的例子中看到的。下面是两个使用iota的等效示例:
 
 \begin{lstlisting}[style=styleCXX]
 // using the iota_view type
@@ -122,7 +122,7 @@ for (auto i : std::views::iota(1, 10))
 	std::cout << i << '\n';
 \end{lstlisting}
 
-iota视图是称为工厂的特殊视图类别的一部分。这些工厂是新生成范围的视图，范围库中有以下工厂:
+iota视图是工厂视图的一部分。这些工厂视图是新生成范围的视图，范围库中有以下工厂视图:
 
 \begin{table}[H]
 \centering
@@ -139,10 +139,10 @@ iota视图是称为工厂的特殊视图类别的一部分。这些工厂是新�
 		\begin{tabular}[c]{@{}l@{}}生成具有单个T类型元素的视图。\end{tabular} \\ \hline
 		\begin{tabular}[c]{@{}l@{}}ranges::iota\_\\ view\end{tabular} &
 		ranges::views::iota &
-		\begin{tabular}[c]{@{}l@{}}生成一个连续元素序列的视图，从\\开始值到结束值(有界视图)或无限(无界视图)。\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}生成一个连续元素序列的视图，从\\开始值到结束值(有界视图)或无限\\ (无界视图)。\end{tabular} \\ \hline
 		\begin{tabular}[c]{@{}l@{}}ranges::basic\_\\ iostream\_view\end{tabular} &
 		ranges::views::istream &
-		\begin{tabular}[c]{@{}l@{}}通过反复应用操作符\textgreater{}\textgreater\\ 生成一个元素序列的视图。\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}通过反复应用操作符>{}>生成一个元\\ 素序列的视图。\end{tabular} \\ \hline
 	\end{tabular}
 \end{table}
 
@@ -150,7 +150,7 @@ iota视图是称为工厂的特殊视图类别的一部分。这些工厂是新�
 表 9.3
 \end{center}
 
-若想知道为什么empty\_view和single\_view有用，答案应该不难找到。这在模板代码中很有用，这些代码处理空范围或只有一个元素的范围是有效输入的范围。不希望一个函数模板多次重载来处理这些特殊情况；反之，可以传递一个empty\_view或single\_view范围。下面的代码片段展示了使用这些工厂的几个示例。这些代码段应该不言自明:
+为什么empty\_view和single\_view有用，答案应该不难找到。模板代码中，可以处理空范围或只有一个元素的范围是有效输入的范围。一个函数模板不用多次重载来处理这些特殊情况；反之，可以接受一个empty\_view或single\_view范围。下面的代码使用工厂视图的几个示例:
 
 \begin{lstlisting}[style=styleCXX]
 constexpr std::ranges::empty_view<int> ev;
@@ -164,7 +164,7 @@ static_assert(std::ranges::size(sv) == 1);
 static_assert(*std::ranges::data(sv) == 42);
 \end{lstlisting}
 
-对于iota\_view，我们已经看到了一些有界视图的例子。下面的代码段再次展示了一个例子，不仅使用了由iota生成的有界视图，还使用了同样由iota生成的无界视图:
+对于iota\_view，已经看过一些有界视图的例子。下面的代码段再次展示了一个例子，不仅使用了iota生成的有界视图，还使用了同样由iota生成的无界视图:
 
 \begin{lstlisting}[style=styleCXX]
 auto v1 = std::ranges::views::iota(1, 10);
@@ -179,7 +179,7 @@ std::ranges::for_each(
 	[](int const n) {std::cout << n << '\n'; });
 \end{lstlisting}
 
-最后一个示例使用了另一个名为take\_view的视图。这将生成另一个视图(我们的示例中是iota生成的无界视图)的前N个元素(我们的示例中是9)的视图。首先，让我们举一个使用第四个视图工厂basic\_iostream\_view的例子。假设在文本中有一个商品价格列表，用空格分隔，需要输出这些价格的总和。有不同的解决方法，但这里给出了一个可能的解决方案:
+最后一个示例中，使用了另一个名为take\_view的视图。这将生成另一个视图(我们的示例中是iota生成的无界视图)的前N个元素(我们的示例中是9)的视图。首先，举一个使用第四个视图工厂basic\_iostream\_view的例子。假设在文本中有一个商品价格列表，用空格分隔，需要输出这些价格的总和。有不同的解决方法，但这里给出了一个可能的解决方案:
 
 \begin{lstlisting}[style=styleCXX]
 auto text = "19.99 7.50 49.19 20 12.34";
@@ -207,7 +207,7 @@ for (double const price :
 }
 \end{lstlisting}
 
-istream\_view范围工厂所做的是在istringstream对象上重复应用操作符>{}>，并在每次应用时产生一个值。不能指定分隔符,只适用于空格。若喜欢使用标准算法而不是手工循环，可以使用range::for\_each约束算法来产生相同的结果:
+istream\_view范围工厂所做的是在istringstream对象上重复应用操作符>{}>，并在每次应用时产生一个值。不能指定分隔符，只适用于空格。若喜欢使用标准算法，可以使用range::for\_each约束算法来产生相同的结果:
 
 \begin{lstlisting}[style=styleCXX]
 std::ranges::for_each(
@@ -216,7 +216,7 @@ std::ranges::for_each(
 		prices.push_back(price); });
 \end{lstlisting}
 
-到目前为止，本章给出的示例包括filter, take, drop和reverse等视图。这些只是C++20中可用的一些标准视图，C++23中添加了更多，未来的标准版本中可能还会添加更多。下表列出了整个标准视图集:
+目前为止，本章给出的示例包括filter, take, drop和reverse等视图。这些只是C++20中可用的一些标准视图，C++23中会添加了更多。下表列出了整个标准视图集:
 
 \begin{table}[H]
 \centering
@@ -322,11 +322,11 @@ std::ranges::for_each(
 表 9.5
 \end{center}
 
-我们已经列举了所有标准范围适配器，来看一下使用其中一些适配器的更多示例。
+我们已经列举了所有标准范围适配器，来看一下使用适配器的更多示例。
 
 \subsubsubsection{9.2.1\hspace{0.2cm}更多的例子}
 
-本节之前，我们看到了以下示例(这次使用显式命名空间):
+本节之前，我们看到了以下示例(使用显式命名空间):
 
 \begin{lstlisting}[style=styleCXX]
 namespace rv = std::ranges::views;
@@ -356,7 +356,7 @@ std::ranges::sort(v);auto r =
 
 \begin{itemize}
 \item
-若一个范围适配器a有一个参数，一个视图V，那么a (V)和v| a是等价的。这样的范围适配器是reverse\_view，示例如下:
+若范围适配器a有一个参数，一个视图V，那么a(V)和v| a是等价的。这样的范围适配器是reverse\_view:
 
 \begin{lstlisting}[style=styleCXX]
 std::vector<int> v{ 1, 5, 3, 2, 8, 7, 6, 4 };
@@ -366,7 +366,7 @@ auto r2 = v | rv::reverse;
 \end{lstlisting}
 
 \item
-若一个范围适配器a有多个参数，一个视图V和args…，那么a (V, args…)，a (args…)(V)和V| a (args…)是等价的。这样的范围适配器是take\_view，示例如下:
+若一个范围适配器a有多个参数，一个视图V和args…，那么a (V, args…)，a (args…)(V)和V| a (args…)是等价的。这样的范围适配器是take\_view:
 
 \begin{lstlisting}[style=styleCXX]
 std::vector<int> v{ 1, 5, 3, 2, 8, 7, 6, 4 };
@@ -378,7 +378,7 @@ auto r3 = v | rv::take(2);
 
 \end{itemize}
 
-目前为止，已经看到了使用过滤器、变换、反转和删除。为了完成本章的这一部分，我们通过一系列例子来演示表8.7中的视图的使用。以下所有示例中，我们将把rv视为std::ranges::views命名空间的别名:
+已经看过滤器、变换、反转和删除的例子。下面，我们会通过一系列例子来演示表8.7中的视图的使用。以下所有示例中，我们将把rv视为std::ranges::views命名空间的别名:
 
 \begin{itemize}
 \item
@@ -430,7 +430,7 @@ for (auto i : v | rv::elements<2>)
 \end{lstlisting}
 
 \item
-输出一个由整数组成的向量的所有元素:
+输出一个由整数vector中的所有元素:
 
 \begin{lstlisting}[style=styleCXX]
 std::vector<std::vector<int>> v {
@@ -442,7 +442,7 @@ for (int const i : v | rv::join)
 \end{lstlisting}
 
 \item
-打印一个由整数组成的向量的所有元素，但在每个vector的元素之间插入一个0。范围适配器join\_with是C++23的新功能，编译器可能还不支持:
+输出由整数vector中的所有元素，但在每个vector的元素之间插入一个0。范围适配器join\_with是C++23的新功能，编译器可能还不支持:
 
 \begin{lstlisting}[style=styleCXX]
 std::vector<std::vector<int>> v{
@@ -453,7 +453,7 @@ for(int const i : v | rv::join_with(0))
 \end{lstlisting}
 
 \item
-打印句子中的单个单词，其中分隔符为空格:
+输出句子中的单个单词，其中分隔符为空格:
 
 \begin{lstlisting}[style=styleCXX]
 std::string text{ "this is a demo!" };
@@ -467,7 +467,7 @@ for (auto const word : text | rv::split(delim))
 \end{lstlisting}
 
 \item
-从一个整数数组的元素和一个双精度数组的vector创建一个元组视图:
+从一个整数数组的元素和一个双精度vector创建元组视图:
 
 \begin{lstlisting}[style=styleCXX]
 std::array<int, 4> a {1, 2, 3, 4};
@@ -478,7 +478,7 @@ auto z = rv::zip(a, v)
 \end{lstlisting}
 
 \item
-创建一个包含整数数组的相乘元素和双精度vector的视图:
+创建包含整数数组的相乘元素和双精度vector的视图:
 
 \begin{lstlisting}[style=styleCXX]
 std::array<int, 4> a {1, 2, 3, 4};
@@ -490,7 +490,7 @@ auto z = rv::zip_transform(
 \end{lstlisting}
 
 \item
-打印整数序列的相邻元素对:
+输出整数序列的相邻元素对:
 
 \begin{lstlisting}[style=styleCXX]
 std::vector<int> v {1, 2, 3, 4};
@@ -503,7 +503,7 @@ for (auto i : v | rv::adjacent<2>)
 \end{lstlisting}
 
 \item
-打印从一个整数序列中每三个连续值相乘得到的值:
+输出从一个整数序列中每三个连续值相乘得到的值:
 
 \begin{lstlisting}[style=styleCXX]
 std::vector<int> v {1, 2, 3, 4, 5};
@@ -516,7 +516,7 @@ for (auto i : v | rv::adjacent_transform<3>(
 
 \end{itemize}
 
-这些示例希望能够帮助理解每个可用视图的可能用例，可以在本书附带的源代码中找到更多示例，也可以在扩展阅读部分提到的文章中找到更多示例。下一节中，我们将讨论范围库的另一部分，约束算法。
+这些示例希望能够帮助理解每个可用视图的可能用例，可以在本书附带的源代码中找到更多示例，也可以在扩展阅读部分找到更多示例。下一节中，我们将讨论范围库的另一部分，约束算法。
 
 
 

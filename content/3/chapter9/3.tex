@@ -35,9 +35,9 @@ ForwardIt2 copy_if(ExecutionPolicy&& policy,
 				   UnaryPredicate pred);
 \end{lstlisting}
 
-第一个重载就是这里使用和描述的重载，第二个重载是在C++17中引入的。允许指定一个执行策略，如并行或顺序。这基本上支持标准算法的并行执行。但这与本章的主题无关，我们将不再深入探讨。
+第一个重载就是这里使用和描述的重载，第二个重载是在C++17中引入的。允许指定执行策略，如并行或串行。这基本上支持标准算法的并行执行。但这与本章的主题无关，我们将不再深入探讨。
 
-大多数标准算法在std::ranges命名空间中都有一个新的约束版本。这些算法存在于<algorithm>， <numeric>和<memory>头文件中，具有以下特征:
+大多数标准算法在std::ranges命名空间中都有一个新的约束版本。这些算法存在于<algorithm>，<numeric>和<memory>头文件中，并且具有以下特征:
 
 \begin{itemize}
 \item
@@ -81,7 +81,7 @@ constexpr copy_if_result<ranges::borrowed_iterator_t<R>, O>
 				  Proj proj = {});
 \end{lstlisting}
 
-若这些看起来比较难读，那是因为它们有更多的参数、约束和更长的类型名。然而，好的方面是它们使代码更容易编写。下面是之前的代码片段，使用std::ranges::copy\_if:
+若这些看起来比较难读，因为参数太多、约束和更长的类型名。然而，好的方面是它们使代码更容易编写。下面是之前的代码片段，使用std::ranges::copy\_if:
 
 \begin{lstlisting}[style=styleCXX]
 std::vector<int> v{ 1, 1, 2, 3, 5, 8, 13 };
@@ -98,9 +98,9 @@ auto e3 = std::ranges::copy_if(r, std::back_inserter(o),
 								l_odd);
 \end{lstlisting}
 
-这些例子展示了两件事:如何从std::vector对象和数组复制元素，以及如何从视图(范围适配器)复制元素。这里没有显示的是投影，这一点在前面简要提到过。我们将在这里讨论更多细节和示例。
+这些例子展示了两件事:如何从std::vector对象和数组复制元素，以及如何从视图(范围适配器)复制元素。这里没有显示的是投影，这一点在前面简要提到过。
 
-投影是一个可调用的实体，基本上是一个功能适配器。它影响谓词，提供了一种执行函数组合的方法。它没有提供改变算法的方法。假设有以下类型:
+投影是一个可调用的实体，基本上是一个功能适配器。它影响谓词，提供了一种执行函数组合的方法，并且没有提供改变算法的方法。假设有以下类型:
 
 \begin{lstlisting}[style=styleCXX]
 struct Item
@@ -111,7 +111,7 @@ struct Item
 };
 \end{lstlisting}
 
-为了便于解释，还考虑了以下元素序列:
+为了便于解释，再考虑以下元素序列:
 
 \begin{lstlisting}[style=styleCXX]
 std::vector<Item> items{
@@ -121,7 +121,7 @@ std::vector<Item> items{
 };
 \end{lstlisting}
 
-投影允许您对谓词执行组合。例如，假设想要将所有名称以字母p开头的项复制到第二个vector中。可以这样写:
+投影允许对谓词执行组合。例如，想要将所有名称以字母p开头的项复制到第二个vector中。可以这样:
 
 \begin{lstlisting}[style=styleCXX]
 std::vector<Item> copies;
@@ -144,7 +144,7 @@ std::ranges::copy_if(
 
 本例中，投影是指向成员的指针表达式\&Item::name，在执行谓词(Lambda表达式)之前应用于每个Item元素。当有可重用的函数对象或Lambda表达式，而不想再写一个来传递不同类型的参数时，这会很有用。
 
-以这种方式，项目不能用于将范围从一种类型转换为另一种类型。例如，不能将Item名称从std::vector<Item>复制到std::vector<std::string>。这需要使用std::ranges::transform范围适配器，如下代码所示:
+以这种方式，项目不能用于将范围从一种类型转换为另一种类型。例如，不能将Item名称从std::vector<Item>复制到std::vector<std::string>。这需要使用std::ranges::transform范围适配器，如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 std::vector<std::string> names;

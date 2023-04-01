@@ -21,7 +21,7 @@ CRTP可以解决哪些问题?
 \noindent
 \textbf{参考答案}
 
-Mixins是一些小的类，通过从它们应该补充的类继承来为其他类添加功能。这与CRTP模式相反。
+Mixins是一些小类型，通过它们补充的类继承来为其他类添加功能。这与CRTP模式相反。
 
 \hspace*{\fill} \\ %插入空行
 \noindent
@@ -39,13 +39,13 @@ Mixins是一些小的类，通过从它们应该补充的类继承来为其他�
 \noindent
 \textbf{习题 4}
 
-什么是标签分派，它的替代方案是什么?
+什么是标记分派，它的替代方案是什么?
 
 \hspace*{\fill} \\ %插入空行
 \noindent
 \textbf{参考答案}
 
-标记分派是一种技术，使我们能够在编译时选择一个或另一个函数重载。尽管标记调度本身是std::enable\_if和SFINAE的替代方案，但它也有自己的替代方案。在C++17中是constexpr if，在C++20中是概念。
+标记分派是一种技术，使我们能够在编译时选择一个或另一个函数重载。尽管标记调度本身是std::enable\_if和SFINAE的替代方案，但它也有替代方案。在C++17中是constexpr if，在C++20中是概念。
 
 \hspace*{\fill} \\ %插入空行
 \noindent
