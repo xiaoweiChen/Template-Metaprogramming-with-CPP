@@ -1,8 +1,8 @@
-类型擦除描述了一种模式，其中删除类型信息，允许以通用方式处理不一定相关的类型。这不是C++语言特有的东西，这个概念也存在于其他语言中(如Python和Java)。有不同形式的类型擦除，如多态性和使用void指针(C语言的使用方式，需要避免)，但真正的类型擦除是通过模板实现的。讨论这个问题之前，先简要地看一下其他问题。
+类型擦除描述了一种模式，其中删除类型信息，允许以通用方式处理不一定相关的类型。这不是C++语言特有的东西，这个概念也存在于其他语言(如Python和Java)。有不同形式的类型擦除，如多态性和使用void指针(C语言的使用方式，需要避免)，但真正的类型擦除是通过模板实现的。讨论这个问题之前，先简要地看一下其他问题。
 
 类型擦除的最基本形式是使用void指针。这是典型的C语言方式，尽管在C++中可以，但绝不推荐这样做。这样做不是类型安全的，因此很容易出错。但为了便于讨论，来看看这种方法。
 
-再次假设我们有knight和mage类型，他们都有攻击功能(行为)，我们希望以一种共同的方式来对待他们，以展示这种行为。先看看这些类:
+再次假设我们有knight和mage类型，他们都有攻击功能(行为)，我们希望以一种共同的方式来对待他们，以展示这种行为:
 
 \begin{lstlisting}[style=styleCXX]
 struct knight
@@ -58,7 +58,7 @@ std::vector<std::pair<void*, fight_fn>> units {
 fight(units);
 \end{lstlisting}
 
-C++的角度来看，这可能看起来很奇怪。这个示例中，我将C技术与C++类相结合，希望不会在生产环境中看到这样的代码片段。若将一个mage传递给fight\_knight函数或者相反，就会因为一个简单的输入错误而出错。然而，这是可能的，并且是类型擦除的一种形式。C++中一个明显的替代解决方案是通过继承使用多态性。
+C++的角度来看，这可能看起来很奇怪。这个示例中，我将C与C++类相结合，希望不会在生产环境中看到这样的代码片段。若将一个mage传递给fight\_knight函数或者相反，就会因为一个简单的输入错误而出错。然而，这是可能的，并且是类型擦除的一种形式。C++中一个明显的替代解决方案是通过继承使用多态性。
 
 这是在本章开头看到的第一个解决方案：
 
@@ -87,11 +87,11 @@ void fight(std::vector<game_unit*> const & units)
 }
 \end{lstlisting}
 
-fight功能可以同时处理knight和mage的对象，它不知道传递给它地址的实际对象(在vector内)。然而，可以说类型并没有完全删除。knight和mage都是game\_unit，而fight函数处理任何game\_unit。对于这个函数要处理的另一种类型，需要派生自game\_unit纯抽象类。
+fight功能可以同时处理knight和mage的对象，不知道传递给它地址的实际对象(在vector内)，因此可以说类型并没有完全删除。knight和mage都是game\_unit，而fight函数处理任何game\_unit。对于这个函数要处理的另一种类型，需要派生自game\_unit纯抽象类。
 
-有时候这是不可能的。我们想在类似的事情中处理不相关的类型(鸭子类型的过程)，但不能改变这些类型。例如，我们并不拥有源代码。这个问题的解决方案，就是使用模板进行真正的类型擦除。
+有时候这是不可能的。在类似的事情中处理不相关的类型(鸭子类型的过程)，但不能改变这些类型。例如，我们并不拥有源代码。这个问题的解决方案，就是使用模板进行真正的类型擦除。
 
-看到这个模式是什么样子之前，来一步一步来理解这个模式是如何发展的，从不相关的knight和mage开始，以及不能修改他们的实现作为前提。但我们可以围绕它们编写包装器，为公共功能(行为)提供统一的接口:
+看到这个模式是什么样子之前，来一步一步理解这个模式的发展，从不相关的knight和mage开始，以及不能修改他们的实现作为前提。但我们可以编写包装器，为公共功能(行为)提供统一的接口:
 
 \begin{lstlisting}[style=styleCXX]
 struct knight
@@ -135,7 +135,7 @@ void fight(std::vector<game_unit*> const & units)
 }
 \end{lstlisting}
 
-我们不需要像在knight和mage中那样调用game\_unit中的attack成员函数，其名称可以随意，这种选择纯粹是基于模仿原始行为名称。fight函数接受一个指向game\_unit的指针集合，因此能够同时处理knight和mage对象:
+我们不需要像在knight和mage中那样调用game\_unit中的attack成员函数，其名称可以随意，纯粹是基于模仿原始行为名称。fight函数接受一个指向game\_unit的指针集合，因此能够同时处理knight和mage对象:
 
 \begin{lstlisting}[style=styleCXX]
 knight k;
@@ -213,7 +213,7 @@ private:
 };
 \end{lstlisting}
 
-game类包含game\_unit对象的集合，并有一个向游戏单元(具有attack成员函数)添加新包装器的方法。还有一个成员函数fight，用于调用常见的行为。这次的调用端代码如下所示:
+game类包含game\_unit对象的集合，并有一个向game\_unit(具有attack成员函数)添加新包装器的方法。还有一个成员函数fight，用于调用常见的行为。这次的调用端的代码如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 knight k;
@@ -226,7 +226,7 @@ g.addUnit(m);
 g.fight();
 \end{lstlisting}
 
-类型擦除模式中，抽象基类称为概念，继承的包装器称为模型。若要以既定的正式方式实现类型擦除模式，可以进行如下实现:
+类型擦除模式中，抽象基类称为概念，继承的包装器称为模型。若要以既定的方式实现类型擦除模式，可以进行如下实现:
 
 \begin{lstlisting}[style=styleCXX]
 struct unit
@@ -269,7 +269,7 @@ void fight(std::vector<unit>& units)
 }
 \end{lstlisting}
 
-这个代码片段中，game\_unit重命名为unit\_concept, game\_unit\_wrapper重命名为unit\_model，除了名字没有其他变化。它们是名为unit的新类的成员，该类存储一个指针，指向实现unit\_concept的对象;这可以是unit\_model<knight>或unit\_model<mage>。单元类有一个模板构造函数，使我们能够从knight和mage对象中创建这样的模型对象。
+这段代码片中，game\_unit重命名为unit\_concept，game\_unit\_wrapper重命名为unit\_model，除了名字没有其他变化。它们是名为unit的新类的成员，该类存储一个指针，指向实现unit\_concept的对象;这可以是unit\_model<knight>或unit\_model<mage>。unit类有一个模板构造函数，能够从knight和mage对象中创建模型对象。
 
 其还有一个公共成员函数attack(同样，它可以有任何名称)。另一方面，fight函数处理unit对象，并调用它们的fight成员函数。调用端代码可能如下所示:
 
@@ -286,7 +286,7 @@ fight(v);
 
 \begin{itemize}
 \item
-std::function: 这是一个通用的多态函数包装器，它使我们能够存储、复制和调用可调用的东西，例如函数、Lambda表达式、绑定表达式、函数对象、指向成员函数的指针和指向数据成员的指针。下面是一个使用std::function的例子:
+std::function: 这是一个通用的多态函数包装器，能够存储、复制和调用可调用的东西，例如函数、Lambda表达式、绑定表达式、函数对象、指向成员函数的指针和指向数据成员的指针。下面是一个使用std::function的例子:
 
 \begin{lstlisting}[style=styleCXX]
 class async_bool
@@ -317,7 +317,7 @@ if (b3) { std::cout << "b3 is true\n"; }
 \end{lstlisting}
 
 \item
-std::any: 这是一个将容器表示为可复制构造类型值的类。下面的代码段中使用了一个例子:
+std::any: 这是一个将容器表示为可复制构造类型值的类。下面的代码中使用了一个例子:
 
 \begin{lstlisting}[style=styleCXX]
 std::any u;
@@ -334,7 +334,7 @@ if (u.has_value())
 
 类型擦除是一种习语，将面向对象编程的继承与模板结合起来，以创建可以存储任何类型的包装器。本节中，我们了解了模式的表现形式和工作方式，以及该模式的一些实际实现。
 
-下一节中，我们将讨论一种称为标记分派的技术。
+下一节中，我们将讨论标记分派。
 
 
 

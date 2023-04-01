@@ -2,7 +2,7 @@
 类型列表是一种编译时构造，能够管理类型序列。类型列表在某种程度上类似于元组，但不存储数据。类型列表只携带类型信息，并在编译时用于实现不同的元编程算法、类型开关或设计模式(如抽象工厂或访问者)。
 
 \begin{tcolorbox}[breakable,enhanced jigsaw,colback=blue!5!white,colframe=blue!75!black,title={重要的Note}]
-虽然type list和typelist两个名称都在使用，但大多数时候，会在C++书籍和文章中看到术语typelist。因此，这将是我们在本书中使用的术语名称。
+虽然type list和typelist两个名称都在使用，但大多数时候，会在C++书籍和文章中看到术语typelist。因此，这将是我们在本书中使用的术语名称typelist。
 \end{tcolorbox}
 
 类型列表是由Andrei Alexandrescu在他的书《现代C++设计》中普及开来的，这本书在C++11(以及可变参数模板)发布的10年前出版。Alexandrescu定义了一个类型列表:
@@ -22,14 +22,14 @@ struct Typelist
 class null_typelist {};
 \end{lstlisting}
 
-有了这两个结构，我们可以用以下方式定义类型列表:
+有了这两个结构，就可以用以下方式定义类型列表:
 
 \begin{lstlisting}[style=styleCXX]
 typedef Typelist<int,
 				 Typelist<double, null_typelist>> MyList;
 \end{lstlisting}
 
-可变参数模板简化了类型列表的实现，如下面代码所示:
+可变参数模板简化了类型列表的实现，如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename ... Ts>
@@ -40,7 +40,7 @@ using MyList = typelist<int, double>;
 
 类型列表操作的实现(访问给定索引处的类型，从列表中添加或删除类型等)根据所选方法的不同而有很大差异。本书中，只考虑可变参数模板的版本。这种方法的优点是在不同层次上都很简单:类型列表的定义更短，不需要类型来表示列表的末尾，定义类型列表别名也更短，更容易阅读。
 
-目前，也许许多由类型列表解决的问题，也可以使用可变参数模板来解决。然而，还是有需要类型列表的场景。这里有一个例子:试想一个可变元函数(一个执行类型转换的类型特征)，对类型模板参数进行一些转换(比如添加const限定符)。此元函数定义了一个表示输入类型的成员类型和一个表示转换类型的成员类型。若试图这样定义，则是行不通的:
+目前，也许许多由类型列表解决的问题，也可以使用可变参数模板来解决。这里有一个例子:试想一个可变元函数(一个执行类型转换的类型特征)，对类型模板参数进行一些转换(比如添加const限定符)。此元函数定义了一个表示输入类型的成员类型和一个表示转换类型的成员类型。若这样定义，是行不通的:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename ... Ts>
@@ -51,7 +51,7 @@ struct transformer
 };
 \end{lstlisting}
 
-因为在此上下文中不可能展开参数包，所以这段代码会产生编译器错误。这是在第3章中讨论过的主题。解决方案是使用一个类型列表:
+因为在此上下文中不可能展开参数包，所以这段代码会产生编译器错误。解决方案是使用类型列表:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename ... Ts>
@@ -67,13 +67,13 @@ static_assert(
 		typelist<int const, double const>>);
 \end{lstlisting}
 
-变化很小，但产生了预期的结果。虽然这是一个需要类型列表的好例子，但它不是使用类型列表的例子。下面我们将看一个这样的例子。
+代码变化很小，但产生了预期的结果。虽然这是一个需要类型列表的好例子，但它不是使用类型列表的例子。下面我们将看一个这样的例子。
 
 \subsubsubsection{7.7.1\hspace{0.2cm}使用类型列表}
 
 讨论如何在类型列表上实现操作之前，有必要研究一个更复杂的示例。这将使各位读者更加了解类型列表的可能用法，也可以在网上搜索更多用法。
 
-回到游戏单位的例子。简单起见，我们只考虑以下类:
+回到game\_unit的例子。简单起见，只考虑以下类:
 
 \begin{lstlisting}[style=styleCXX]
 struct game_unit
@@ -83,7 +83,7 @@ struct game_unit
 };
 \end{lstlisting}
 
-一个游戏单元有两个数据成员，代表进攻和防守的指数(或级别)。我们希望借助一些函子对这些成员进行操作更改。下面的代码中显示了两个这样的函数:
+game\_unit有两个数据成员，代表进攻和防守的指数(或级别)。我们希望借助一些函子对这些成员进行操作更改。下面的代码中显示了两个这样的函数:
 
 \begin{lstlisting}[style=styleCXX]
 struct upgrade_defense
@@ -102,7 +102,7 @@ struct upgrade_attack
 };
 \end{lstlisting}
 
-第一种增加防御指数20\%，第二种增加攻击指数两个单位。尽管这是一个用于演示用例的小示例，也可以想象可以在一些定义良好的组合中应用类似的函子的更大种类。在例子中，我们想在game\_unit对象上应用这两个函子，希望有这样一个函数:
+第一种增加防御指数20\%，第二种增加攻击指数两个单位。尽管这是一个用于演示的小示例，也可以想象可以在一些定义良好的组合中应用类似的函子的更大种类。例子中，我们想在game\_unit对象上应用这两个函子，希望有这样一个函数:
 
 \begin{lstlisting}[style=styleCXX]
 void upgrade_unit(game_unit& unit)
@@ -113,7 +113,7 @@ void upgrade_unit(game_unit& unit)
 }
 \end{lstlisting}
 
-upgrade\_unit函数接受一个game\_unit对象，并对其应用upgrade\_defense和upgrade\_attack函数子。为此，它使用另一个名为apply\_functors的辅助函子，这是一个只有一个template参数的类模板。这个模板参数是一个类型列表。apply\_functors函子的可能实现如下所示:
+upgrade\_unit函数接受一个game\_unit对象，并对其应用upgrade\_defense和upgrade\_attack函数子。为此，使用另一个名为apply\_functors的辅助函子，这是一个只有一个template参数的类模板，模板参数是一个类型列表。apply\_functors函子的可能实现如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 template <typename TL>
@@ -168,7 +168,7 @@ std::cout << std::format("{},{}\n", u.attack, u.defense);
 
 \subsubsubsection{7.7.2\hspace{0.2cm}实现对类型列表的操作}
 
-类型列表是一种在编译时只携带有价值信息的类型。类型列表充当其他类型的容器。使用类型列表时，需要执行各种操作，例如计算列表中的类型，在给定索引处访问类型，在列表的开头或结尾添加类型，或者反向操作，从列表的开头或结尾删除类型等。仔细想想，这些都是你在容器中使用的典型操作，比如vector容器。所以在本节中，我们将讨论如何实现以下操作:
+类型列表是一种在编译时只携带有value信息的类型，类型列表可充当其他类型的容器。使用类型列表时，需要执行各种操作，例如计算列表中的类型，在给定索引处访问类型，在列表的开头或结尾添加类型，或者反向操作，从列表的开头或结尾删除类型等。仔细想想，这些都是容器中的典型操作，比如vector容器。所以在本节中，我们将讨论如何实现以下操作:
 
 \begin{itemize}
 \item
@@ -196,9 +196,9 @@ pop\_back: 删除列表末尾的类型
 pop\_front: 删除列表开头的类型
 \end{itemize}
 
-类型列表是编译时构造，是一个不可改变的实体。因此，添加或删除类型的操作不会修改类型列表，而是创建一个新的类型列表。首先，让我们从最简单的操作开始，即检索类型列表的长度。
+类型列表是编译时构造，是一个不可改变的实体。因此，添加或删除类型的操作不会修改类型列表，而是创建一个新的类型列表。首先，从最简单的操作开始，即检索类型列表的长度。
 
-为了避免与size\_t类型的命名混淆，我们将此操作称为length\_t，而不是size\_t。我们可以这样定义:
+为了避免与size\_t类型的命名混淆，将此操作称为length\_t，而不是size\_t。可以这样定义:
 
 \begin{lstlisting}[style=styleCXX]
 namespace detail
@@ -222,9 +222,9 @@ template <typename TL>
 constexpr std::size_t length_v = length_t<TL>::value;
 \end{lstlisting}
 
-detail命名空间中，有一个名为length的类模板。一个类型列表有一个主模板(没有定义)和一个特化。这个特化定义了一个名为type的成员类型，是一个std::integral\_constant，其值类型为std::size\_t，表示形参包Ts中的参数数量。此外，还有一个别名模板length\_h，是length类模板中名为type的成员的别名。最后，有一个名为length\_v的变量模板，是由std::integral\_constant成员的值初始化，该成员也称为value。
+detail命名空间中，有一个名为length的类模板，一个类型列表有一个主模板(没有定义)和一个特化。这个特化定义了一个名为type的成员类型，是一个std::integral\_constant，其值类型为std::size\_t，表示形参包Ts中的参数数量。此外，还有一个别名模板length\_h，是length类模板中名为type的成员的别名。最后，有一个名为length\_v的变量模板，是由std::integral\_constant成员的值初始化，该成员也称为value。
 
-可以通过static\_assert来验证这个实现的正确性，如下所示:
+可以通过static\_assert来验证这个实现的正确性:
 
 \begin{lstlisting}[style=styleCXX]
 static_assert(
@@ -261,7 +261,7 @@ template <typename TL>
 using front_t = typename detail::front_type<TL>::type;
 \end{lstlisting}
 
-detail命名空间中，有一个名为front\_type的类模板。同样，我们声明了一个主模板，但没有定义。但我们有两个特化:一个用于至少包含一种类型的类型列表，另一个用于空类型列表。前一种情况下，type成员是类型列表中的第一个类型的别名。后一种情况下，没有类型，所以type成员别名为empty\_type类型。这是一个空类，它的唯一作用是充当不返回类型的操作的返回类型。可以进行如下的验证:
+detail命名空间中，有一个名为front\_type的类模板。同样，我们声明了一个主模板，但没有定义。但有两个特化:一个用于至少包含一种类型的类型列表，另一个用于空类型列表。前一种情况下，type成员是类型列表中的第一个类型的别名。后一种情况下，没有类型，所以type成员别名为empty\_type类型。这是一个空类，唯一的作用是充当不返回类型的操作的返回类型。可以进行如下的验证:
 
 \begin{lstlisting}[style=styleCXX]
 static_assert(
@@ -306,7 +306,7 @@ template <typename TL>
 using back_t = typename detail::back_type<TL>::type;
 \end{lstlisting}
 
-实现的区别是back\_type类模板有三种特化，并且涉及到递归。这三种特化分别针对空类型列表、具有单一类型的类型列表，以及具有两个或多个类型的类型列表。最后一个(实际上是前一个清单中的第一个)是在其类型成员的定义中使用模板递归。我们已经在第4章中看到了这是如何工作的。为了确保我们以正确的方式实现操作，可以进行如下验证:
+实现的区别是back\_type类模板有三种特化，并且涉及到递归。这三种特化分别针对空类型列表、具有单一类型的类型列表，以及具有两个或多个类型的类型列表。最后一个(实际上是前一个代码示例中的第一个)是在其类型成员的定义中使用模板递归。为了确保我们以正确的方式实现操作，可以进行如下验证:
 
 \begin{lstlisting}[style=styleCXX]
 static_assert(
@@ -318,7 +318,7 @@ static_assert(
 				   char>);
 \end{lstlisting}
 
-除了访问类型列表中的第一个和最后一个类型外，还对在给定索引处访问类型感兴趣。然而，这个操作的实现并不是那么简单:
+除了访问类型列表中的第一个和最后一个类型外，还对在给定索引处访问类型感兴趣，但这个操作的实现并不是那么简单:
 
 \begin{lstlisting}[style=styleCXX]
 namespace detail
@@ -351,7 +351,7 @@ using at_t = typename detail::at_type<I, 0, TL>::type;
 
 at\_t别名模板有两个模板参数:一个索引和一个类型列表。at\_t模板是来自detail命名空间的at\_type类模板的成员类型的别名。主模板有三个模板参数:一个索引表示要检索的类型的位置(I)，另一个索引表示列表中类型迭代的当前位置(N)，以及一个类型列表(TL)。
 
-这个主模板有两种特化:一种特化用于至少包含一种类型的类型列表，另一种特化用于空类型列表。后一种情况下，成员类型是empty\_type类型的别名。前一种情况下，成员类型是借助std::conditional\_t元函数定义的。当I == N时将其成员类型定义为第一个类型(T)，当此条件为false时将其成员类型定义为第二个类型(typename at\_type<I, N + 1, TL<Ts…>{}>::type)。这里，再次使用模板递归，在每次迭代中增加第二个索引的值。下面的static\_assert的验证实现:
+这个主模板有两种特化:一种特化用于至少包含一种类型的类型列表，另一种特化用于空类型列表。后一种情况下，成员类型是empty\_type类型的别名。前一种情况下，成员类型是借助std::conditional\_t元函数定义的。当I == N时将其成员类型定义为第一个类型(T)，当此条件为false时将其成员类型定义为第二个类型(typename at\_type<I, N + 1, TL<Ts…>{}>::type)。这里，再次使用模板递归，在每次迭代中增加第二个索引的值。下面是static\_assert的验证实现:
 
 \begin{lstlisting}[style=styleCXX]
 static_assert(
@@ -412,7 +412,7 @@ using push_front_t =
 	typename detail::push_front_type<TL, T>::type;
 \end{lstlisting}
 
-根据在前面的操作中看到的内容，这些操作应该很容易理解。相反的操作，当我们从类型列表中删除第一个或最后一个类型时，则更加复杂。第一个，pop\_front\_t:
+根据在前面的操作中看到的内容，这些操作应该很容易理解。相反的操作，当从类型列表中删除第一个或最后一个类型时，则更加复杂。第一个，pop\_front\_t:
 
 \begin{lstlisting}[style=styleCXX]
 namespace detail
@@ -487,9 +487,9 @@ using pop_back_t = typename detail::pop_back_type<
 				typelist<>, TL>::type;
 \end{lstlisting}
 
-为了实现这个操作，需要从一个类型列表开始，然后逐元素递归地构造另一个类型列表，直到得到输入类型列表中的最后一个类型，这个类型应该省略。为此，我们使用一个计数器，表示迭代了该类型列表的次数。
+为了实现这个操作，需要从一个类型列表开始，然后逐元素递归地构造另一个类型列表，直到得到输入类型列表中的最后一个类型，这个类型应该省略。为此，我们使用计数器，表示迭代了该类型列表的次数。
 
-这是在类型列表的大小减1时开始的，当达到0时需要停止。由于这个原因，pop\_back\_type类模板有四个特化，一个用于在类型列表中进行迭代时的一般情况，两个用于计数器达到0时的情况，一个用于计数器达到-1时的情况。这是初始类型列表为空时的情况(length\_t<TL>-1将计算为-1)。下面是一些演示如何使用pop\_back\_t并验证其正确性的断言:
+这是在类型列表的大小减1时开始的，当达到0时需要停止。由于这个原因，pop\_back\_type类模板有四个特化，一个用于在类型列表中进行迭代时的一般情况，两个用于计数器达到0时的情况，一个用于计数器达到-1时的情况。这是初始类型列表为空时的情况(length\_t<TL>-1将计算为-1)。下面是如何使用pop\_back\_t的演示:
 
 \begin{lstlisting}[style=styleCXX]
 static_assert(std::is_same_v<pop_back_t<typelist<>>,
