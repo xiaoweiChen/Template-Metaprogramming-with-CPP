@@ -14,6 +14,8 @@
 >
 > <p align="right"> — 云风，程序员修炼之道第2版译者</p>
 
+PDF可在本库的[Release页面](https://github.com/xiaoweiChen/Template-Metaprogramming-with-CPP/releases)获取。
+
 ## 本书概述
 
 了解元编程，可以创建在编译时进行计算的数据结构和函数。本书将带您了解如何使用模板避免编写重复的代码，以及其为什么会成为通用库(如标准库或Boost)的关键(通用库可用于很多程序中)。
