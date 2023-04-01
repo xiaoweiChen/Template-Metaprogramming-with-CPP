@@ -1,12 +1,12 @@
 
-理解容器和迭代器如何工作的最好方法是，通过创建自己的容器和迭代器来亲身体验。为了避免实现标准库中已经存在的东西，将考虑一些不同的东西——更准确地说，是循环缓冲区。这是一个容器，当它满时，将覆盖现有的元素。可以想象这样一个容器的不同工作方式;因此，首先定义它的需求是很重要的。具体如下:
+理解容器和迭代器如何工作的最好方法是，通过创建自己的容器和迭代器来亲身体验。为了避免实现标准库中已经存在的东西，将考虑一些不同的东西——更准确地说，是循环缓冲区。这是一个容器，当它满时，将覆盖现有的元素。可以想象这样一个容器的不同工作方式;因此，首先定义它的需求是很重要的。
 
 \begin{itemize}
 \item
-容器应该有一个在编译时已知的固定容量。因此，不存在运行时内存管理。
+容器应该有一个在编译时已知的固定容量，所以不存在运行时内存管理。
 
 \item
-容量是容器可以存储的元素数量，大小是容器实际包含的元素数量。当大小等于容量时，我们说容器满了。
+容量是容器可以存储的元素数量，大小是容器实际包含的元素数量。当大小等于容量时，容器满了。
 
 \item
 容器满时，添加一个新元素将覆盖容器中最旧的元素。
@@ -22,13 +22,13 @@
 
 \begin{itemize}
 \item
-元素可以存储在数组中。方便起见，这可以是std::array类。
+元素可以存储在数组中，这可以是std::array。
 
 \item
-需要两个变量(head和tail)来存储容器的第一个和最后一个元素的索引。这是必需的，因为容器的循环性质，开始和结束会随着时间的推移而变化。
+需要两个变量(head和tail)来存储容器的第一个和最后一个元素的索引。因为容器的循环性质，开始和结束会随着时间的推移而变化。
 
 \item
-第三个变量将存储容器中的元素数量。没有的话，我们将无法从头和尾索引的值区分容器是空，还是只有一个元素。
+第三个变量将存储容器中的元素数量。没有的话，将无法从头和尾索引的值区分容器是空，还是只有一个元素。
 
 \begin{tcolorbox}[breakable,enhanced jigsaw,colback=blue!5!white,colframe=blue!75!black,title={重要的Note}]
 这里展示的实现仅用于教学目的，并不是用于生产的解决方案。有经验的读者会发现实现的不同方面可以优化。但这里的目的是学习如何编写容器，而不是如何优化实现。
@@ -50,10 +50,10 @@
 图A:这是一个空缓冲区。容量为8，大小为0，头部和尾部都指向索引0。
 
 \item
-图B:这个缓冲区包含一个元素。容量仍然是8，大小是1，头部和尾部都指向索引0。
+图B:缓冲区包含一个元素。容量仍然是8，大小是1，头部和尾部都指向索引0。
 
 \item
-图C:这个缓冲区包含两个元素。大小为2，头部包含索引0，尾部包含索引1。
+图C:缓冲区包含两个元素。大小为2，头部包含索引0，尾部包含索引1。
 
 \item
 图D:缓冲区已满。大小为8，等于容量，头部包含索引0，尾部包含索引7。
@@ -62,7 +62,7 @@
 图E:缓冲区仍然是满的，但是添加了一个额外的元素，触发了缓冲区中最旧元素的覆盖。大小为8，头部包含索引1，尾部包含索引0。
 \end{itemize}
 
-现在已经了解了循环缓冲区的语义，可以开始编写实现了。我们将从容器类开始。
+现在已经了解了循环缓冲区的语义，可以开始编写实现了，先从容器类开始。
 
 \subsubsubsection{8.2.1\hspace{0.2cm}实现循环缓冲区容器}
 
@@ -81,7 +81,7 @@ class circular_buffer
 };
 \end{lstlisting}
 
-这里有两件事:一个是类模板circular\_buffer\_iterator的前向声明，另一个是类模板circular\_buffer。两者都有相同的模板实参，一个类型模板形参T，表示元素的类型，一个非类型模板形参，表示缓冲区的容量。使用约束来确保提供的容量值总是正的。若没有使用C++20，可以用static\_assert替换这个约束，或者enable\_if来执行相同的限制。下面的代码段是circular\_buffer类的一部分。
+这里有两件事:一个是类模板circular\_buffer\_iterator的前向声明，另一个是类模板circular\_buffer。两者都有相同的模板实参，一个类型模板形参T，表示元素的类型，一个非类型模板形参，表示缓冲区的容量。使用约束来确保提供的容量值总是正的。若不支持C++20，可以用static\_assert替换这个约束，或者enable\_if来执行相同的限制。下面的代码段是circular\_buffer类的一部分。
 
 首先，有一系列成员类型定义，为与circular\_buffer类模板相关的不同类型提供别名。这些将在类的实现中使用:
 
@@ -99,7 +99,7 @@ class circular_buffer
 	circular_buffer_iterator<T const, N>;
 \end{lstlisting}
 
-其次，有存储缓冲区状态的数据成员。实际的元素存储在std::array对象中。head、tail和size都存储在size\_type数据类型的变量中。这些成员都是私有的:
+其次，有存储缓冲区状态的数据成员，元素存储在std::array对象中。head、tail和size都存储在size\_type数据类型的变量中。这些成员都是私有的:
 
 \begin{lstlisting}[style=styleCXX]
 private:
@@ -126,7 +126,7 @@ constexpr circular_buffer(const_reference v):
 }
 \end{lstlisting}
 
-这里定义了三个构造函数(可以考虑其他的构造函数)，是初始化空缓冲区的默认构造函数(也是默认构造函数)，大小为N的类C数组的构造函数，通过复制数组元素初始化完整缓冲区，最后是接受单个值的构造函数，通过将该值复制到缓冲区的每个元素来初始化完整缓冲区。这些构造函数允许以以下任何一种方式创建循环缓冲区:
+这里定义了三个构造函数(可以考虑其他的构造函数)，初始化空缓冲区的默认构造函数(也是默认构造函数)，大小为N的类C数组的构造函数，通过复制数组元素初始化完整缓冲区，最后是接受单个值的构造函数，通过将该值复制到缓冲区的每个元素来初始化完整缓冲区。这些构造函数允许以以下方式创建循环缓冲区:
 
 \begin{lstlisting}[style=styleCXX]
 circular_buffer<int, 1> b1; // {}
@@ -134,7 +134,7 @@ circular_buffer<int, 3> b2({ 1, 2, 3 }); // {1, 2, 3}
 circular_buffer<int, 3> b3(42); // {42, 42, 42}
 \end{lstlisting}
 
-接下来，定义了几个成员函数来描述循环缓冲区的状态:
+接下来，定义了几个成员函数来描述循环缓冲区状态:
 
 \begin{lstlisting}[style=styleCXX]
 constexpr size_type size() const noexcept
@@ -153,7 +153,7 @@ constexpr void clear() noexcept
 { size_ = 0; head_ = 0; tail_ = 0; };
 \end{lstlisting}
 
-size函数返回缓冲区中的元素数量，capacity函数返回缓冲区中可以容纳的元素数量，empty函数检查缓冲区中是否没有元素(与size() == 0相同)，full函数检查缓冲区是否已满(与size() == N相同)。还有一个名为clear的函数将循环缓冲区置于空状态。注意，此函数不销毁任何元素(不释放内存或调用析构函数)，而只是重置定义缓冲区状态的值。
+size函数返回缓冲区中的元素数量，capacity函数返回缓冲区中可以容纳的元素数量，empty函数检查缓冲区中是否没有元素(与size() == 0相同)，full函数检查缓冲区是否已满(与size() == N相同)。还有一个名为clear的函数将循环缓冲区置于空状态，此函数不销毁任何元素(不释放内存或调用析构函数)，而只是重置定义缓冲区状态的值。
 
 需要访问缓冲区中的元素，为此定义了以下函数:
 
@@ -213,10 +213,10 @@ constexpr const_reference back() const
 
 \begin{itemize}
 \item
-下标操作符，返回由其索引指定的元素的引用，而不检查索引的值
+{}[]操作符，返回由其索引指定的元素的引用，而不检查索引的值
 
 \item
-at方法的工作原理与下标操作符类似，只是它检查索引是否小于大小，若小于则抛出异常
+at方法的工作原理与下标操作符类似，但检查索引是否小于大小，若小于则抛出异常
 
 \item
 front方法，返回对第一个元素的引用；若缓冲区为空，则抛出异常
@@ -225,7 +225,7 @@ front方法，返回对第一个元素的引用；若缓冲区为空，则抛出
 back方法，返回对最后一个元素的引用；若缓冲区为空，则抛出异常
 \end{itemize}
 
-可以使用成员函数来访问元素，也需要成员来向缓冲区中添加和删除元素。添加新元素总是发生在最后，因此称为push\_back。删除现有元素总是发生在最开始(最古老的元素)，因此称为pop\_front。让我们先来看看前者:
+可以使用成员函数来访问元素，也需要成员来向缓冲区中添加和删除元素。添加新元素总是发生在最后，因此称为push\_back。删除现有元素总是发生在最开始(最旧的元素)，因此称为pop\_front。让我们先来看看前者:
 
 \begin{lstlisting}[style=styleCXX]
 constexpr void push_back(T const& value)
@@ -256,13 +256,13 @@ constexpr void push_back(T const& value)
 若缓冲区为空，则将该值复制到tail\_索引所指向的元素，并增加其大小。
 
 \item
-若缓冲区既不空也不满，执行同样的操作，但也增加tail\_索引的值。
+若缓冲区既不空也不满，执行同样的操作，也增加了tail\_索引的值。
 
 \item
 若缓冲区已满，则同时增加head\_和tail\_，然后将值复制到tail\_索引所指向的元素。
 \end{itemize}
 
-该函数将值参数复制到缓冲区元素，也可以针对推送到缓冲区后不再需要的临时对象或对象进行优化。因此，提供了接受右值引用的重载。这会将值移动到缓冲区，避免不必要的复制。这个重载显示在下面的代码段中:
+该函数将值参数复制到缓冲区元素，也可以针对推送到缓冲区后不再需要的临时对象或对象进行优化。因此，提供了接受右值引用的重载。这会将值移动到缓冲区，避免不必要的复制。这个重载显示在下面的代码中:
 
 \begin{lstlisting}[style=styleCXX]
 constexpr void push_back(T&& value)
@@ -302,14 +302,14 @@ constexpr T pop_front()
 }
 \end{lstlisting}
 
-若缓冲区为空，此函数将抛出异常。否则，它将head\_索引的值加1，并返回head\_之前位置的元素的值。下图直观地描述了这一点:
+若缓冲区为空，此函数将抛出异常。否则，将head\_索引的值加1，并返回head\_之前位置的元素的值。下图直观地描述了这一点:
 
 \begin{center}
 \includegraphics[width=0.7\textwidth]{content/3/chapter8/images/3.png}\\
 图 8.3
 \end{center}
 
-在这里看到的是:
+可以看到:
 
 \begin{itemize}
 \item
@@ -325,7 +325,7 @@ constexpr T pop_front()
 图D:前面删除了一个元素，即索引1。头部现在在索引2，尾部仍然在索引0。缓冲区现在有7个元素。
 \end{itemize}
 
-下面的代码段显示了同时使用push\_back和pop\_front成员函数的例子:
+下面的代码展示了同时使用push\_back和pop\_front的例子:
 
 \begin{lstlisting}[style=styleCXX]
 circular_buffer<int, 4> b({ 1, 2, 3, 4 });
@@ -341,7 +341,7 @@ assert(b[1] == 5);
 assert(b[2] == 6);
 \end{lstlisting}
 
-最后，成员函数begin和end返回指向缓冲区中第一个和倒数一个元素的迭代器。以下是它们的实现:
+最后，成员函数begin和end返回指向缓冲区中第一个和倒数第一个元素的迭代器:
 
 \begin{lstlisting}[style=styleCXX]
 iterator begin()
@@ -369,14 +369,14 @@ const_iterator end() const
 
 \subsubsubsection{8.2.2\hspace{0.2cm}为循环缓冲区容器实现迭代器类型}
 
-上一节开始使用circular\_buffer容器时声明了迭代器类模板，但也需要定义它的实现。然而，还有一件事我们必须做:为了使迭代器类能够访问容器的私有成员，它需要声明为友元:
+上一节开始使用circular\_buffer容器时声明了迭代器类模板，但也需要定义它的实现。然而，还有一件事必须做:为了使迭代器类能够访问容器的私有成员，需要声明为友元:
 
 \begin{lstlisting}[style=styleCXX]
 private:
 	friend circular_buffer_iterator<T, N>;
 \end{lstlisting}
 
-来看看circular\_buffer\_iterator类，它实际上与容器类有相似之处。这包括模板参数、约束和成员类型集(其中一些与circular\_buffer中的成员类型相同)。下面是这个类的一个代码段:
+来看看circular\_buffer\_iterator类，与容器类有相似之处。这包括模板参数、约束和成员类型集(其中一些与circular\_buffer中的成员类型相同):
 
 \begin{lstlisting}[style=styleCXX]
 template <typename T, std::size_t N>
@@ -403,7 +403,7 @@ private:
 };
 \end{lstlisting}
 
-circular\_buffer\_iterator类有一个对循环缓冲区的引用，以及其所指向的缓冲区中元素的索引。circular\_buffer<T, N>的引用包装在std::reference\_wrapper对象中。可以通过提供这两个参数显式地创建这样的迭代器，所以构造函数如下所示:
+circular\_buffer\_iterator类有一个对循环缓冲区的引用，以及其所指向的缓冲区中元素的索引。circular\_buffer<T, N>的引用包装在std::reference\_wrapper对象中。可以通过提供这两个参数显式地创建这样的迭代器，构造函数如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 explicit circular_buffer_iterator(
@@ -413,11 +413,11 @@ explicit circular_buffer_iterator(
 { }
 \end{lstlisting}
 
-若现在回顾circular\_buffer的begin和end成员函数的定义，可以看到第一个参数是*this，第二个参数是0 (begin迭代器)，size\_ (end迭代器)。第二个值是迭代器指向的元素头部的偏移量。因此，0是第一个元素，而size\_是缓冲区中最后一个元素。
+若现在回顾circular\_buffer的begin和end成员函数的定义，可以看到第一个参数是*this，第二个参数是0 (begin迭代器)，size\_(end迭代器)。第二个值是迭代器指向的元素头部的偏移量。因此，0是第一个元素，而size\_是缓冲区中最后一个元素。
 
-这里，我们需要随机访问缓冲区的元素，所以迭代器类别是随机迭代器。成员类型iterator\_category是std::random\_access\_iterator\_tag的别名。因此，需要提供这样一个迭代器所支持的所有操作。本章的前一节中，讨论了迭代器类别，以及每个类别所需的操作。接下来我们将实现所有需要的。
+这里，需要随机访问缓冲区的元素，所以迭代器类别是随机迭代器。成员类型iterator\_category是std::random\_access\_iterator\_tag的别名。因此，需要提供这样一个迭代器所支持的所有操作。本章的前一节中，讨论了迭代器类别，以及每个类别所需的操作。接下来我们将逐一进行实现。
 
-从输入迭代器的要求开始:
+从输入迭代器开始:
 
 \begin{lstlisting}[style=styleCXX]
 self_type& operator++()
@@ -487,9 +487,9 @@ bool in_bounds() const
 }
 \end{lstlisting}
 
-前向迭代器是一个输入迭代器，同时也是一个输出迭代器。对输出迭代器的要求将在本节的最后讨论。之前看到的那些用于输入迭代器的迭代器，因为对可解引用的前向迭代器执行操作会使其迭代器值解引用，所以前向迭代器可以用于多遍算法。拖a和b是两个前向迭代器并且它们相等，要么不可解引用，否则，其迭代器值*a和*b指向同一个对象。反之亦然，弱*a和*b相等，那么a和b也相等。这对于我们的实现来说是正确的。
+前向迭代器是输入迭代器，同时也是输出迭代器。之前看到的那些用于输入迭代器的迭代器，因为对可解引用的前向迭代器执行操作会使其迭代器值解引用，所以前向迭代器可以用于多遍算法。若a和b是两个前向迭代器并且相等，要么不可解引用；否则，其迭代器值*a和*b指向同一个对象。反之亦然，若*a和*b相等，那么a和b也相等。这对于我们的实现来说是正确的。
 
-前向迭代器的另一个要求是它们是可交换的。若a和b是两个前向迭代器，那么swap(a, b)应该是一个有效的操作。回到使用std::reference\_wrapper对象来保存对循环\_buffer<T, N>的引用。引用是不可交换的，所以circular\_buffer\_iterator也不可交换。然而，std::reference\_wrapper是可交换的，这也使得我们的迭代器类型可交换。可以使用static\_assert语句进行验证:
+前向迭代器的另一个要求是是可交换的。若a和b是两个前向迭代器，那么swap(a, b)应该是一个有效的操作。回到使用std::reference\_wrapper对象来保存对循环\_buffer<T, N>的引用。引用是不可交换的，所以circular\_buffer\_iterator不可交换。然而，std::reference\_wrapper可交换，这也使得我们的迭代器类型可交换。可以使用static\_assert进行验证:
 
 \begin{lstlisting}[style=styleCXX]
 static_assert(
@@ -497,10 +497,10 @@ static_assert(
 \end{lstlisting}
 
 \begin{tcolorbox}[breakable,enhanced jigsaw,colback=blue!5!white,colframe=blue!75!black,title={重要的Note}]
-std::reference\_wrapper的另一种替代方法是使用指向circular\_buffer类的原始指针，因为指针可以赋值，因此是可交换的。使用哪一种是风格和个人的选择。本例中，我倾向于避免使用原始指针的解决方案。
+std::reference\_wrapper的另一种替代方法是使用指向circular\_buffer类的原始指针，因为指针可以赋值，因此是可交换的。使用哪一种就看开发者的开发风格和个人喜好。本例中，我倾向于避免使用原始指针的解决方案。
 \end{tcolorbox}
 
-为了满足双向迭代器类别的要求，需要支持递减。在下一个代码段中，可以看到前缀和后缀递减操作符的实现:
+为了满足双向迭代器类别的要求，需要支持递减。下一个代码段中，可以看到前缀和后缀递减操作符的实现:
 
 \begin{lstlisting}[style=styleCXX]
 self_type& operator--()
@@ -521,7 +521,7 @@ self_type operator--(int)
 }
 \end{lstlisting}
 
-最后，因为有随机访问迭代器的要求。首先要实现的需求是算术(+和-)和复合(+=和-=)操作:
+最后，因为需要实现随机迭代器。首先要实现的需求是算术(+和-)和复合(+=和-=)操作:
 
 \begin{lstlisting}[style=styleCXX]
 self_type operator+(difference_type offset) const
@@ -559,7 +559,7 @@ self_type& operator -=(difference_type const offset)
 }
 \end{lstlisting}
 
-随机访问迭代器必须支持与其他操作的不相等比较。所以，需要重载<、<=、>和>=操作符。但是，<=、>和>=操作符可以基于<操作符实现。因此，其定义如下所示:
+随机访问迭代器必须支持与其他操作的不相等比较，需要重载<、<=、>和>=操作符，但<=、>和>=操作符可以基于<操作符实现。其定义如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 bool operator<(self_type const& other) const
@@ -598,7 +598,7 @@ const
 }
 \end{lstlisting}
 
-至此，我们已经完成了循环缓冲区迭代器类型的实现。若在理解这两个类的大量代码片段时遇到困难，可以在本书的GitHub存储库中找到完整的实现。下面是一个使用迭代器类型的简单示例:
+至此，我们已经完成了循环缓冲区迭代器类型的实现。若在理解这两个类的大量代码片段时遇到困难，可以在本书的GitHub存储库中找到完整实现。下面是使用迭代器类型的简单示例:
 
 \begin{lstlisting}[style=styleCXX]
 circular_buffer<int, 3> b({1, 2, 3});
@@ -620,7 +620,7 @@ for (auto const e : b)
 }
 \end{lstlisting}
 
-但是，这里为circular\_buffer\_iterator提供的实现，不能让以下代码段编译通过:
+但这里为circular\_buffer\_iterator提供的实现，不能使以下代码段编译通过:
 
 \begin{lstlisting}[style=styleCXX]
 circular_buffer<int, 3> b({ 1,2,3 });
