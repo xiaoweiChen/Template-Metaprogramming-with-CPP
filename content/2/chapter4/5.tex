@@ -271,15 +271,12 @@ void h(T&& v)
 这个实现使用std::forward将左值作为左值传递，将右值作为右值传递，同样适用于可变函数模板。下面是std::make\_unique函数的概念实现，其创建了一个std::unique\_ptr对象:
 
 \begin{lstlisting}[style=styleCXX]
-	void g(foo& v) { std::cout << "g(foo&)\n"; }
-	void g(foo&& v) { std::cout << "g(foo&&)\n"; }
-	
-	template <typename T> void h(T& v) { g(v); }
-	template <typename T> void h(T&& v) { g(v); }
-	
-	foo x{ 42 };
-	h(x); // g(foo&)
-	h(foo{ 42 }); // g(foo&)
+	template<typename T, typename... Args>
+	std::unique_ptr<T> make_unique(Args&&... args)
+	{
+		return std::unique_ptr<T>(
+						new T(std::forward<Args>(args)...));
+	}
 \end{lstlisting}
 
 总结一下本节，请记住转发引用(也称为通用引用)基本上是针对函数模板参数的特殊推导规则。基于引用折叠规则工作，目的是实现完全转发。这是通过保留值语义将引用传递给另一个函数:右值应作为右值传递，左值应作为左值传递。

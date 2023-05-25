@@ -114,7 +114,7 @@ typename std::enable_if<!uses_write_v<T>>::type serialize(
 \begin{lstlisting}[style=styleCXX]
 template <
 	typename T,
-	typename=typenamestd::enable_if_t<
+	typename=typename std::enable_if_t<
 						 std::is_integral_v<T>>>
 struct integral_wrapper
 {
@@ -172,7 +172,7 @@ template <
 struct integral_wrapper
 {
 	T value;
-	
+
 	integral_wrapper(T v) : value(v) {}
 };
 
@@ -183,7 +183,7 @@ template <
 struct floating_wrapper
 {
 	T value;
-	
+
 	floating_wrapper(T v) : value(v) {}
 };
 \end{lstlisting}

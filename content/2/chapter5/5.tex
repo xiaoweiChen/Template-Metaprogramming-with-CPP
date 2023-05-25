@@ -59,8 +59,8 @@
 	\begin{tabular}{|l|l|}
 		\hline
 		\textbf{名称} &
-		\textbf{描述} \\ \hline	
-		is\_pointer & 
+		\textbf{描述} \\ \hline
+		is\_pointer &
 		\begin{tabular}[c]{@{}l@{}}类型是指向对象的指针、指向函数的指针还是cv限定变量。\\ 这不包括指向成员对象的指针或指向成员函数的指针。\end{tabular} \\ \hline
 
 		is\_member\_pointer &
@@ -165,7 +165,7 @@ static\_assert(false)会使程序格式不正确。原因是它的条件不依�
 		\begin{tabular}[c]{@{}l@{}}是标准布局类型，还是cv限定类型\\ ·标量类型或标量类型的数组\\ ·标准布局类或此类的数组\end{tabular} \\ \hline
 		is\_empty &
 		C++11 &
-		\begin{tabular}[c]{@{}l@{}}是否为空类型。空类型是一种类类型(不是联合体)，\\ 是否为空类型。空类型是一种类类型(不是联合体)，\\ 没有虚函数，没有虚基类，也没有非空基类。\end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}是否为空类型。空类型是一种类类型(不是联合体)，\\ 没有虚函数，没有虚基类，也没有非空基类。\end{tabular} \\ \hline
 		is\_polymorphic &
 		C++11 &
 		\begin{tabular}[c]{@{}l@{}}是否为多态类型。多态类型至少继承\\ 自有一个虚函数的类型(不是联合体)。\end{tabular} \\ \hline
@@ -481,7 +481,7 @@ template <typename T>
 std::string as_string(T&& value)
 {
 	using value_type = std::decay_t<T>;
-	
+
 	if constexpr (std::is_null_pointer_v<value_type>)
 		return "null";
 	else if constexpr (std::is_same_v<value_type, bool>)

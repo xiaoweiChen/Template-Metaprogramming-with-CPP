@@ -39,7 +39,7 @@ struct mage : game_unit<mage>
 
 game\_unit类现在是一个模板类，但包含相同的成员函数attack。在内部，它将this指针上转换为T*，然后调用一个名为do\_attack的成员函数。knight和mage类派生自game\_unit类，并将自己作为类型模板参数T进行传递。它们都提供了一个名为do\_attack的成员函数。
 
-注意，基类模板中的成员函数和派生类中调用的成员函数具有不同的名称。否则，若具有相同的名称，因为它们不再是虚函数了，派生类成员函数将隐藏基类成员，、。
+注意，基类模板中的成员函数和派生类中调用的成员函数具有不同的名称。否则，若具有相同的名称，因为它们不再是虚函数了，派生类成员函数将隐藏基类成员。
 
 fight函数(获取游戏单位集合并调用攻击函数)也需要改变。需要作为函数模板实现，实现如下所示:
 
@@ -189,7 +189,7 @@ struct knight : movable_unit<knight>
 {
 	void step_forth()
 	{ std::cout << "knight moves forward\n"; }
-	
+
 	void step_back()
 	{ std::cout << "knight moves back\n"; }
 };
@@ -198,7 +198,7 @@ struct mage : movable_unit<mage>
 {
 	void step_forth()
 	{ std::cout << "mage moves forward\n"; }
-	
+
 	void step_back()
 	{ std::cout << "mage moves back\n"; }
 };
@@ -223,7 +223,7 @@ struct knight
 {
 	void step_forth()
 	{ std::cout << "knight moves forward\n"; }
-	
+
 	void step_back()
 	{ std::cout << "knight moves back\n"; }
 };
@@ -232,7 +232,7 @@ struct mage
 {
 	void step_forth()
 	{ std::cout << "mage moves forward\n"; }
-	
+
 	void step_back()
 	{ std::cout << "mage moves back\n"; }
 };
@@ -293,7 +293,7 @@ hero const& obj)
 {
 	for (hero* u : obj.connections)
 		os << obj.name << " --> [" << u->name << "]" << '\n';
-		
+
 	return os;
 }
 \end{lstlisting}
@@ -359,17 +359,17 @@ struct base_unit
 struct hero : base_unit<hero>
 {
 	hero(std::string_view n) : name(n) {}
-	
+
 	hero* begin() { return this; }
 	hero* end() { return this + 1; }
-	
+
 private:
 	std::string name;
 	std::set<hero*> connections;
-	
+
 	template <typename U>
 	friend struct base_unit;
-	
+
 	template <typename U>
 	friend std::ostream& operator<<(std::ostream& os,
 									base_unit<U>& object);
@@ -546,7 +546,7 @@ struct building
 {
 	building() { std::cout << "building created\n"; }
 	~building() { std::cout << "building destroyed\n"; }
-	
+
 	void upgrade()
 	{
 		if (exec)
@@ -562,10 +562,10 @@ private:
 	{
 		std::cout << "upgrading\n";
 		operational = false;
-		
+
 		using namespace std::chrono_literals;
 		std::this_thread::sleep_for(1000ms);
-		
+
 		operational = true;
 		std::cout << "building is functional\n";
 	}
@@ -585,7 +585,7 @@ int main()
 		std::make_shared<building>();
 	b->set_executor(&e);
 	b->upgrade();
-	
+
 	std::cout << "main finished\n";
 }
 \end{lstlisting}
